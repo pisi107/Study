@@ -1,577 +1,3024 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#7657e8">
-<title>STUDY PRO — Il tuo spazio di studio</title>
+<meta name="theme-color" content="#f7f8fc">
+<title>STUDY PRO</title>
 
 <style>
 :root {
-  --bg:#f7f7ff;
-  --card:#fff;
-  --text:#272544;
-  --muted:#85849f;
-  --purple:#7657e8;
-  --pink:#ff6b9d;
-  --blue:#55a4ff;
-  --green:#36c99a;
-  --orange:#ffad5c;
-  --border:#ecebfa;
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --surface2: #f0f3f9;
+  --text: #20263a;
+  --muted: #7b849b;
+  --primary: #635bff;
+  --primary-light: #eeedff;
+  --border: #e5e8f0;
+  --green: #16a36a;
+  --red: #e55365;
+  --orange: #f39a38;
+  --radius: 18px;
+  --shadow: 0 5px 22px rgba(31, 41, 70, .055);
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
-.app{min-height:100vh}
-.sidebar{position:fixed;inset:0 auto 0 0;width:235px;background:#fff;border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column;gap:28px;z-index:5}
-.brand{display:flex;align-items:center;gap:11px;padding:0 7px}
-.logo{width:43px;height:43px;border-radius:14px;background:linear-gradient(135deg,#7657e8,#b18bff);display:grid;place-items:center;color:#fff;font-size:24px}
-.brand strong{font-size:16px;letter-spacing:.5px}
-.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:1.5px;margin-top:3px}
-.nav-title{font-size:10px;color:#aaa9bf;letter-spacing:1.4px;font-weight:800;padding:0 12px;margin-bottom:8px}
-.nav{display:grid;gap:5px}
-.nav button{border:0;background:transparent;padding:12px;border-radius:12px;text-align:left;color:#777690;font-size:13px;font-weight:650}
-.nav button span{display:inline-block;width:29px;font-size:17px}
-.nav button.active,.nav button:hover{background:#f0edff;color:var(--purple)}
-.side-note{margin-top:auto;padding:17px;border-radius:17px;background:linear-gradient(135deg,#eeeaff,#fff0f6)}
-.side-note strong{font-size:13px}
-.side-note p{font-size:11px;line-height:1.6;color:var(--muted)}
-.side-note button{width:100%;border:0;border-radius:10px;background:var(--purple);color:#fff;padding:10px;font-weight:750;font-size:11px}
-main{margin-left:235px;padding:27px 32px 50px;max-width:1700px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
-.eyebrow{color:var(--purple);font-size:10px;font-weight:850;letter-spacing:1.5px}
-h1{font-size:27px;letter-spacing:-.8px;margin:6px 0 0}
-.actions{display:flex;align-items:center;gap:10px}
-.date-pill{border:1px solid var(--border);border-radius:12px;padding:11px;font-size:12px;background:#fff}
-.avatar{height:40px;width:40px;border-radius:13px;background:#ffe5ef;color:#b83f76;display:grid;place-items:center;font-weight:850}
-.primary{border:0;border-radius:11px;background:var(--purple);color:white;padding:12px 15px;font-size:12px;font-weight:800}
-.primary:hover{background:#6043d0}
-.page{display:none}.page.active{display:block}
-.hero{position:relative;overflow:hidden;border-radius:23px;padding:27px 29px;background:linear-gradient(115deg,#7052df,#9078f4);color:#fff;display:flex;align-items:center;justify-content:space-between;min-height:185px}
-.hero:after{content:"";position:absolute;right:-20px;bottom:-130px;width:230px;height:230px;border-radius:50%;background:#ffffff15}
-.hero-copy{position:relative;z-index:1}
-.tag{display:inline-block;padding:7px 10px;border-radius:8px;background:#ffffff25;font-size:10px;font-weight:800;letter-spacing:1px}
-.hero h2{font-size:28px;line-height:1.2;margin:14px 0 8px}
-.hero p{max-width:470px;font-size:12px;line-height:1.7;color:#f0edff}
-.hero .white-btn{border:0;border-radius:10px;background:white;color:var(--purple);padding:11px 14px;font-size:11px;font-weight:850}
-.hero-art{position:relative;z-index:1;font-size:75px;margin-right:25px;transform:rotate(-8deg)}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 0 14px}
-.section-head h3{font-size:16px;margin:0}
-.section-head p{font-size:11px;color:var(--muted);margin:5px 0 0}
-.text-btn{border:0;background:transparent;color:var(--purple);font-weight:800;font-size:11px}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
-.stat,.panel,.subject-card{background:#fff;border:1px solid var(--border);border-radius:17px;box-shadow:0 8px 25px #34317b08}
-.stat{padding:16px;min-width:0}
-.stat-top{display:flex;justify-content:space-between;align-items:center}
-.stat small{font-size:9px;font-weight:800;color:var(--muted)}
-.stat-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px}
-.stat h3{font-size:27px;margin:12px 0 5px}
-.stat p{font-size:10px;color:var(--muted);margin:0}
-.stat p b{color:var(--green)}
-.grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:16px;margin-top:17px}
-.panel{padding:19px;min-width:0}
-.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
-.panel-title h3{font-size:14px;margin:0}
-.panel-title small{font-size:10px;color:var(--muted)}
-.task-list{display:grid;gap:8px}
-.task{display:flex;align-items:center;gap:9px;padding:11px;border:1px solid #f0effb;border-radius:12px;min-width:0}
-.task-check{appearance:none;width:18px;height:18px;border:1.5px solid #d5d4e9;border-radius:5px;flex-shrink:0}
-.task-check:checked{background:var(--green);border-color:var(--green)}
-.task-check:checked:after{content:"✓";color:#fff;display:block;text-align:center;font-size:13px}
-.task-info{flex:1;min-width:0}
-.task-info strong{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.task-info small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
-.task.done .task-info strong{text-decoration:line-through;color:#aaa}
-.badge{font-size:9px;font-weight:800;padding:5px 7px;border-radius:7px;white-space:nowrap}
-.badge.homework{background:#ece8ff;color:#6554d7}
-.badge.exam{background:#ffe5ef;color:#c54477}
-.badge.study{background:#ddf8ef;color:#168966}
-.badge.other{background:#fff0dd;color:#b87521}
-.icon-btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 9px}
-.empty{text-align:center;padding:25px 12px;color:var(--muted);font-size:12px;line-height:1.7}
-.empty div{font-size:26px;margin-bottom:6px}
-.week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-.day{border:1px solid var(--border);border-radius:10px;background:white;text-align:center;padding:10px 1px;min-width:0}
-.day small{display:block;color:var(--muted);font-size:9px;margin-bottom:9px}
-.day strong{font-size:13px}
-.day .dot{width:5px;height:5px;border-radius:50%;background:var(--pink);margin:7px auto 0}
-.day.selected{background:var(--purple);color:#fff;border-color:var(--purple)}
-.day.selected small{color:#eee9ff}
-.day.today:not(.selected){border-color:var(--purple);color:var(--purple)}
-.progress-row{display:flex;align-items:center;gap:12px;margin-top:18px}
-.ring{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--purple) var(--pct,0%),#efedff 0);flex-shrink:0}
-.ring:before{content:"";position:absolute;inset:5px;border-radius:50%;background:#fff}
-.ring strong{z-index:1;font-size:12px}
-.progress-copy strong{font-size:12px}
-.progress-copy p{font-size:10px;color:var(--muted);line-height:1.5}
-.subject-list{display:grid;gap:13px}
-.subject-row{display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:9px;align-items:center}
-.subject-dot{width:9px;height:9px;border-radius:4px}
-.subject-row strong{font-size:11px}
-.subject-row small{font-size:10px;color:var(--muted)}
-.bar{height:5px;border-radius:9px;background:#efeffa;margin-top:6px;overflow:hidden}
-.bar span{display:block;height:100%;border-radius:9px}
-.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}
-.toolbar input,.toolbar select,.field input,.field select,.field textarea{border:1px solid var(--border);border-radius:10px;padding:11px;background:#fff;color:var(--text);outline:none;font-size:12px}
-.toolbar input{flex:1;min-width:160px}
-.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-.month-name{text-align:center;color:var(--muted);font-size:10px;padding:8px 0}
-.month-day{min-height:75px;border:1px solid var(--border);border-radius:9px;padding:7px;background:#fff;font-size:11px;cursor:pointer;overflow:hidden}
-.month-day.muted{opacity:.4}
-.month-day.current{background:#f1edff;border-color:var(--purple)}
-.event-dot{display:block;background:#e9e6ff;color:#6554d7;border-radius:4px;padding:3px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
-.subject-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.subject-card{padding:16px}
-.subject-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:13px}
-.subject-card h4{margin:0 0 6px;font-size:13px}
-.subject-card p{margin:0;font-size:10px;color:var(--muted)}
-.subject-card .card-actions{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-top:15px}
-.subject-card button{border:0;background:#f0edff;color:var(--purple);border-radius:7px;padding:7px;font-size:10px;font-weight:800}
-.field{display:grid;gap:7px;margin-bottom:14px}
-.field label{font-size:11px;font-weight:800;color:#666581}
-.field input,.field select,.field textarea{width:100%}
-.field textarea{min-height:75px;resize:vertical}
-.modal-backdrop{position:fixed;inset:0;background:#1c1a3b77;display:none;align-items:center;justify-content:center;padding:15px;z-index:20}
-.modal-backdrop.open{display:flex}
-.modal{background:#fff;width:min(100%,520px);border-radius:20px;padding:22px;max-height:90vh;overflow:auto}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.modal-head h3{margin:0;font-size:17px}
-.close{border:0;background:#f0edff;border-radius:9px;padding:7px 11px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-.span-2{grid-column:1/-1}
-.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:17px}
-.secondary{border:1px solid var(--border);background:white;border-radius:10px;padding:10px 13px;font-size:12px;font-weight:750}
-.toast{position:fixed;bottom:22px;right:20px;background:#272544;color:white;padding:13px 17px;border-radius:12px;font-size:12px;opacity:0;transform:translateY(8px);transition:.2s;z-index:40;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
-@media(max-width:1050px){.sidebar{width:205px}main{margin-left:205px;padding:22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.subject-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){
-.sidebar{inset:auto 0 0;width:100%;padding:6px 5px calc(6px + env(safe-area-inset-bottom));border:0;border-top:1px solid var(--border);background:#ffffffed;backdrop-filter:blur(12px)}
-.brand,.nav-title,.side-note{display:none}.nav{grid-template-columns:repeat(5,1fr);gap:1px}
-.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:8px 1px;font-size:9px}
-.nav button span{width:auto;font-size:18px}
-main{margin:0;padding:18px 12px 95px}
-h1{font-size:22px}.topbar{align-items:flex-start;gap:8px}.date-pill{display:none}.actions{gap:6px}.avatar{width:34px;height:34px}.primary{padding:10px;font-size:10px}
-.hero{padding:21px 18px;min-height:180px}.hero h2{font-size:23px}.hero p{max-width:280px;font-size:11px}.hero-art{position:absolute;right:7px;top:22px;font-size:43px;opacity:.6;margin:0}
-.stats{gap:8px}.stat{padding:12px}.stat h3{font-size:23px}.stat small{font-size:8px}.stat-icon{width:31px;height:31px;font-size:15px}
-.panel{padding:13px}.task{gap:6px;padding:9px 6px}.task-info strong{font-size:11px}.task-info small{font-size:9px}.badge{font-size:8px;padding:4px}
-.subject-cards{grid-template-columns:1fr 1fr;gap:8px}.subject-card{padding:12px}.month-day{min-height:51px;padding:4px}.event-dot{font-size:8px;padding:2px}.month-name{font-size:9px}
-.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.toolbar input{flex-basis:100%;min-width:0}.toolbar select{flex:1;min-width:0}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(99, 91, 255, .22);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  z-index: 20;
+  inset: 0 auto 0 0;
+  width: 250px;
+  padding: 25px 17px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+
+.brand-logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 5px 13px rgba(99, 91, 255, .2);
+}
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -.7px;
+}
+
+.brand-subtitle {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 1px;
+}
+
+.nav-label {
+  padding: 0 10px;
+  margin: 3px 0 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nav-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #69738a;
+  text-align: left;
+  transition: background .18s, color .18s;
+}
+
+.nav-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.nav-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 750;
+}
+
+.nav-icon {
+  width: 22px;
+  text-align: center;
+  font-size: 17px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 15px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f0eeff, #f7f5ff);
+}
+
+.sidebar-bottom strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.sidebar-bottom p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.main {
+  min-height: 100vh;
+  margin-left: 250px;
+}
+
+.topbar {
+  min-height: 78px;
+  padding: 17px 32px;
+  background: rgba(255, 255, 255, .88);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+}
+
+.topbar-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -.45px;
+}
+
+.topbar-subtitle {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.today-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.avatar {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 850;
+}
+
+.content {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 30px 32px 50px;
+}
+
+.page {
+  display: none;
+  animation: appear .2s ease;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-heading h1 {
+  margin: 0;
+  font-size: clamp(23px, 3vw, 29px);
+  line-height: 1.25;
+  letter-spacing: -1px;
+}
+
+.page-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.btn {
+  min-height: 40px;
+  padding: 10px 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  transition: transform .15s, background .15s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  color: white;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: #5148ee;
+}
+
+.btn-soft {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-color: transparent;
+}
+
+.btn-danger {
+  color: var(--red);
+  background: #fff0f2;
+  border-color: #ffe0e5;
+}
+
+.btn-small {
+  min-height: 33px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.card {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 21px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.card-description {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.grid {
+  display: grid;
+  gap: 18px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stat-icon {
+  width: 39px;
+  height: 39px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+}
+
+.icon-purple {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.icon-green {
+  color: var(--green);
+  background: #e8f8f0;
+}
+
+.icon-orange {
+  color: var(--orange);
+  background: #fff3e5;
+}
+
+.icon-red {
+  color: var(--red);
+  background: #fff0f2;
+}
+
+.stat-value {
+  margin-top: 17px;
+  font-size: 29px;
+  line-height: 1.1;
+  font-weight: 850;
+  letter-spacing: -1px;
+  overflow-wrap: anywhere;
+}
+
+.stat-label {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.badge-purple {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.badge-green {
+  color: var(--green);
+  background: #e8f8f0;
+}
+
+.badge-orange {
+  color: #b66a12;
+  background: #fff3e5;
+}
+
+.badge-red {
+  color: var(--red);
+  background: #fff0f2;
+}
+
+.section-gap {
+  margin-top: 22px;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 12px;
+}
+
+.empty-state {
+  padding: 35px 15px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-icon {
+  margin-bottom: 12px;
+  font-size: 34px;
+}
+
+.empty-state strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  color: #505a70;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+}
+
+.field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--primary);
+}
+
+.divider {
+  height: 1px;
+  margin: 18px 0;
+  background: var(--border);
+}
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  background: var(--surface2);
+  border-radius: 20px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--primary);
+  border-radius: inherit;
+  transition: width .3s;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  min-width: 0;
+}
+
+.list-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-item-title {
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.list-item-sub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.check-circle {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #d7dbea;
+  border-radius: 50%;
+  background: white;
+  color: white;
+}
+
+.check-circle.done {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.mobile-menu {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: white;
+  font-size: 18px;
+}
+
+@media (max-width: 1150px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content {
+    padding: 25px 22px 40px;
+  }
+
+  .topbar {
+    padding: 15px 22px;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    width: 270px;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    box-shadow: none;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 15px 0 40px rgba(20, 25, 50, .13);
+  }
+
+  .main {
+    margin-left: 0;
+  }
+
+  .topbar {
+    min-height: 70px;
+    padding: 12px 15px;
+  }
+
+  .mobile-menu {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+  }
+
+  .topbar-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .topbar-title {
+    font-size: 16px;
+  }
+
+  .topbar-subtitle {
+    font-size: 10px;
+  }
+
+  .today-label {
+    display: none;
+  }
+
+  .content {
+    padding: 22px 14px 35px;
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-heading .btn {
+    align-self: flex-start;
+  }
+
+  .card {
+    padding: 17px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full {
+    grid-column: auto;
+  }
+
+  .stat-value {
+    font-size: 25px;
+  }
 }
 </style>
 </head>
 <body>
+
 <div class="app">
-<aside class="sidebar">
-  <div class="brand"><div class="logo">✦</div><div><strong>STUDY PRO</strong><small>IL TUO SPAZIO STUDIO</small></div></div>
-  <div><div class="nav-title">MENU PRINCIPALE</div>
-    <nav class="nav">
-      <button class="active" data-page="home"><span>⌂</span>Panoramica</button>
-      <button data-page="tasks"><span>☑</span>Attività</button>
-      <button data-page="calendar"><span>▦</span>Calendario</button>
-      <button data-page="subjects"><span>▤</span>Materie</button>
-      <button data-page="settings"><span>⚙</span>Impostazioni</button>
-    </nav>
-  </div>
-  <div class="side-note"><div style="font-size:25px">🚀</div><strong>Un passo alla volta!</strong><p>Ogni attività completata ti avvicina ai tuoi obiettivi.</p><button onclick="openTaskModal()">+ Aggiungi attività</button></div>
-</aside>
 
-<main>
-<header class="topbar">
-  <div><div class="eyebrow" id="eyebrow">IL TUO SPAZIO DI STUDIO</div><h1 id="pageTitle">Ciao, studente! 👋</h1></div>
-  <div class="actions"><div class="date-pill" id="todayPill"></div><button class="primary" onclick="openTaskModal()">＋ Nuova attività</button><div class="avatar" id="avatar">S</div></div>
-</header>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">S</div>
+      <div>
+        <div class="brand-name">STUDY PRO</div>
+        <div class="brand-subtitle">Il tuo studio, organizzato.</div>
+      </div>
+    </div>
 
-<section class="page active" id="page-home">
-  <div class="hero"><div class="hero-copy"><span class="tag">✨ IL TUO PIANO, I TUOI OBIETTIVI</span><h2>Organizza oggi,<br>brilla domani.</h2><p>Un piccolo passo alla volta. Tieni sotto controllo compiti, verifiche e tutto quello che vuoi raggiungere.</p><button class="white-btn" onclick="openTaskModal()">Pianifica la giornata ↗</button></div><div class="hero-art">📚</div></div>
-  <div class="section-head"><div><h3>La tua panoramica</h3><p>Ecco come sta andando il tuo studio.</p></div></div>
-  <div class="stats">
-    <div class="stat"><div class="stat-top"><small>ATTIVITÀ APERTE</small><div class="stat-icon" style="background:#eeeaff">📝</div></div><h3 id="statOpen">0</h3><p>Da portare a termine</p></div>
-    <div class="stat"><div class="stat-top"><small>SCADENZE OGGI</small><div class="stat-icon" style="background:#ffe8ef">⏰</div></div><h3 id="statToday">0</h3><p>Non dimenticarle!</p></div>
-    <div class="stat"><div class="stat-top"><small>VERIFICHE FUTURE</small><div class="stat-icon" style="background:#fff0dd">🎯</div></div><h3 id="statExams">0</h3><p>Preparati in anticipo</p></div>
-    <div class="stat"><div class="stat-top"><small>COMPLETATE</small><div class="stat-icon" style="background:#ddf8ef">✅</div></div><h3 id="statDone">0</h3><p><b id="donePercent">0%</b> delle attività totali</p></div>
-  </div>
-  <div class="grid">
-    <div class="panel"><div class="panel-title"><h3>📌 Prossime attività</h3><button class="text-btn" onclick="navigate('tasks')">Vedi tutte ↗</button></div><div class="task-list" id="homeTasks"></div></div>
-    <div class="panel"><div class="panel-title"><h3>🗓️ Questa settimana</h3><small id="weekCaption"></small></div><div class="week-grid" id="weekGrid"></div><div class="progress-row"><div class="ring" id="progressRing"><strong id="progressNumber">0%</strong></div><div class="progress-copy"><strong>Il tuo ritmo di studio</strong><p id="progressText">Completa un'attività per iniziare.</p></div></div></div>
-  </div>
-  <div class="grid">
-    <div class="panel"><div class="panel-title"><h3>📚 Le tue materie</h3><button class="text-btn" onclick="navigate('subjects')">Gestisci ↗</button></div><div class="subject-list" id="homeSubjects"></div></div>
-    <div class="panel"><div class="panel-title"><h3>💡 Un consiglio per te</h3></div><div style="background:linear-gradient(130deg,#fff0f6,#f1edff);border-radius:13px;padding:17px"><div style="font-size:25px">🍅</div><strong style="font-size:12px">Prova la tecnica del Pomodoro</strong><p style="font-size:11px;color:#85849f;line-height:1.7">Studia per 25 minuti senza distrazioni, poi concediti 5 minuti di pausa.</p></div></div>
-  </div>
-</section>
+    <div>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav">
+        <button class="nav-btn active" data-page="dashboard">
+          <span class="nav-icon">▦</span> Dashboard
+        </button>
+        <button class="nav-btn" data-page="tasks">
+          <span class="nav-icon">✓</span> Compiti
+        </button>
+        <button class="nav-btn" data-page="exams">
+          <span class="nav-icon">◷</span> Verifiche
+        </button>
+        <button class="nav-btn" data-page="notes">
+          <span class="nav-icon">▤</span> Appunti digitali
+        </button>
+        <button class="nav-btn" data-page="timetable">
+          <span class="nav-icon">▦</span> Orario scolastico
+        </button>
+        <button class="nav-btn" data-page="timer">
+          <span class="nav-icon">⏱</span> Timer studio
+        </button>
+      </nav>
+    </div>
 
-<section class="page" id="page-tasks">
-  <div class="section-head"><div><h3>Tutte le attività</h3><p>Compiti, verifiche, interrogazioni e sessioni di studio.</p></div><button class="primary" onclick="openTaskModal()">＋ Aggiungi</button></div>
-  <div class="toolbar"><input id="taskSearch" placeholder="🔎 Cerca un'attività..." oninput="renderTasks()"><select id="filterType" onchange="renderTasks()"><option value="all">Tutti i tipi</option><option value="homework">Compito</option><option value="exam">Verifica</option><option value="study">Studio</option><option value="other">Altro</option></select><select id="filterStatus" onchange="renderTasks()"><option value="open">Da fare</option><option value="all">Tutte</option><option value="done">Completate</option></select><select id="filterSubject" onchange="renderTasks()"><option value="all">Tutte le materie</option></select></div>
-  <div class="panel"><div class="task-list" id="allTasks"></div></div>
-</section>
+    <div>
+      <div class="nav-label">Personale</div>
+      <nav class="nav">
+        <button class="nav-btn" data-page="planner">
+          <span class="nav-icon">▣</span> Pianificazione
+        </button>
+        <button class="nav-btn" data-page="profile">
+          <span class="nav-icon">⚙</span> Il mio profilo
+        </button>
+      </nav>
+    </div>
 
-<section class="page" id="page-calendar">
-  <div class="section-head"><div><h3>Il tuo calendario</h3><p>Seleziona un giorno per vedere gli impegni.</p></div><button class="primary" onclick="openTaskModal(selectedDate)">＋ Nuovo impegno</button></div>
-  <div class="panel"><div class="panel-title"><div style="display:flex;align-items:center;gap:10px"><button class="icon-btn" onclick="changeMonth(-1)">‹</button><strong id="monthLabel"></strong><button class="icon-btn" onclick="changeMonth(1)">›</button></div><button class="text-btn" onclick="goToday()">Oggi</button></div><div class="month-grid" id="monthGrid"></div></div>
-  <div class="section-head"><div><h3 id="selectedDateTitle">Impegni del giorno</h3><p>Gli impegni del giorno selezionato.</p></div><button class="text-btn" onclick="openTaskModal(selectedDate)">＋ Aggiungi</button></div>
-  <div class="panel"><div class="task-list" id="dayTasks"></div></div>
-</section>
+    <div class="sidebar-bottom">
+      <strong>✦ Il tuo spazio di studio</strong>
+      <p>Organizza le lezioni, prepara le verifiche e raggiungi i tuoi obiettivi un giorno alla volta.</p>
+    </div>
+  </aside>
 
-<section class="page" id="page-subjects">
-  <div class="section-head"><div><h3>Le tue materie</h3><p>Organizza le attività per materia.</p></div><button class="primary" onclick="openSubjectModal()">＋ Nuova materia</button></div>
-  <div class="subject-cards" id="subjectCards"></div>
-</section>
+  <main class="main">
+    <header class="topbar">
+      <button class="mobile-menu" id="mobileMenu" aria-label="Apri menu">☰</button>
 
-<section class="page" id="page-settings">
-  <div class="section-head"><div><h3>Impostazioni</h3><p>Personalizza la tua esperienza.</p></div></div>
-  <div class="panel" style="max-width:620px">
-    <div class="field"><label for="userName">Come vuoi essere chiamato?</label><input id="userName" placeholder="Es. Alex"></div>
-    <div class="field"><label for="studyLevel">Il tuo percorso di studio</label><select id="studyLevel"><option>Scuola media</option><option>Scuola superiore</option><option>Università</option><option>Altro</option></select></div>
-    <div class="field"><label for="weekStart">La settimana inizia di...</label><select id="weekStart"><option value="1">Lunedì</option><option value="0">Domenica</option></select></div>
-    <button class="primary" onclick="saveSettings()">Salva impostazioni</button>
-    <hr style="border:0;border-top:1px solid var(--border);margin:23px 0">
-    <h3 style="font-size:14px">I tuoi dati</h3><p style="font-size:11px;color:var(--muted);line-height:1.7">I dati sono salvati in questo browser e non sono ancora sincronizzati tra dispositivi.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" onclick="exportData()">Esporta backup JSON</button><button class="secondary" onclick="document.getElementById('importFile').click()">Importa backup</button><input id="importFile" type="file" accept=".json,application/json" hidden onchange="importData(event)"><button class="secondary" onclick="resetData()" style="color:#c54477">Ripristina demo</button></div>
-  </div>
-</section>
-</main>
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-subtitle">Il tuo percorso scolastico, sotto controllo.</div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="today-label" id="todayLabel"></div>
+        <div class="avatar" id="userAvatar">S</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-heading">
+          <div>
+            <h1 id="welcomeTitle">Ciao! 👋</h1>
+            <p>Ecco cosa succede oggi nel tuo studio.</p>
+          </div>
+          <button class="btn btn-primary" onclick="showPage('tasks')">
+            + Nuovo compito
+          </button>
+        </div>
+
+        <div class="grid grid-4">
+          <div class="card stat-card">
+            <div class="stat-top">
+              <span class="muted small">Compiti da fare</span>
+              <span class="stat-icon icon-purple">✓</span>
+            </div>
+            <div class="stat-value" id="statTasks">0</div>
+            <div class="stat-label">Attività ancora aperte</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-top">
+              <span class="muted small">Verifiche future</span>
+              <span class="stat-icon icon-orange">◷</span>
+            </div>
+            <div class="stat-value" id="statExams">0</div>
+            <div class="stat-label">Date da preparare</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-top">
+              <span class="muted small">Ore di studio</span>
+              <span class="stat-icon icon-green">⏱</span>
+            </div>
+            <div class="stat-value" id="statHours">0h</div>
+            <div class="stat-label">Sessioni completate</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-top">
+              <span class="muted small">Appunti salvati</span>
+              <span class="stat-icon icon-red">▤</span>
+            </div>
+            <div class="stat-value" id="statNotes">0</div>
+            <div class="stat-label">Nel tuo archivio</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2 section-gap">
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <h3 class="card-title">📚 Compiti in programma</h3>
+                <div class="card-description">Le attività da completare.</div>
+              </div>
+              <button class="btn btn-small" onclick="showPage('tasks')">Vedi tutti</button>
+            </div>
+            <div class="divider"></div>
+            <div id="dashboardTasks" class="list">
+              <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <strong>Nessun compito inserito</strong>
+                Aggiungi il tuo primo compito.
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <h3 class="card-title">🎯 Prossime verifiche</h3>
+                <div class="card-description">Non farti trovare impreparato.</div>
+              </div>
+              <button class="btn btn-small" onclick="showPage('exams')">Vedi tutte</button>
+            </div>
+            <div class="divider"></div>
+            <div id="dashboardExams" class="list">
+              <div class="empty-state">
+                <div class="empty-icon">📅</div>
+                <strong>Nessuna verifica programmata</strong>
+                Aggiungi una data importante.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2 section-gap">
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <h3 class="card-title">📈 Il tuo obiettivo</h3>
+                <div class="card-description">Monitora il tempo dedicato allo studio.</div>
+              </div>
+              <span class="badge badge-purple">Settimanale</span>
+            </div>
+
+            <div style="margin-top:24px" class="flex-between">
+              <span class="muted small">Tempo di studio</span>
+              <strong id="weeklyHours">0h / 10h</strong>
+            </div>
+            <div class="progress-track" style="margin-top:10px">
+              <div class="progress-fill" id="weeklyProgress"></div>
+            </div>
+            <p class="muted small" id="weeklyMessage" style="margin-bottom:0">
+              Ogni sessione ti avvicina al tuo obiettivo.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">⚡ Accesso rapido</h3>
+            <div class="card-description">Vai direttamente a quello che ti serve.</div>
+            <div class="grid grid-2" style="margin-top:17px">
+              <button class="btn" onclick="showPage('timer')">⏱ Timer studio</button>
+              <button class="btn" onclick="showPage('notes')">📝 Nuovi appunti</button>
+              <button class="btn" onclick="showPage('exams')">📅 Verifica</button>
+              <button class="btn" onclick="showPage('timetable')">🏫 Orario</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPITI -->
+      <section class="page" id="page-tasks">
+        <div class="page-heading">
+          <div>
+            <h1>Compiti 📝</h1>
+            <p>Registra le attività, le materie e le scadenze.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Aggiungi un compito</h3>
+          <div class="card-description">Inserisci i dettagli dell'attività da svolgere.</div>
+
+          <form id="taskForm" style="margin-top:20px">
+            <div class="form-grid">
+              <div class="field">
+                <label for="taskSubject">Materia</label>
+                <input id="taskSubject" required maxlength="70" placeholder="Es. Matematica">
+              </div>
+
+              <div class="field">
+                <label for="taskTitle">Compito da svolgere</label>
+                <input id="taskTitle" required maxlength="180" placeholder="Es. Esercizi pagina 45">
+              </div>
+
+              <div class="field">
+                <label for="taskDate">Scadenza</label>
+                <input id="taskDate" type="date" required>
+              </div>
+
+              <div class="field">
+                <label for="taskPriority">Priorità</label>
+                <select id="taskPriority">
+                  <option value="Normale">Normale</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Urgente">Urgente</option>
+                </select>
+              </div>
+
+              <div class="field full">
+                <label for="taskDescription">Descrizione (facoltativa)</label>
+                <textarea id="taskDescription" maxlength="1000" placeholder="Aggiungi dettagli, pagine o esercizi..."></textarea>
+              </div>
+            </div>
+
+            <div class="flex-wrap" style="margin-top:17px">
+              <button class="btn btn-primary" type="submit">+ Salva compito</button>
+              <button class="btn" type="reset">Pulisci campi</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card section-gap">
+          <div class="flex-between">
+            <div>
+              <h3 class="card-title">I tuoi compiti</h3>
+              <div class="card-description">Segna come completate le attività già svolte.</div>
+            </div>
+            <span class="badge badge-purple" id="taskCount">0 compiti</span>
+          </div>
+
+          <div class="flex-wrap" style="margin-top:17px">
+            <button class="btn btn-small task-filter active" data-filter="all">Tutti</button>
+            <button class="btn btn-small task-filter" data-filter="open">Da fare</button>
+            <button class="btn btn-small task-filter" data-filter="done">Completati</button>
+          </div>
+
+          <div class="divider"></div>
+          <div id="tasksList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- VERIFICHE -->
+      <section class="page" id="page-exams">
+        <div class="page-heading">
+          <div>
+            <h1>Verifiche e interrogazioni 🎯</h1>
+            <p>Organizza le date e tieni sotto controllo il conto alla rovescia.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Aggiungi una verifica</h3>
+          <div class="card-description">La data verrà usata per calcolare i giorni rimanenti.</div>
+
+          <form id="examForm" style="margin-top:20px">
+            <div class="form-grid">
+              <div class="field">
+                <label for="examSubject">Materia</label>
+                <input id="examSubject" required maxlength="70" placeholder="Es. Storia">
+              </div>
+
+              <div class="field">
+                <label for="examTitle">Argomento</label>
+                <input id="examTitle" required maxlength="180" placeholder="Es. Rivoluzione francese">
+              </div>
+
+              <div class="field">
+                <label for="examDate">Data della verifica</label>
+                <input id="examDate" type="date" required>
+              </div>
+
+              <div class="field">
+                <label for="examType">Tipo</label>
+                <select id="examType">
+                  <option value="Verifica scritta">Verifica scritta</option>
+                  <option value="Interrogazione">Interrogazione</option>
+                  <option value="Test">Test</option>
+                  <option value="Presentazione">Presentazione</option>
+                  <option value="Altro">Altro</option>
+                </select>
+              </div>
+
+              <div class="field full">
+                <label for="examNotes">Argomenti da studiare (facoltativo)</label>
+                <textarea id="examNotes" maxlength="1500" placeholder="Capitoli, pagine, formule, argomenti..."></textarea>
+              </div>
+            </div>
+
+            <div class="flex-wrap" style="margin-top:17px">
+              <button class="btn btn-primary" type="submit">+ Salva verifica</button>
+              <button class="btn" type="reset">Pulisci campi</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card section-gap">
+          <div class="flex-between">
+            <div>
+              <h3 class="card-title">Calendario delle verifiche</h3>
+              <div class="card-description">Le verifiche più vicine vengono mostrate per prime.</div>
+            </div>
+            <span class="badge badge-orange" id="examCount">0 verifiche</span>
+          </div>
+
+          <div class="divider"></div>
+          <div id="examsList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- FINE PARTE 2 -->
+
+      <!-- APPUNTI DIGITALI -->
+      <section class="page" id="page-notes">
+        <div class="page-heading">
+          <div>
+            <h1>Appunti digitali 📚</h1>
+            <p>Raccogli appunti, formule, schemi e riassunti in un unico posto.</p>
+          </div>
+          <button class="btn btn-primary" onclick="document.getElementById('noteTitle').focus()">
+            + Nuovo appunto
+          </button>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Crea un appunto</h3>
+          <div class="card-description">Puoi scrivere, incollare testi e organizzare i contenuti per materia.</div>
+
+          <form id="noteForm" style="margin-top:20px">
+            <div class="form-grid">
+              <div class="field">
+                <label for="noteTitle">Titolo</label>
+                <input id="noteTitle" required maxlength="150" placeholder="Es. Equazioni di secondo grado">
+              </div>
+
+              <div class="field">
+                <label for="noteSubject">Materia</label>
+                <input id="noteSubject" required maxlength="70" placeholder="Es. Matematica">
+              </div>
+
+              <div class="field full">
+                <label for="noteContent">Contenuto degli appunti</label>
+                <textarea id="noteContent" required maxlength="30000" rows="9" placeholder="Scrivi qui gli appunti, le formule, i riassunti e gli schemi..."></textarea>
+              </div>
+
+              <div class="field full">
+                <label for="noteTags">Parole chiave (facoltative)</label>
+                <input id="noteTags" maxlength="250" placeholder="Es. formule, equazioni, esercizi">
+              </div>
+            </div>
+
+            <div class="flex-wrap" style="margin-top:17px">
+              <button class="btn btn-primary" type="submit">💾 Salva appunto</button>
+              <button class="btn" type="reset">Pulisci campi</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card section-gap">
+          <div class="flex-between">
+            <div>
+              <h3 class="card-title">Il mio archivio</h3>
+              <div class="card-description">Cerca e riapri gli appunti salvati.</div>
+            </div>
+            <span class="badge badge-purple" id="noteCount">0 appunti</span>
+          </div>
+
+          <div class="field" style="margin-top:17px">
+            <label for="noteSearch">Cerca negli appunti</label>
+            <input id="noteSearch" placeholder="Cerca titolo, materia o contenuto...">
+          </div>
+
+          <div class="divider"></div>
+          <div id="notesList" class="grid grid-2"></div>
+        </div>
+
+        <div class="card section-gap">
+          <h3 class="card-title">📷 Importa appunti da una foto</h3>
+          <div class="card-description">
+            Seleziona una fotografia di appunti scritti a mano o stampati.
+            La lettura automatica del testo verrà collegata nella parte dedicata all'OCR.
+          </div>
+
+          <div class="field" style="margin-top:17px">
+            <label for="notePhoto">Fotografia o immagine</label>
+            <input id="notePhoto" type="file" accept="image/*">
+          </div>
+
+          <div id="notePhotoPreview" style="margin-top:14px"></div>
+
+          <div class="flex-wrap" style="margin-top:15px">
+            <button class="btn btn-soft" type="button" id="preparePhotoBtn">
+              📄 Prepara immagine
+            </button>
+          </div>
+
+          <p class="muted small" style="margin-bottom:0">
+            Nota: selezionare un'immagine non basta per estrarre automaticamente il testo.
+            Per riconoscere scrittura a mano, formule e schemi serve un motore OCR compatibile.
+          </p>
+        </div>
+      </section>
+
+      <!-- ORARIO SCOLASTICO -->
+      <section class="page" id="page-timetable">
+        <div class="page-heading">
+          <div>
+            <h1>Orario scolastico 🏫</h1>
+            <p>Costruisci il tuo orario settimanale personalizzato.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Aggiungi una lezione</h3>
+          <div class="card-description">Scegli giorno, materia, aula e orario.</div>
+
+          <form id="lessonForm" style="margin-top:20px">
+            <div class="form-grid">
+              <div class="field">
+                <label for="lessonDay">Giorno</label>
+                <select id="lessonDay" required>
+                  <option value="1">Lunedì</option>
+                  <option value="2">Martedì</option>
+                  <option value="3">Mercoledì</option>
+                  <option value="4">Giovedì</option>
+                  <option value="5">Venerdì</option>
+                  <option value="6">Sabato</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="lessonSubject">Materia</label>
+                <input id="lessonSubject" required maxlength="70" placeholder="Es. Inglese">
+              </div>
+
+              <div class="field">
+                <label for="lessonStart">Ora di inizio</label>
+                <input id="lessonStart" type="time" required value="08:00">
+              </div>
+
+              <div class="field">
+                <label for="lessonEnd">Ora di fine</label>
+                <input id="lessonEnd" type="time" required value="09:00">
+              </div>
+
+              <div class="field">
+                <label for="lessonRoom">Aula (facoltativa)</label>
+                <input id="lessonRoom" maxlength="40" placeholder="Es. Aula 12">
+              </div>
+
+              <div class="field">
+                <label for="lessonTeacher">Docente (facoltativo)</label>
+                <input id="lessonTeacher" maxlength="80" placeholder="Nome docente">
+              </div>
+            </div>
+
+            <div class="flex-wrap" style="margin-top:17px">
+              <button class="btn btn-primary" type="submit">+ Aggiungi lezione</button>
+              <button class="btn" type="reset">Pulisci campi</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card section-gap">
+          <div class="flex-between">
+            <div>
+              <h3 class="card-title">La mia settimana</h3>
+              <div class="card-description">Le lezioni sono ordinate per ora di inizio.</div>
+            </div>
+            <button class="btn btn-small" id="printTimetableBtn" type="button">🖨️ Stampa orario</button>
+          </div>
+
+          <div class="divider"></div>
+          <div id="timetableList"></div>
+        </div>
+      </section>
+
+      <!-- TIMER STUDIO -->
+      <section class="page" id="page-timer">
+        <div class="page-heading">
+          <div>
+            <h1>Timer studio ⏱</h1>
+            <p>Concentrati su una materia e misura il tempo dedicato allo studio.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <h3 class="card-title">Sessione di concentrazione</h3>
+                <div class="card-description">Imposta una durata e inizia a studiare.</div>
+              </div>
+              <span class="badge badge-purple">Focus</span>
+            </div>
+
+            <div class="field" style="margin-top:22px">
+              <label for="timerSubject">Materia della sessione</label>
+              <input id="timerSubject" maxlength="70" placeholder="Es. Scienze">
+            </div>
+
+            <div class="field" style="margin-top:15px">
+              <label for="timerDuration">Durata della sessione</label>
+              <select id="timerDuration">
+                <option value="15">15 minuti</option>
+                <option value="25" selected>25 minuti</option>
+                <option value="30">30 minuti</option>
+                <option value="45">45 minuti</option>
+                <option value="50">50 minuti</option>
+                <option value="60">60 minuti</option>
+                <option value="90">90 minuti</option>
+              </select>
+            </div>
+
+            <div style="text-align:center;padding:28px 0 18px">
+              <div id="timerDisplay" style="font-size:clamp(48px,8vw,72px);font-weight:850;letter-spacing:-3px;font-variant-numeric:tabular-nums">
+                25:00
+              </div>
+              <div id="timerStatus" class="muted small" style="margin-top:8px">
+                Pronto per iniziare
+              </div>
+            </div>
+
+            <div class="progress-track">
+              <div class="progress-fill" id="timerProgress"></div>
+            </div>
+
+            <div class="flex-wrap" style="justify-content:center;margin-top:22px">
+              <button class="btn btn-primary" id="timerStartBtn" type="button">▶ Inizia</button>
+              <button class="btn" id="timerPauseBtn" type="button" disabled>Ⅱ Pausa</button>
+              <button class="btn btn-danger" id="timerResetBtn" type="button">↺ Reset</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">💡 Metodo Pomodoro</h3>
+            <div class="card-description">Un modo semplice per organizzare le sessioni.</div>
+
+            <div class="list" style="margin-top:20px">
+              <div class="list-item">
+                <div class="stat-icon icon-purple">1</div>
+                <div class="list-item-main">
+                  <div class="list-item-title">Scegli un obiettivo</div>
+                  <div class="list-item-sub">Decidi cosa vuoi imparare o completare.</div>
+                </div>
+              </div>
+
+              <div class="list-item">
+                <div class="stat-icon icon-green">2</div>
+                <div class="list-item-main">
+                  <div class="list-item-title">Elimina le distrazioni</div>
+                  <div class="list-item-sub">Metti da parte il telefono e concentrati.</div>
+                </div>
+              </div>
+
+              <div class="list-item">
+                <div class="stat-icon icon-orange">3</div>
+                <div class="list-item-main">
+                  <div class="list-item-title">Fai una pausa</div>
+                  <div class="list-item-sub">Dopo la sessione, riposati qualche minuto.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 class="card-title">📊 Sessioni completate</h3>
+            <div class="stat-value" id="timerSessions">0</div>
+            <div class="stat-label">Sessioni registrate</div>
+            <p class="muted small" style="margin-bottom:0">
+              Le sessioni completate verranno conteggiate nel riepilogo della dashboard.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINE PARTE 3 -->
+
+      <!-- PIANIFICAZIONE -->
+      <section class="page" id="page-planner">
+        <div class="page-heading">
+          <div>
+            <h1>Pianificazione 📅</h1>
+            <p>Organizza le tue attività e prepara la settimana in anticipo.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 class="card-title">🎯 I tuoi obiettivi</h3>
+            <div class="card-description">Definisci quello che vuoi raggiungere.</div>
+
+            <form id="goalForm" style="margin-top:20px">
+              <div class="field">
+                <label for="goalTitle">Obiettivo</label>
+                <input id="goalTitle" required maxlength="150" placeholder="Es. Ripassare matematica">
+              </div>
+
+              <div class="field" style="margin-top:14px">
+                <label for="goalDate">Entro quando?</label>
+                <input id="goalDate" type="date" required>
+              </div>
+
+              <div class="field" style="margin-top:14px">
+                <label for="goalDetails">Dettagli (facoltativi)</label>
+                <textarea id="goalDetails" maxlength="1000" placeholder="Descrivi il risultato che vuoi ottenere..."></textarea>
+              </div>
+
+              <button class="btn btn-primary" type="submit" style="margin-top:15px">
+                + Aggiungi obiettivo
+              </button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <h3 class="card-title">I miei obiettivi</h3>
+                <div class="card-description">Segui i tuoi progressi.</div>
+              </div>
+              <span class="badge badge-purple" id="goalCount">0 obiettivi</span>
+            </div>
+
+            <div class="divider"></div>
+            <div id="goalsList" class="list"></div>
+          </div>
+        </div>
+
+        <div class="card section-gap">
+          <div class="flex-between">
+            <div>
+              <h3 class="card-title">📋 Riepilogo attività</h3>
+              <div class="card-description">Controlla rapidamente cosa devi ancora fare.</div>
+            </div>
+            <button class="btn btn-small" onclick="showPage('tasks')">Apri compiti</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="grid grid-3">
+            <div>
+              <div class="stat-label">Compiti aperti</div>
+              <div class="stat-value" id="plannerOpenTasks">0</div>
+            </div>
+            <div>
+              <div class="stat-label">Verifiche nei prossimi 7 giorni</div>
+              <div class="stat-value" id="plannerUpcomingExams">0</div>
+            </div>
+            <div>
+              <div class="stat-label">Obiettivi raggiunti</div>
+              <div class="stat-value" id="plannerCompletedGoals">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILO -->
+      <section class="page" id="page-profile">
+        <div class="page-heading">
+          <div>
+            <h1>Il mio profilo ⚙️</h1>
+            <p>Personalizza STUDY PRO in base alle tue esigenze scolastiche.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 class="card-title">👤 Informazioni personali</h3>
+            <div class="card-description">Imposta il nome visualizzato nell'app.</div>
+
+            <form id="profileForm" style="margin-top:20px">
+              <div class="field">
+                <label for="profileName">Nome</label>
+                <input id="profileName" maxlength="70" placeholder="Come vuoi essere chiamato?">
+              </div>
+
+              <div class="field" style="margin-top:15px">
+                <label for="profileSchool">Scuola (facoltativa)</label>
+                <input id="profileSchool" maxlength="120" placeholder="Nome della scuola">
+              </div>
+
+              <div class="field" style="margin-top:15px">
+                <label for="profileClass">Classe (facoltativa)</label>
+                <input id="profileClass" maxlength="30" placeholder="Es. 3ª A">
+              </div>
+
+              <button class="btn btn-primary" type="submit" style="margin-top:17px">
+                Salva profilo
+              </button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">🎓 Preferenze di studio</h3>
+            <div class="card-description">Configura il tuo percorso personale.</div>
+
+            <form id="preferencesForm" style="margin-top:20px">
+              <div class="field">
+                <label for="studyLevel">Livello scolastico</label>
+                <select id="studyLevel">
+                  <option value="medie">Scuola media</option>
+                  <option value="superiori" selected>Scuola superiore</option>
+                  <option value="universita">Università</option>
+                  <option value="altro">Altro</option>
+                </select>
+              </div>
+
+              <div class="field" style="margin-top:15px">
+                <label for="weeklyGoal">Obiettivo di studio settimanale</label>
+                <select id="weeklyGoal">
+                  <option value="3">3 ore</option>
+                  <option value="5">5 ore</option>
+                  <option value="7">7 ore</option>
+                  <option value="10" selected>10 ore</option>
+                  <option value="15">15 ore</option>
+                  <option value="20">20 ore</option>
+                </select>
+              </div>
+
+              <div class="field" style="margin-top:15px">
+                <label for="studyStyle">Metodo di studio preferito</label>
+                <select id="studyStyle">
+                  <option value="pomodoro">Metodo Pomodoro</option>
+                  <option value="riassunti">Riassunti e schemi</option>
+                  <option value="esercizi">Esercizi pratici</option>
+                  <option value="lettura">Lettura e ripetizione</option>
+                  <option value="misto">Metodo misto</option>
+                </select>
+              </div>
+
+              <button class="btn btn-primary" type="submit" style="margin-top:17px">
+                Salva preferenze
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card section-gap">
+          <h3 class="card-title">💾 Dati dell'applicazione</h3>
+          <div class="card-description">
+            I dati di questa versione vengono salvati nel browser del dispositivo.
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex-between" style="align-items:flex-start">
+            <div style="flex:1">
+              <strong>Esporta i miei dati</strong>
+              <p class="muted small">
+                Crea una copia JSON dei compiti, delle verifiche, degli appunti,
+                dell'orario e delle preferenze.
+              </p>
+            </div>
+            <button class="btn btn-soft" type="button" id="exportDataBtn">
+              Esporta JSON
+            </button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex-between" style="align-items:flex-start">
+            <div style="flex:1">
+              <strong>Importa un backup</strong>
+              <p class="muted small">
+                Ripristina i dati da un backup JSON precedentemente esportato.
+              </p>
+            </div>
+            <button class="btn" type="button" id="importDataBtn">
+              Importa backup
+            </button>
+            <input type="file" id="importDataFile" accept=".json,application/json" hidden>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex-between" style="align-items:flex-start">
+            <div style="flex:1">
+              <strong style="color:var(--red)">Cancella tutti i dati</strong>
+              <p class="muted small">
+                Elimina i dati salvati localmente. Questa operazione non può essere annullata.
+              </p>
+            </div>
+            <button class="btn btn-danger" type="button" id="clearDataBtn">
+              Cancella dati
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- AREA NOTIFICHE -->
+      <div id="toast" role="status" aria-live="polite" style="
+        position:fixed;
+        z-index:100;
+        right:20px;
+        bottom:20px;
+        max-width:calc(100vw - 40px);
+        padding:13px 18px;
+        border-radius:13px;
+        background:#20263a;
+        color:#fff;
+        box-shadow:0 8px 30px rgba(0,0,0,.15);
+        opacity:0;
+        transform:translateY(10px);
+        pointer-events:none;
+        transition:opacity .2s,transform .2s;
+      "></div>
+
+    </div>
+  </main>
 </div>
 
-<div class="modal-backdrop" id="taskBackdrop" onclick="if(event.target===this)closeTaskModal()">
-<div class="modal"><div class="modal-head"><h3 id="taskModalTitle">✨ Nuova attività</h3><button class="close" onclick="closeTaskModal()">×</button></div>
-<form id="taskForm" onsubmit="saveTask(event)">
-<input type="hidden" id="taskId">
-<div class="form-grid">
-<div class="field span-2"><label for="taskTitle">Titolo *</label><input id="taskTitle" required maxlength="120" placeholder="Es. Studiare il capitolo 4"></div>
-<div class="field"><label for="taskType">Tipo</label><select id="taskType"><option value="homework">Compito</option><option value="exam">Verifica</option><option value="study">Studio</option><option value="other">Altro</option></select></div>
-<div class="field"><label for="taskSubject">Materia</label><select id="taskSubject"></select></div>
-<div class="field"><label for="taskDate">Data *</label><input id="taskDate" type="date" required></div>
-<div class="field"><label for="taskTime">Orario facoltativo</label><input id="taskTime" type="time"></div>
-<div class="field"><label for="taskPriority">Priorità</label><select id="taskPriority"><option value="medium">Media</option><option value="high">Alta</option><option value="low">Bassa</option></select></div>
-<div class="field"><label for="taskDuration">Durata prevista (min)</label><input id="taskDuration" type="number" min="0" max="1440" value="30"></div>
-<div class="field span-2"><label for="taskNotes">Note facoltative</label><textarea id="taskNotes" placeholder="Pagine, capitoli, materiali..."></textarea></div>
-</div><div class="form-actions"><button type="button" class="secondary" onclick="closeTaskModal()">Annulla</button><button class="primary">Salva attività</button></div>
-</form></div></div>
-
-<div class="modal-backdrop" id="subjectBackdrop" onclick="if(event.target===this)closeSubjectModal()">
-<div class="modal"><div class="modal-head"><h3>📚 Nuova materia</h3><button class="close" onclick="closeSubjectModal()">×</button></div>
-<form onsubmit="saveSubject(event)">
-<div class="field"><label for="subjectName">Nome materia *</label><input id="subjectName" required maxlength="60" placeholder="Es. Matematica"></div>
-<div class="field"><label for="subjectIcon">Icona</label><select id="subjectIcon"><option>📘</option><option>➗</option><option>🧪</option><option>🌍</option><option>🗣️</option><option>🎨</option><option>💻</option><option>📖</option><option>⚡</option><option>🎵</option></select></div>
-<div class="field"><label for="subjectColor">Colore</label><select id="subjectColor"><option value="#7657e8">Viola</option><option value="#ff6b9d">Rosa</option><option value="#36c99a">Verde</option><option value="#55a4ff">Blu</option><option value="#ffad5c">Arancione</option><option value="#e4b83f">Giallo</option></select></div>
-<div class="form-actions"><button type="button" class="secondary" onclick="closeSubjectModal()">Annulla</button><button class="primary">Aggiungi materia</button></div>
-</form></div></div>
-<div class="toast" id="toast"></div>
+<!-- FINE PARTE 4 -->
 
 <script>
 "use strict";
-const STORAGE_KEY="studypro_v1_data";
-const defaultSubjects=[
-{id:"mat",name:"Matematica",icon:"➗",color:"#7657e8"},
-{id:"ita",name:"Italiano",icon:"📖",color:"#ff6b9d"},
-{id:"ing",name:"Inglese",icon:"🗣️",color:"#55a4ff"},
-{id:"sci",name:"Scienze",icon:"🧪",color:"#36c99a"},
-{id:"sto",name:"Storia",icon:"🌍",color:"#ffad5c"}
-];
-const typeNames={homework:"Compito",exam:"Verifica",study:"Studio",other:"Altro"};
-const typeIcons={homework:"📝",exam:"🎯",study:"📚",other:"📌"};
 
-function today(){
- const d=new Date();
- return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-function shiftDate(s,n){
- const d=new Date(s+"T12:00:00");
- d.setDate(d.getDate()+n);
- return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
-function seedData(){
- const t=today();
- return {
-  settings:{name:"",level:"Scuola superiore",weekStart:"1"},
-  subjects:defaultSubjects.map(s=>({...s})),
-  tasks:[
-   {id:uid(),title:"Esercizi pagina 82",type:"homework",subjectId:"mat",date:shiftDate(t,0),time:"16:00",priority:"high",duration:30,notes:"Esercizi dal numero 1 al numero 8",done:false},
-   {id:uid(),title:"Ripassare il capitolo 3",type:"study",subjectId:"ita",date:shiftDate(t,1),time:"17:00",priority:"medium",duration:45,notes:"Rivedere appunti e schema",done:false},
-   {id:uid(),title:"Verifica sui verbi",type:"exam",subjectId:"ing",date:shiftDate(t,3),time:"09:00",priority:"high",duration:60,notes:"Present perfect e past simple",done:false},
-   {id:uid(),title:"Leggere pagine 44–51",type:"homework",subjectId:"sto",date:shiftDate(t,2),time:"",priority:"low",duration:25,notes:"",done:false},
-   {id:uid(),title:"Ripasso apparato digerente",type:"study",subjectId:"sci",date:shiftDate(t,-1),time:"18:00",priority:"medium",duration:30,notes:"",done:true}
-  ]
- };
-}
-function loadData(){
- try{
-  const raw=localStorage.getItem(STORAGE_KEY);
-  if(!raw)return seedData();
-  const d=JSON.parse(raw);
-  if(!d||!Array.isArray(d.tasks)||!Array.isArray(d.subjects)||!d.settings)throw Error("Dati non validi");
-  return d;
- }catch(e){return seedData()}
-}
-let data=loadData();
-let currentPage="home";
-let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
-let selectedDate=today();
-let toastTimer;
+/* =========================================
+   STUDY PRO - DATI E FUNZIONI DI BASE
+========================================= */
 
-function persist(){
- try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
- catch(e){toast("Impossibile salvare i dati nel browser.")}
-}
-function esc(value){
- return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-function subject(id){
- return data.subjects.find(s=>s.id===id)||{name:"Senza materia",icon:"📚",color:"#aaa"};
-}
-function fmtDate(s,opts={day:"numeric",month:"short"}){
- if(!s)return "";
- return new Date(s+"T12:00:00").toLocaleDateString("it-IT",opts);
-}
-function sortTasks(arr){
- return [...arr].sort((a,b)=>a.date.localeCompare(b.date)||(a.time||"").localeCompare(b.time||"")||({high:0,medium:1,low:2}[a.priority]??1)-({high:0,medium:1,low:2}[b.priority]??1));
-}
-function taskMarkup(t){
- const s=subject(t.subjectId);
- const late=!t.done&&t.date<today();
- return `<div class="task ${t.done?"done":""}">
- <input class="task-check" aria-label="Segna completata" type="checkbox" ${t.done?"checked":""} onchange="toggleTask('${t.id}',this.checked)">
- <div class="task-info"><strong>${esc(t.title)}</strong><small><span style="color:${s.color}">●</span> ${esc(s.name)} · ${fmtDate(t.date)}${t.time?" · "+esc(t.time):""}${late?' · <b style="color:#c54477">In ritardo</b>':""}</small></div>
- <span class="badge ${t.type}">${typeIcons[t.type]||"📌"} ${typeNames[t.type]||"Altro"}</span>
- <button class="icon-btn" title="Modifica" onclick="editTask('${t.id}')">✎</button>
- <button class="icon-btn" title="Elimina" onclick="deleteTask('${t.id}')">×</button>
- </div>`;
-}
-function render(){
- renderHeader();
- renderHome();
- renderTasks();
- renderCalendar();
- renderSubjects();
- fillSubjectSelects();
- loadSettings();
-}
-function renderHeader(){
- const name=data.settings.name?.trim();
- const titles={home:`Ciao${name?", "+name:""}! 👋`,tasks:"Le tue attività",calendar:"Il tuo calendario",subjects:"Le tue materie",settings:"Impostazioni"};
- const labels={home:"IL TUO SPAZIO DI STUDIO",tasks:"TUTTO SOTTO CONTROLLO",calendar:"PIANIFICA IL TUO TEMPO",subjects:"IL TUO PERCORSO",settings:"PERSONALIZZA LA TUA APP"};
- document.getElementById("pageTitle").textContent=titles[currentPage];
- document.getElementById("eyebrow").textContent=labels[currentPage];
- document.getElementById("avatar").textContent=(name?name[0]:"S").toUpperCase();
- document.getElementById("todayPill").textContent=new Date().toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"});
-}
-function renderHome(){
- const all=data.tasks,open=all.filter(t=>!t.done),done=all.filter(t=>t.done);
- document.getElementById("statOpen").textContent=open.length;
- document.getElementById("statToday").textContent=open.filter(t=>t.date===today()).length;
- document.getElementById("statExams").textContent=open.filter(t=>t.type==="exam"&&t.date>=today()).length;
- document.getElementById("statDone").textContent=done.length;
- document.getElementById("donePercent").textContent=(all.length?Math.round(done.length/all.length*100):0)+"%";
- const upcoming=sortTasks(open).slice(0,5);
- document.getElementById("homeTasks").innerHTML=upcoming.length?upcoming.map(taskMarkup).join(""):'<div class="empty"><div>🎉</div>Non hai attività in sospeso.<br>Aggiungine una nuova quando vuoi!</div>';
- renderWeek();
- const pct=all.length?Math.round(done.length/all.length*100):0;
- document.getElementById("progressRing").style.setProperty("--pct",pct+"%");
- document.getElementById("progressNumber").textContent=pct+"%";
- document.getElementById("progressText").textContent=all.length?`${done.length} attività completate su ${all.length}. Continua così!`:"Aggiungi attività per iniziare.";
- document.getElementById("homeSubjects").innerHTML=data.subjects.length?data.subjects.map(s=>{
-  const ts=all.filter(t=>t.subjectId===s.id),finished=ts.filter(t=>t.done).length,p=ts.length?Math.round(finished/ts.length*100):0;
-  return `<div class="subject-row"><span class="subject-dot" style="background:${s.color}"></span><div><strong>${s.icon} ${esc(s.name)}</strong><div class="bar"><span style="width:${p}%;background:${s.color}"></span></div></div><small>${finished}/${ts.length}</small></div>`;
- }).join(""):'<div class="empty">Aggiungi una materia per iniziare.</div>';
-}
-function renderWeek(){
- const base=new Date(),offset=(base.getDay()-(Number(data.settings.weekStart)||0)+7)%7;
- base.setDate(base.getDate()-offset);
- document.getElementById("weekCaption").textContent=fmtDate(base.getFullYear()+"-"+String(base.getMonth()+1).padStart(2,"0")+"-"+String(base.getDate()).padStart(2,"0"));
- document.getElementById("weekGrid").innerHTML=Array.from({length:7},(_,i)=>{
-  const d=new Date(base);d.setDate(base.getDate()+i);
-  const s=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  const has=data.tasks.some(t=>t.date===s&&!t.done);
-  return `<button class="day ${s===today()?"today":""} ${s===selectedDate?"selected":""}" onclick="selectedDate='${s}';renderWeek();if(currentPage==='calendar'){renderCalendar()}"><small>${d.toLocaleDateString("it-IT",{weekday:"short"}).replace(".","")}</small><strong>${d.getDate()}</strong>${has?'<div class="dot"></div>':""}</button>`;
- }).join("");
-}
-function renderTasks(){
- const q=(document.getElementById("taskSearch")?.value||"").toLowerCase();
- const type=document.getElementById("filterType")?.value||"all";
- const status=document.getElementById("filterStatus")?.value||"open";
- const sub=document.getElementById("filterSubject")?.value||"all";
- const arr=sortTasks(data.tasks).filter(t=>
-  (!q||(t.title+" "+t.notes+" "+subject(t.subjectId).name).toLowerCase().includes(q))&&
-  (type==="all"||t.type===type)&&
-  (status==="all"||(status==="done"?t.done:!t.done))&&
-  (sub==="all"||t.subjectId===sub)
- );
- document.getElementById("allTasks").innerHTML=arr.length?arr.map(taskMarkup).join(""):'<div class="empty"><div>🗂️</div>Nessuna attività trovata.<br>Prova a cambiare i filtri.</div>';
-}
-function renderCalendar(){
- const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth();
- document.getElementById("monthLabel").textContent=calendarMonth.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
- const first=new Date(y,m,1);
- const offset=(first.getDay()-(Number(data.settings.weekStart)||0)+7)%7;
- const daysIn=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate();
- const names=Number(data.settings.weekStart)===0?["Dom","Lun","Mar","Mer","Gio","Ven","Sab"]:["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
- let out=names.map(n=>`<div class="month-name">${n}</div>`).join("");
- for(let i=0;i<42;i++){
-  let day=i-offset+1,dt,muted=false;
-  if(day<1){dt=new Date(y,m-1,prevDays+day);muted=true}
-  else if(day>daysIn){dt=new Date(y,m+1,day-daysIn);muted=true}
-  else dt=new Date(y,m,day);
-  const s=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
-  const events=sortTasks(data.tasks.filter(t=>t.date===s)).slice(0,2);
-  out+=`<div class="month-day ${muted?"muted":""} ${s===today()||s===selectedDate?"current":""}" onclick="selectedDate='${s}';if(${dt.getMonth()}!==calendarMonth.getMonth())calendarMonth=new Date(${dt.getFullYear()},${dt.getMonth()},1);renderCalendar()"><b>${dt.getDate()}</b>${events.map(t=>`<span class="event-dot">${esc(t.title)}</span>`).join("")}</div>`;
- }
- document.getElementById("monthGrid").innerHTML=out;
- document.getElementById("selectedDateTitle").textContent="Impegni del "+fmtDate(selectedDate,{weekday:"long",day:"numeric",month:"long"});
- renderDayTasks();
-}
-function renderDayTasks(){
- const arr=sortTasks(data.tasks.filter(t=>t.date===selectedDate));
- document.getElementById("dayTasks").innerHTML=arr.length?arr.map(taskMarkup).join(""):'<div class="empty"><div>🌈</div>Nessun impegno per questo giorno.</div>';
-}
-function renderSubjects(){
- document.getElementById("subjectCards").innerHTML=data.subjects.length?data.subjects.map(s=>{
-  const ts=data.tasks.filter(t=>t.subjectId===s.id),done=ts.filter(t=>t.done).length;
-  return `<div class="subject-card"><div class="subject-icon" style="background:${s.color}20;color:${s.color}">${s.icon}</div><h4>${esc(s.name)}</h4><p>${ts.length} attività · ${done} completate</p><div class="card-actions"><span style="font-size:10px;color:#85849f">${ts.length?Math.round(done/ts.length*100):0}%</span><button onclick="filterBySubject('${s.id}')">Vedi attività</button><button onclick="deleteSubject('${s.id}')" title="Elimina materia">×</button></div></div>`;
- }).join(""):'<div class="empty">Non hai ancora aggiunto materie.</div>';
-}
-function fillSubjectSelects(){
- const opts=data.subjects.map(s=>`<option value="${esc(s.id)}">${esc(s.icon+" "+s.name)}</option>`).join("");
- const a=document.getElementById("taskSubject"),b=document.getElementById("filterSubject");
- const old=a.value,oldB=b.value;
- a.innerHTML='<option value="">Nessuna materia</option>'+opts;
- b.innerHTML='<option value="all">Tutte le materie</option>'+opts;
- if(data.subjects.some(s=>s.id===old))a.value=old;
- if(data.subjects.some(s=>s.id===oldB))b.value=oldB;
-}
-function navigate(page){
- currentPage=page;
- document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
- document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
- renderHeader();
- if(page==="calendar")renderCalendar();
- if(page==="tasks")renderTasks();
- if(page==="subjects")renderSubjects();
- window.scrollTo({top:0,behavior:"smooth"});
-}
-document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));
+const STORAGE_KEY = "studyProData_v1";
 
-function openTaskModal(date=selectedDate,id=""){
- const t=id?data.tasks.find(x=>x.id===id):null;
- document.getElementById("taskForm").reset();
- fillSubjectSelects();
- document.getElementById("taskId").value=t?.id||"";
- document.getElementById("taskTitle").value=t?.title||"";
- document.getElementById("taskType").value=t?.type||"homework";
- document.getElementById("taskSubject").value=t?.subjectId||"";
- document.getElementById("taskDate").value=t?.date||date||today();
- document.getElementById("taskTime").value=t?.time||"";
- document.getElementById("taskPriority").value=t?.priority||"medium";
- document.getElementById("taskDuration").value=t?.duration??30;
- document.getElementById("taskNotes").value=t?.notes||"";
- document.getElementById("taskModalTitle").textContent=t?"✏️ Modifica attività":"✨ Nuova attività";
- document.getElementById("taskBackdrop").classList.add("open");
- setTimeout(()=>document.getElementById("taskTitle").focus(),50);
+const defaultData = {
+  tasks: [],
+  exams: [],
+  notes: [],
+  lessons: [],
+  goals: [],
+  sessions: [],
+  profile: {
+    name: "",
+    school: "",
+    className: "",
+    level: "superiori",
+    weeklyGoal: 10,
+    studyStyle: "pomodoro"
+  }
+};
+
+let data = loadData();
+let currentTaskFilter = "all";
+let timerInterval = null;
+let timerRemaining = 25 * 60;
+let timerTotal = 25 * 60;
+let timerRunning = false;
+let timerStartedAt = null;
+let timerSessionSubject = "";
+let timerElapsed = 0;
+let photoPreviewUrl = null;
+
+const $ = id => document.getElementById(id);
+
+function uid() {
+  return Date.now().toString(36) +
+    Math.random().toString(36).slice(2, 9);
 }
-function closeTaskModal(){document.getElementById("taskBackdrop").classList.remove("open")}
-function saveTask(e){
- e.preventDefault();
- const id=document.getElementById("taskId").value,existing=data.tasks.find(t=>t.id===id);
- const t={
-  id:id||uid(),title:document.getElementById("taskTitle").value.trim(),
-  type:document.getElementById("taskType").value,
-  subjectId:document.getElementById("taskSubject").value,
-  date:document.getElementById("taskDate").value,
-  time:document.getElementById("taskTime").value,
-  priority:document.getElementById("taskPriority").value,
-  duration:Number(document.getElementById("taskDuration").value)||0,
-  notes:document.getElementById("taskNotes").value.trim(),
-  done:existing?.done||false
- };
- if(existing)data.tasks=data.tasks.map(x=>x.id===id?t:x);
- else data.tasks.push(t);
- selectedDate=t.date;persist();closeTaskModal();render();
- toast(existing?"Attività aggiornata!":"Attività aggiunta!");
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
-function editTask(id){openTaskModal("",id)}
-function toggleTask(id,done){
- const t=data.tasks.find(x=>x.id===id);
- if(t){t.done=done;persist();render();toast(done?"Attività completata! 🎉":"Attività riaperta.")}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(defaultData);
+
+    const saved = JSON.parse(raw);
+
+    return {
+      ...structuredClone(defaultData),
+      ...saved,
+      tasks: Array.isArray(saved.tasks) ? saved.tasks : [],
+      exams: Array.isArray(saved.exams) ? saved.exams : [],
+      notes: Array.isArray(saved.notes) ? saved.notes : [],
+      lessons: Array.isArray(saved.lessons) ? saved.lessons : [],
+      goals: Array.isArray(saved.goals) ? saved.goals : [],
+      sessions: Array.isArray(saved.sessions) ? saved.sessions : [],
+      profile: {
+        ...defaultData.profile,
+        ...(saved.profile || {})
+      }
+    };
+  } catch (error) {
+    console.error("Errore nel caricamento dei dati:", error);
+    return structuredClone(defaultData);
+  }
 }
-function deleteTask(id){
- const t=data.tasks.find(x=>x.id===id);
- if(t&&confirm(`Vuoi eliminare "${t.title}"?`)){
-  data.tasks=data.tasks.filter(x=>x.id!==id);
-  persist();render();toast("Attività eliminata.");
- }
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
+  } catch (error) {
+    console.error("Errore nel salvataggio:", error);
+    toast("Impossibile salvare i dati. Spazio disponibile insufficiente?");
+    return false;
+  }
 }
-function changeMonth(n){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+n,1);renderCalendar()}
-function goToday(){calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);selectedDate=today();renderCalendar()}
-function openSubjectModal(){
- document.getElementById("subjectName").value="";
- document.getElementById("subjectBackdrop").classList.add("open");
- setTimeout(()=>document.getElementById("subjectName").focus(),50);
+
+function toast(message) {
+  const el = $("toast");
+  if (!el) return;
+
+  el.textContent = message;
+  el.style.opacity = "1";
+  el.style.transform = "translateY(0)";
+
+  clearTimeout(toast.timeout);
+  toast.timeout = setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transform = "translateY(10px)";
+  }, 2800);
 }
-function closeSubjectModal(){document.getElementById("subjectBackdrop").classList.remove("open")}
-function saveSubject(e){
- e.preventDefault();
- const name=document.getElementById("subjectName").value.trim();
- if(data.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase()))return toast("Questa materia esiste già.");
- data.subjects.push({id:uid(),name,icon:document.getElementById("subjectIcon").value,color:document.getElementById("subjectColor").value});
- persist();closeSubjectModal();render();toast("Materia aggiunta!");
+
+function localDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
-function deleteSubject(id){
- const s=subject(id);
- if(!confirm(`Eliminare la materia "${s.name}"? Le attività resteranno senza materia.`))return;
- data.subjects=data.subjects.filter(x=>x.id!==id);
- data.tasks.forEach(t=>{if(t.subjectId===id)t.subjectId=""});
- persist();render();toast("Materia eliminata.");
+
+function parseLocalDate(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  date.setHours(0, 0, 0, 0);
+  return date;
 }
-function filterBySubject(id){navigate("tasks");document.getElementById("filterSubject").value=id;renderTasks()}
-function saveSettings(){
- data.settings.name=document.getElementById("userName").value.trim();
- data.settings.level=document.getElementById("studyLevel").value;
- data.settings.weekStart=document.getElementById("weekStart").value;
- persist();render();toast("Impostazioni salvate!");
+
+function formatDate(value) {
+  const date = parseLocalDate(value);
+  if (!date) return "Data non impostata";
+
+  return date.toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
 }
-function loadSettings(){
- document.getElementById("userName").value=data.settings.name||"";
- document.getElementById("studyLevel").value=data.settings.level||"Scuola superiore";
- document.getElementById("weekStart").value=data.settings.weekStart??"1";
+
+function dayDifference(value) {
+  const target = parseLocalDate(value);
+  if (!target) return null;
+
+  const today = parseLocalDate(localDateString());
+  return Math.round((target - today) / 86400000);
 }
-function exportData(){
- const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
- const url=URL.createObjectURL(blob),a=document.createElement("a");
- a.href=url;a.download="study-pro-backup-"+today()+".json";a.click();
- URL.revokeObjectURL(url);toast("Backup esportato!");
+
+function plural(number, singular, pluralForm) {
+  return `${number} ${number === 1 ? singular : pluralForm}`;
 }
-function importData(e){
- const f=e.target.files?.[0];if(!f)return;
- const reader=new FileReader();
- reader.onload=()=>{
-  try{
-   const d=JSON.parse(reader.result);
-   if(!Array.isArray(d.tasks)||!Array.isArray(d.subjects)||!d.settings)throw Error();
-   data=d;persist();loadSettings();render();toast("Backup importato!");
-  }catch(err){alert("File non valido: scegli un backup JSON di STUDY PRO.")}
-  e.target.value="";
- };
- reader.readAsText(f);
+
+/* =========================================
+   NAVIGAZIONE
+========================================= */
+
+const pageTitles = {
+  dashboard: "Dashboard",
+  tasks: "Compiti",
+  exams: "Verifiche",
+  notes: "Appunti digitali",
+  timetable: "Orario scolastico",
+  timer: "Timer studio",
+  planner: "Pianificazione",
+  profile: "Il mio profilo"
+};
+
+function showPage(pageName) {
+  if (!pageTitles[pageName]) return;
+
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.toggle("active", page.id === `page-${pageName}`);
+  });
+
+  document.querySelectorAll(".nav-btn").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.page === pageName
+    );
+  });
+
+  $("topbarTitle").textContent = pageTitles[pageName];
+  $("sidebar").classList.remove("open");
+
+  if (pageName === "dashboard") renderDashboard();
+  if (pageName === "tasks") renderTasks();
+  if (pageName === "exams") renderExams();
+  if (pageName === "notes") renderNotes();
+  if (pageName === "timetable") renderTimetable();
+  if (pageName === "planner") renderPlanner();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
-function resetData(){
- if(!confirm("Sostituire i dati attuali con i dati demo? Esporta prima un backup se vuoi conservarli."))return;
- data=seedData();persist();loadSettings();render();toast("Dati demo ripristinati.");
-}
-function toast(msg){
- const el=document.getElementById("toast");
- el.textContent=msg;el.classList.add("show");
- clearTimeout(toastTimer);
- toastTimer=setTimeout(()=>el.classList.remove("show"),2600);
-}
-document.addEventListener("keydown",e=>{
- if(e.key==="Escape"){closeTaskModal();closeSubjectModal()}
- if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openTaskModal()}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    showPage(button.dataset.page);
+  });
 });
-loadSettings();
-render();
+
+$("mobileMenu").addEventListener("click", () => {
+  $("sidebar").classList.toggle("open");
+});
+
+document.addEventListener("click", event => {
+  if (
+    window.innerWidth <= 760 &&
+    $("sidebar").classList.contains("open") &&
+    !$("sidebar").contains(event.target) &&
+    !$("mobileMenu").contains(event.target)
+  ) {
+    $("sidebar").classList.remove("open");
+  }
+});
+
+/* =========================================
+   PROFILO E PREFERENZE
+========================================= */
+
+function renderProfile() {
+  $("profileName").value = data.profile.name || "";
+  $("profileSchool").value = data.profile.school || "";
+  $("profileClass").value = data.profile.className || "";
+
+  $("studyLevel").value = data.profile.level || "superiori";
+  $("weeklyGoal").value = String(data.profile.weeklyGoal || 10);
+  $("studyStyle").value = data.profile.studyStyle || "pomodoro";
+
+  updateGreeting();
+}
+
+function updateGreeting() {
+  const name = data.profile.name.trim();
+
+  $("welcomeTitle").textContent = name
+    ? `Ciao ${name}! 👋`
+    : "Ciao! 👋";
+
+  $("userAvatar").textContent = name
+    ? name.charAt(0).toUpperCase()
+    : "S";
+}
+
+$("profileForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  data.profile.name = $("profileName").value.trim();
+  data.profile.school = $("profileSchool").value.trim();
+  data.profile.className = $("profileClass").value.trim();
+
+  saveData();
+  updateGreeting();
+  toast("Profilo salvato!");
+});
+
+$("preferencesForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  data.profile.level = $("studyLevel").value;
+  data.profile.weeklyGoal = Number($("weeklyGoal").value);
+  data.profile.studyStyle = $("studyStyle").value;
+
+  saveData();
+  renderDashboard();
+  toast("Preferenze aggiornate!");
+});
+
+/* =========================================
+   COMPITI
+========================================= */
+
+$("taskForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const subject = $("taskSubject").value.trim();
+  const title = $("taskTitle").value.trim();
+  const date = $("taskDate").value;
+
+  if (!subject || !title || !parseLocalDate(date)) {
+    toast("Controlla materia, compito e scadenza.");
+    return;
+  }
+
+  data.tasks.push({
+    id: uid(),
+    subject,
+    title,
+    date,
+    priority: $("taskPriority").value,
+    description: $("taskDescription").value.trim(),
+    done: false,
+    createdAt: new Date().toISOString()
+  });
+
+  saveData();
+  $("taskForm").reset();
+
+  renderTasks();
+  renderDashboard();
+  renderPlanner();
+
+  toast("Compito aggiunto!");
+});
+
+document.querySelectorAll(".task-filter").forEach(button => {
+  button.addEventListener("click", () => {
+    currentTaskFilter = button.dataset.filter;
+
+    document.querySelectorAll(".task-filter").forEach(item => {
+      item.classList.toggle("active", item === button);
+    });
+
+    renderTasks();
+  });
+});
+
+function toggleTask(id) {
+  const task = data.tasks.find(item => item.id === id);
+  if (!task) return;
+
+  task.done = !task.done;
+
+  saveData();
+  renderTasks();
+  renderDashboard();
+  renderPlanner();
+}
+
+function deleteTask(id) {
+  if (!confirm("Vuoi eliminare questo compito?")) return;
+
+  data.tasks = data.tasks.filter(task => task.id !== id);
+
+  saveData();
+  renderTasks();
+  renderDashboard();
+  renderPlanner();
+
+  toast("Compito eliminato.");
+}
+
+function renderTasks() {
+  const list = $("tasksList");
+
+  let tasks = [...data.tasks].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return (a.date || "").localeCompare(b.date || "");
+  });
+
+  if (currentTaskFilter === "open") {
+    tasks = tasks.filter(task => !task.done);
+  } else if (currentTaskFilter === "done") {
+    tasks = tasks.filter(task => task.done);
+  }
+
+  $("taskCount").textContent = plural(
+    data.tasks.length,
+    "compito",
+    "compiti"
+  );
+
+  if (!tasks.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <strong>Nessun compito in questa sezione</strong>
+        Aggiungi un compito o cambia filtro.
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = tasks.map(task => {
+    const diff = dayDifference(task.date);
+
+    let dueLabel = formatDate(task.date);
+    if (!task.done && diff !== null) {
+      if (diff < 0) dueLabel += " · Scaduto";
+      else if (diff === 0) dueLabel += " · Oggi";
+      else if (diff === 1) dueLabel += " · Domani";
+    }
+
+    const priorityClass = task.priority === "Urgente"
+      ? "badge-red"
+      : task.priority === "Alta"
+        ? "badge-orange"
+        : "badge-purple";
+
+    return `
+      <div class="list-item">
+        <button
+          class="check-circle ${task.done ? "done" : ""}"
+          type="button"
+          onclick="toggleTask('${task.id}')"
+          aria-label="${task.done ? "Segna come da fare" : "Segna come completato"}"
+        >${task.done ? "✓" : ""}</button>
+
+        <div class="list-item-main">
+          <div class="list-item-title" style="${task.done ? "text-decoration:line-through;opacity:.55" : ""}">
+            ${escapeHTML(task.title)}
+          </div>
+          <div class="list-item-sub">
+            ${escapeHTML(task.subject)} · ${escapeHTML(dueLabel)}
+          </div>
+          ${task.description ? `
+            <div class="list-item-sub">${escapeHTML(task.description)}</div>
+          ` : ""}
+        </div>
+
+        <span class="badge ${priorityClass}">
+          ${escapeHTML(task.priority || "Normale")}
+        </span>
+
+        <button class="btn btn-small btn-danger"
+          type="button"
+          onclick="deleteTask('${task.id}')"
+          aria-label="Elimina compito">×</button>
+      </div>`;
+  }).join("");
+}
+
+/* =========================================
+   VERIFICHE E CONTO ALLA ROVESCIA
+========================================= */
+
+$("examForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const subject = $("examSubject").value.trim();
+  const title = $("examTitle").value.trim();
+  const date = $("examDate").value;
+
+  if (!subject || !title || !parseLocalDate(date)) {
+    toast("Controlla i dati della verifica.");
+    return;
+  }
+
+  const diff = dayDifference(date);
+  if (diff === null || diff < 0) {
+    toast("Scegli una data di oggi o futura.");
+    return;
+  }
+
+  data.exams.push({
+    id: uid(),
+    subject,
+    title,
+    date,
+    type: $("examType").value,
+    notes: $("examNotes").value.trim(),
+    createdAt: new Date().toISOString()
+  });
+
+  saveData();
+  $("examForm").reset();
+
+  renderExams();
+  renderDashboard();
+  renderPlanner();
+
+  toast("Verifica aggiunta!");
+});
+
+function deleteExam(id) {
+  if (!confirm("Vuoi eliminare questa verifica?")) return;
+
+  data.exams = data.exams.filter(exam => exam.id !== id);
+
+  saveData();
+  renderExams();
+  renderDashboard();
+  renderPlanner();
+
+  toast("Verifica eliminata.");
+}
+
+function renderExams() {
+  const list = $("examsList");
+
+  const exams = [...data.exams].sort((a, b) =>
+    (a.date || "").localeCompare(b.date || "")
+  );
+
+  $("examCount").textContent = plural(
+    exams.length,
+    "verifica",
+    "verifiche"
+  );
+
+  if (!exams.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <strong>Ancora nessuna verifica</strong>
+        Inserisci la prossima data importante.
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = exams.map(exam => {
+    const diff = dayDifference(exam.date);
+
+    let countdown = "Data non disponibile";
+    let badgeClass = "badge-purple";
+
+    if (diff === 0) {
+      countdown = "È oggi!";
+      badgeClass = "badge-red";
+    } else if (diff === 1) {
+      countdown = "Domani";
+      badgeClass = "badge-red";
+    } else if (diff > 1) {
+      countdown = `Mancano ${diff} giorni`;
+      badgeClass = diff <= 7 ? "badge-orange" : "badge-green";
+    } else if (diff < 0) {
+      countdown = "Data passata";
+      badgeClass = "badge-red";
+    }
+
+    return `
+      <div class="list-item">
+        <div class="stat-icon icon-orange">📚</div>
+
+        <div class="list-item-main">
+          <div class="list-item-title">${escapeHTML(exam.subject)} — ${escapeHTML(exam.title)}</div>
+          <div class="list-item-sub">
+            ${escapeHTML(exam.type)} · ${escapeHTML(formatDate(exam.date))}
+          </div>
+          ${exam.notes ? `
+            <div class="list-item-sub">${escapeHTML(exam.notes)}</div>
+          ` : ""}
+        </div>
+
+        <span class="badge ${badgeClass}">${escapeHTML(countdown)}</span>
+
+        <button class="btn btn-small btn-danger"
+          type="button"
+          onclick="deleteExam('${exam.id}')"
+          aria-label="Elimina verifica">×</button>
+      </div>`;
+  }).join("");
+}
+
+/* =========================================
+   FINE PARTE 5
+========================================= */
 </script>
+
+<script>
+/* =========================================
+   APPUNTI DIGITALI
+========================================= */
+
+$("noteForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const title = $("noteTitle").value.trim();
+  const subject = $("noteSubject").value.trim();
+  const content = $("noteContent").value.trim();
+
+  if (!title || !subject || !content) {
+    toast("Compila titolo, materia e contenuto.");
+    return;
+  }
+
+  data.notes.push({
+    id: uid(),
+    title,
+    subject,
+    content,
+    tags: $("noteTags").value.trim(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+
+  saveData();
+  $("noteForm").reset();
+  renderNotes();
+  renderDashboard();
+  toast("Appunto salvato!");
+});
+
+$("noteSearch").addEventListener("input", renderNotes);
+
+function deleteNote(id) {
+  if (!confirm("Vuoi eliminare questo appunto?")) return;
+
+  data.notes = data.notes.filter(note => note.id !== id);
+  saveData();
+  renderNotes();
+  renderDashboard();
+  toast("Appunto eliminato.");
+}
+
+function editNote(id) {
+  const note = data.notes.find(item => item.id === id);
+  if (!note) return;
+
+  $("noteTitle").value = note.title || "";
+  $("noteSubject").value = note.subject || "";
+  $("noteContent").value = note.content || "";
+  $("noteTags").value = note.tags || "";
+
+  const form = $("noteForm");
+  form.dataset.editing = id;
+
+  showPage("notes");
+  $("noteTitle").focus();
+  toast("Modifica l'appunto e premi Salva appunto.");
+}
+
+const originalNoteFormSubmit = $("noteForm").onsubmit;
+
+$("noteForm").addEventListener("submit", event => {
+  const editingId = $("noteForm").dataset.editing;
+  if (!editingId) return;
+
+  event.preventDefault();
+
+  const note = data.notes.find(item => item.id === editingId);
+  if (!note) {
+    delete $("noteForm").dataset.editing;
+    return;
+  }
+
+  note.title = $("noteTitle").value.trim();
+  note.subject = $("noteSubject").value.trim();
+  note.content = $("noteContent").value.trim();
+  note.tags = $("noteTags").value.trim();
+  note.updatedAt = new Date().toISOString();
+
+  saveData();
+  delete $("noteForm").dataset.editing;
+  $("noteForm").reset();
+  renderNotes();
+  renderDashboard();
+  toast("Appunto aggiornato!");
+});
+
+function renderNotes() {
+  const list = $("notesList");
+  const search = $("noteSearch").value.trim().toLowerCase();
+
+  const notes = [...data.notes]
+    .filter(note => {
+      const text = [
+        note.title, note.subject, note.content, note.tags
+      ].join(" ").toLowerCase();
+
+      return text.includes(search);
+    })
+    .sort((a, b) =>
+      (b.updatedAt || b.createdAt || "")
+        .localeCompare(a.updatedAt || a.createdAt || "")
+    );
+
+  $("noteCount").textContent = plural(
+    data.notes.length, "appunto", "appunti"
+  );
+
+  if (!notes.length) {
+    list.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">📚</div>
+        <strong>Nessun appunto trovato</strong>
+        Crea un appunto oppure prova un'altra ricerca.
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = notes.map(note => `
+    <div class="card">
+      <div class="flex-between" style="align-items:flex-start">
+        <div style="min-width:0">
+          <h3 class="card-title">${escapeHTML(note.title)}</h3>
+          <div class="card-description">
+            ${escapeHTML(note.subject)}
+          </div>
+        </div>
+        <span class="stat-icon icon-purple">▤</span>
+      </div>
+
+      <p style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:150px;overflow:auto;margin:16px 0">
+        ${escapeHTML(note.content)}
+      </p>
+
+      ${note.tags ? `
+        <div class="card-description">
+          🏷️ ${escapeHTML(note.tags)}
+        </div>` : ""}
+
+      <div class="divider"></div>
+
+      <div class="flex-wrap">
+        <button class="btn btn-small btn-soft"
+          onclick="editNote('${note.id}')">Modifica</button>
+
+        <button class="btn btn-small"
+          onclick="downloadNote('${note.id}')">Esporta TXT</button>
+
+        <button class="btn btn-small btn-danger"
+          onclick="deleteNote('${note.id}')">Elimina</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function downloadFile(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadNote(id) {
+  const note = data.notes.find(item => item.id === id);
+  if (!note) return;
+
+  const content =
+    `${note.title}\nMateria: ${note.subject}\n` +
+    `Parole chiave: ${note.tags || "-"}\n\n${note.content}`;
+
+  downloadFile(
+    (note.title || "appunto").replace(/[^\w\- ]/g, "_") + ".txt",
+    content,
+    "text/plain;charset=utf-8"
+  );
+}
+
+/* =========================================
+   IMPORTAZIONE FOTO APPUNTI
+========================================= */
+
+$("notePhoto").addEventListener("change", () => {
+  const file = $("notePhoto").files[0];
+  const preview = $("notePhotoPreview");
+
+  if (photoPreviewUrl) {
+    URL.revokeObjectURL(photoPreviewUrl);
+    photoPreviewUrl = null;
+  }
+
+  if (!file) {
+    preview.innerHTML = "";
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    preview.textContent = "Seleziona un'immagine valida.";
+    return;
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    preview.textContent = "L'immagine supera il limite di 12 MB.";
+    $("notePhoto").value = "";
+    return;
+  }
+
+  photoPreviewUrl = URL.createObjectURL(file);
+
+  const image = document.createElement("img");
+  image.src = photoPreviewUrl;
+  image.alt = "Anteprima degli appunti";
+  image.style.cssText =
+    "display:block;max-width:100%;max-height:420px;" +
+    "object-fit:contain;border-radius:12px;border:1px solid var(--border)";
+
+  preview.replaceChildren(image);
+});
+
+$("preparePhotoBtn").addEventListener("click", () => {
+  const file = $("notePhoto").files[0];
+
+  if (!file) {
+    toast("Seleziona prima una fotografia.");
+    return;
+  }
+
+  toast("Foto pronta: l'estrazione OCR richiede un servizio aggiuntivo.");
+});
+
+/* =========================================
+   ORARIO SCOLASTICO
+========================================= */
+
+const weekdayNames = {
+  1: "Lunedì",
+  2: "Martedì",
+  3: "Mercoledì",
+  4: "Giovedì",
+  5: "Venerdì",
+  6: "Sabato"
+};
+
+$("lessonForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const start = $("lessonStart").value;
+  const end = $("lessonEnd").value;
+
+  if (!start || !end || start >= end) {
+    toast("L'ora di fine deve essere successiva all'inizio.");
+    return;
+  }
+
+  data.lessons.push({
+    id: uid(),
+    day: Number($("lessonDay").value),
+    subject: $("lessonSubject").value.trim(),
+    start,
+    end,
+    room: $("lessonRoom").value.trim(),
+    teacher: $("lessonTeacher").value.trim()
+  });
+
+  saveData();
+  $("lessonForm").reset();
+  $("lessonStart").value = "08:00";
+  $("lessonEnd").value = "09:00";
+
+  renderTimetable();
+  toast("Lezione aggiunta!");
+});
+
+function deleteLesson(id) {
+  if (!confirm("Vuoi eliminare questa lezione?")) return;
+
+  data.lessons = data.lessons.filter(item => item.id !== id);
+  saveData();
+  renderTimetable();
+  toast("Lezione eliminata.");
+}
+
+function renderTimetable() {
+  const container = $("timetableList");
+
+  if (!data.lessons.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🏫</div>
+        <strong>Orario ancora vuoto</strong>
+        Aggiungi le lezioni della tua settimana.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = Object.entries(weekdayNames).map(([day, name]) => {
+    const lessons = data.lessons
+      .filter(item => item.day === Number(day))
+      .sort((a, b) => a.start.localeCompare(b.start));
+
+    return `
+      <div style="margin-bottom:22px">
+        <div class="flex-between" style="margin-bottom:10px">
+          <h3 class="card-title">${name}</h3>
+          <span class="badge badge-purple">
+            ${lessons.length} ${lessons.length === 1 ? "lezione" : "lezioni"}
+          </span>
+        </div>
+
+        ${lessons.length ? `
+          <div class="list">
+            ${lessons.map(lesson => `
+              <div class="list-item">
+                <div class="stat-icon icon-purple">📘</div>
+                <div class="list-item-main">
+                  <div class="list-item-title">
+                    ${escapeHTML(lesson.start)}–${escapeHTML(lesson.end)}
+                    · ${escapeHTML(lesson.subject)}
+                  </div>
+                  <div class="list-item-sub">
+                    ${lesson.room ? "Aula " + escapeHTML(lesson.room) : ""}
+                    ${lesson.room && lesson.teacher ? " · " : ""}
+                    ${lesson.teacher ? escapeHTML(lesson.teacher) : ""}
+                  </div>
+                </div>
+                <button class="btn btn-small btn-danger"
+                  onclick="deleteLesson('${lesson.id}')">×</button>
+              </div>
+            `).join("")}
+          </div>
+        ` : `<p class="muted small">Nessuna lezione.</p>`}
+      </div>`;
+  }).join("");
+}
+
+$("printTimetableBtn").addEventListener("click", () => {
+  window.print();
+});
+
+/* =========================================
+   TIMER STUDIO
+========================================= */
+
+function formatTimer(seconds) {
+  const safe = Math.max(0, Math.ceil(seconds));
+  const minutes = Math.floor(safe / 60);
+  const secs = safe % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function updateTimerDisplay() {
+  $("timerDisplay").textContent = formatTimer(timerRemaining);
+
+  const completed = timerTotal > 0
+    ? ((timerTotal - timerRemaining) / timerTotal) * 100
+    : 0;
+
+  $("timerProgress").style.width =
+    `${Math.max(0, Math.min(100, completed))}%`;
+
+  $("timerStartBtn").disabled = timerRunning;
+  $("timerPauseBtn").disabled = !timerRunning;
+}
+
+function stopTimerInterval() {
+  if (timerInterval !== null) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function resetTimer() {
+  stopTimerInterval();
+
+  timerRunning = false;
+  timerStartedAt = null;
+  timerElapsed = 0;
+
+  timerTotal = Number($("timerDuration").value) * 60;
+  timerRemaining = timerTotal;
+  timerSessionSubject = $("timerSubject").value.trim();
+
+  $("timerStatus").textContent = "Pronto per iniziare";
+  updateTimerDisplay();
+}
+
+function completeTimerSession() {
+  stopTimerInterval();
+
+  timerRunning = false;
+  timerRemaining = 0;
+
+  const durationMinutes = Math.round(timerTotal / 60);
+
+  data.sessions.push({
+    id: uid(),
+    subject: timerSessionSubject || "Studio",
+    durationMinutes,
+    date: localDateString(),
+    completedAt: new Date().toISOString()
+  });
+
+  saveData();
+
+  $("timerStatus").textContent = "Sessione completata! 🎉";
+  updateTimerDisplay();
+  renderDashboard();
+
+  $("timerSessions").textContent = data.sessions.length;
+  toast("Ottimo lavoro! Sessione registrata.");
+}
+
+function timerTick() {
+  if (!timerRunning) return;
+
+  const elapsed = (Date.now() - timerStartedAt) / 1000;
+  timerRemaining = Math.max(0, timerTotal - timerElapsed - elapsed);
+
+  updateTimerDisplay();
+
+  if (timerRemaining <= 0) {
+    completeTimerSession();
+  }
+}
+
+$("timerStartBtn").addEventListener("click", () => {
+  if (timerRunning) return;
+
+  if (timerRemaining <= 0) resetTimer();
+
+  timerSessionSubject = $("timerSubject").value.trim();
+
+  timerStartedAt = Date.now();
+  timerRunning = true;
+
+  $("timerStatus").textContent = "Concentrazione in corso...";
+  stopTimerInterval();
+  timerInterval = setInterval(timerTick, 250);
+
+  updateTimerDisplay();
+});
+
+$("timerPauseBtn").addEventListener("click", () => {
+  if (!timerRunning) return;
+
+  const elapsed = (Date.now() - timerStartedAt) / 1000;
+  timerElapsed += elapsed;
+  timerRemaining = Math.max(0, timerTotal - timerElapsed);
+
+  stopTimerInterval();
+  timerRunning = false;
+
+  $("timerStatus").textContent = "In pausa";
+  updateTimerDisplay();
+});
+
+$("timerResetBtn").addEventListener("click", () => {
+  resetTimer();
+  toast("Timer azzerato.");
+});
+
+$("timerDuration").addEventListener("change", () => {
+  if (!timerRunning) resetTimer();
+});
+
+$("timerSubject").addEventListener("change", () => {
+  if (!timerRunning) {
+    timerSessionSubject = $("timerSubject").value.trim();
+  }
+});
+
+/* =========================================
+   OBIETTIVI
+========================================= */
+
+$("goalForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const title = $("goalTitle").value.trim();
+  const date = $("goalDate").value;
+
+  if (!title || !parseLocalDate(date)) {
+    toast("Inserisci un obiettivo e una data valida.");
+    return;
+  }
+
+  data.goals.push({
+    id: uid(),
+    title,
+    date,
+    details: $("goalDetails").value.trim(),
+    done: false,
+    createdAt: new Date().toISOString()
+  });
+
+  saveData();
+  $("goalForm").reset();
+
+  renderPlanner();
+  toast("Obiettivo aggiunto!");
+});
+
+function toggleGoal(id) {
+  const goal = data.goals.find(item => item.id === id);
+  if (!goal) return;
+
+  goal.done = !goal.done;
+
+  saveData();
+  renderPlanner();
+  toast(goal.done ? "Obiettivo raggiunto!" : "Obiettivo riaperto.");
+}
+
+function deleteGoal(id) {
+  if (!confirm("Vuoi eliminare questo obiettivo?")) return;
+
+  data.goals = data.goals.filter(item => item.id !== id);
+  saveData();
+  renderPlanner();
+  toast("Obiettivo eliminato.");
+}
+
+function renderPlanner() {
+  const goalsList = $("goalsList");
+
+  const goals = [...data.goals].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return (a.date || "").localeCompare(b.date || "");
+  });
+
+  $("goalCount").textContent = plural(
+    goals.length, "obiettivo", "obiettivi"
+  );
+
+  if (!goals.length) {
+    goalsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎯</div>
+        <strong>Nessun obiettivo</strong>
+        Aggiungi un obiettivo personale.
+      </div>`;
+  } else {
+    goalsList.innerHTML = goals.map(goal => `
+      <div class="list-item">
+        <button class="check-circle ${goal.done ? "done" : ""}"
+          onclick="toggleGoal('${goal.id}')"
+          aria-label="Cambia stato obiettivo">${goal.done ? "✓" : ""}</button>
+
+        <div class="list-item-main">
+          <div class="list-item-title"
+            style="${goal.done ? "text-decoration:line-through;opacity:.6" : ""}">
+            ${escapeHTML(goal.title)}
+          </div>
+          <div class="list-item-sub">
+            Scadenza: ${escapeHTML(formatDate(goal.date))}
+          </div>
+          ${goal.details ? `
+            <div class="list-item-sub">${escapeHTML(goal.details)}</div>
+          ` : ""}
+        </div>
+
+        <button class="btn btn-small btn-danger"
+          onclick="deleteGoal('${goal.id}')">×</button>
+      </div>
+    `).join("");
+  }
+
+  $("plannerOpenTasks").textContent =
+    data.tasks.filter(task => !task.done).length;
+
+  $("plannerUpcomingExams").textContent =
+    data.exams.filter(exam => {
+      const diff = dayDifference(exam.date);
+      return diff !== null && diff >= 0 && diff <= 7;
+    }).length;
+
+  $("plannerCompletedGoals").textContent =
+    data.goals.filter(goal => goal.done).length;
+}
+
+/* =========================================
+   DASHBOARD INTELLIGENTE
+========================================= */
+
+function renderDashboard() {
+  const openTasks = data.tasks.filter(task => !task.done);
+
+  const today = localDateString();
+  const todayDate = parseLocalDate(today);
+
+  const upcomingExams = data.exams
+    .filter(exam => {
+      const diff = dayDifference(exam.date);
+      return diff !== null && diff >= 0;
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const weeklySessions = data.sessions.filter(session => {
+    const date = parseLocalDate(session.date);
+    if (!date || !todayDate) return false;
+
+    const daysAgo = Math.floor((todayDate - date) / 86400000);
+    return daysAgo >= 0 && daysAgo < 7;
+  });
+
+  const weeklyMinutes = weeklySessions.reduce(
+    (sum, session) => sum + Number(session.durationMinutes || 0), 0
+  );
+
+  const weeklyGoalMinutes =
+    Math.max(1, Number(data.profile.weeklyGoal) || 10) * 60;
+
+  $("statTasks").textContent = openTasks.length;
+  $("statExams").textContent = upcomingExams.length;
+  $("statNotes").textContent = data.notes.length;
+
+  const totalMinutes = data.sessions.reduce(
+    (sum, session) => sum + Number(session.durationMinutes || 0), 0
+  );
+
+  $("statHours").textContent =
+    `${Math.floor(totalMinutes / 60)}h` +
+    (totalMinutes % 60 ? ` ${totalMinutes % 60}m` : "");
+
+  $("weeklyHours").textContent =
+    `${Math.floor(weeklyMinutes / 60)}h ${weeklyMinutes % 60}m / ${data.profile.weeklyGoal || 10}h`;
+
+  const progress = Math.min(100, weeklyMinutes / weeklyGoalMinutes * 100);
+  $("weeklyProgress").style.width = `${progress}%`;
+
+  $("weeklyMessage").textContent = progress >= 100
+    ? "Obiettivo settimanale raggiunto! Complimenti! 🎉"
+    : `Hai completato il ${Math.round(progress)}% del tuo obiettivo settimanale.`;
+
+  const taskContainer = $("dashboardTasks");
+
+  const visibleTasks = [...openTasks]
+    .sort((a, b) => (a.date || "").localeCompare(b.date || ""))
+    .slice(0, 5);
+
+  taskContainer.innerHTML = visibleTasks.length
+    ? visibleTasks.map(task => `
+      <div class="list-item">
+        <button class="check-circle"
+          onclick="toggleTask('${task.id}')"
+          aria-label="Completa compito"></button>
+        <div class="list-item-main">
+          <div class="list-item-title">${escapeHTML(task.title)}</div>
+          <div class="list-item-sub">
+            ${escapeHTML(task.subject)} · ${escapeHTML(formatDate(task.date))}
+          </div>
+        </div>
+        <span class="badge ${
+          task.priority === "Urgente" ? "badge-red" :
+          task.priority === "Alta" ? "badge-orange" : "badge-purple"
+        }">${escapeHTML(task.priority || "Normale")}</span>
+      </div>
+    `).join("")
+    : `
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <strong>Nessun compito aperto</strong>
+        Hai completato tutto oppure non hai ancora aggiunto attività.
+      </div>`;
+
+  const examContainer = $("dashboardExams");
+  const visibleExams = upcomingExams.slice(0, 5);
+
+  examContainer.innerHTML = visibleExams.length
+    ? visibleExams.map(exam => {
+      const diff = dayDifference(exam.date);
+      const label = diff === 0 ? "Oggi" :
+        diff === 1 ? "Domani" : `${diff} giorni`;
+
+      return `
+        <div class="list-item">
+          <div class="stat-icon icon-orange">📅</div>
+          <div class="list-item-main">
+            <div class="list-item-title">
+              ${escapeHTML(exam.subject)} — ${escapeHTML(exam.title)}
+            </div>
+            <div class="list-item-sub">
+              ${escapeHTML(formatDate(exam.date))}
+            </div>
+          </div>
+          <span class="badge ${diff <= 2 ? "badge-red" : "badge-orange"}">
+            ${escapeHTML(label)}
+          </span>
+        </div>`;
+    }).join("")
+    : `
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <strong>Nessuna verifica futura</strong>
+        Inserisci le prossime date importanti.
+      </div>`;
+
+  updateGreeting();
+  $("timerSessions").textContent = data.sessions.length;
+}
+
+/* =========================================
+   BACKUP E RIPRISTINO
+========================================= */
+
+$("exportDataBtn").addEventListener("click", () => {
+  const backup = {
+    app: "STUDY PRO",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data
+  };
+
+  downloadFile(
+    `study-pro-backup-${localDateString()}.json`,
+    JSON.stringify(backup, null, 2),
+    "application/json"
+  );
+
+  toast("Backup preparato.");
+});
+
+$("importDataBtn").addEventListener("click", () => {
+  $("importDataFile").click();
+});
+
+$("importDataFile").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error("Il file supera il limite di 10 MB.");
+    }
+
+    const parsed = JSON.parse(await file.text());
+    const incoming = parsed.data || parsed;
+
+    const arrays = [
+      "tasks", "exams", "notes", "lessons", "goals", "sessions"
+    ];
+
+    for (const key of arrays) {
+      if (incoming[key] !== undefined && !Array.isArray(incoming[key])) {
+        throw new Error(`Il campo ${key} non è valido.`);
+      }
+    }
+
+    if (parsed.app && parsed.app !== "STUDY PRO") {
+      throw new Error("Questo backup non appartiene a STUDY PRO.");
+    }
+
+    if (!confirm(
+      "Importare questo backup? I dati attuali verranno sostituiti."
+    )) return;
+
+    const clean = structuredClone(defaultData);
+
+    for (const key of arrays) {
+      if (Array.isArray(incoming[key])) {
+        clean[key] = incoming[key];
+      }
+    }
+
+    clean.profile = {
+      ...defaultData.profile,
+      ...(incoming.profile || {})
+    };
+
+    const previous = data;
+    data = clean;
+
+    if (!saveData()) {
+      data = previous;
+      return;
+    }
+
+    renderAll();
+    renderProfile();
+    toast("Backup importato correttamente!");
+  } catch (error) {
+    alert("Impossibile importare il backup: " + error.message);
+  } finally {
+    event.target.value = "";
+  }
+});
+
+$("clearDataBtn").addEventListener("click", () => {
+  const confirmed = confirm(
+    "ATTENZIONE: vuoi eliminare tutti i dati di STUDY PRO da questo browser? Questa operazione non può essere annullata."
+  );
+
+  if (!confirmed) return;
+
+  data = structuredClone(defaultData);
+
+  if (!saveData()) {
+    toast("Non è stato possibile salvare la modifica.");
+    return;
+  }
+
+  resetTimer();
+  renderAll();
+  renderProfile();
+  toast("Dati locali cancellati.");
+});
+
+/* =========================================
+   INIZIALIZZAZIONE
+========================================= */
+
+function renderAll() {
+  renderTasks();
+  renderExams();
+  renderNotes();
+  renderTimetable();
+  renderPlanner();
+  renderDashboard();
+}
+
+function initializeApp() {
+  $("todayLabel").textContent = new Date().toLocaleDateString("it-IT", {
+    weekday: "short",
+    day: "numeric",
+    month: "short"
+  });
+
+  $("taskDate").value = localDateString();
+  $("examDate").value = localDateString();
+  $("goalDate").value = localDateString();
+
+  renderProfile();
+  renderAll();
+  resetTimer();
+
+  console.log("STUDY PRO avviato correttamente.");
+}
+
+initializeApp();
+</script>
+
+<style>
+/* Miglioramenti finali per dispositivi mobili e stampa */
+
+.task-filter.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: transparent;
+}
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  .sidebar,
+  .topbar,
+  .page-heading button,
+  #lessonForm,
+  #printTimetableBtn,
+  .btn,
+  .check-circle {
+    display: none !important;
+  }
+
+  .main {
+    margin: 0;
+  }
+
+  .content {
+    max-width: none;
+    padding: 0;
+  }
+
+  .page {
+    display: none !important;
+  }
+
+  #page-timetable {
+    display: block !important;
+  }
+
+  #page-timetable .card {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+  }
+
+  #page-timetable .card > .flex-between {
+    display: none;
+  }
+
+  #page-timetable .list-item {
+    break-inside: avoid;
+  }
+}
+</style>
+
 </body>
 </html>
