@@ -1,3024 +1,1579 @@
-
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f7f8fc">
-<title>STUDY PRO</title>
-
-<style>
-:root {
-  --bg: #f7f8fc;
-  --surface: #ffffff;
-  --surface2: #f0f3f9;
-  --text: #20263a;
-  --muted: #7b849b;
-  --primary: #635bff;
-  --primary-light: #eeedff;
-  --border: #e5e8f0;
-  --green: #16a36a;
-  --red: #e55365;
-  --orange: #f39a38;
-  --radius: 18px;
-  --shadow: 0 5px 22px rgba(31, 41, 70, .055);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-button, input, select, textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid rgba(99, 91, 255, .22);
-  outline-offset: 2px;
-}
-
-button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-.app {
-  min-height: 100vh;
-}
-
-.sidebar {
-  position: fixed;
-  z-index: 20;
-  inset: 0 auto 0 0;
-  width: 250px;
-  padding: 25px 17px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  overflow-y: auto;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 8px;
-}
-
-.brand-logo {
-  width: 43px;
-  height: 43px;
-  border-radius: 14px;
-  background: var(--primary);
-  color: white;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  font-weight: 900;
-  box-shadow: 0 5px 13px rgba(99, 91, 255, .2);
-}
-
-.brand-name {
-  font-size: 18px;
-  font-weight: 850;
-  letter-spacing: -.7px;
-}
-
-.brand-subtitle {
-  color: var(--muted);
-  font-size: 11px;
-  margin-top: 1px;
-}
-
-.nav-label {
-  padding: 0 10px;
-  margin: 3px 0 8px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.nav-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 13px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: #69738a;
-  text-align: left;
-  transition: background .18s, color .18s;
-}
-
-.nav-btn:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-.nav-btn.active {
-  background: var(--primary-light);
-  color: var(--primary);
-  font-weight: 750;
-}
-
-.nav-icon {
-  width: 22px;
-  text-align: center;
-  font-size: 17px;
-}
-
-.sidebar-bottom {
-  margin-top: auto;
-  padding: 15px;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #f0eeff, #f7f5ff);
-}
-
-.sidebar-bottom strong {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
-}
-
-.sidebar-bottom p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.7;
-}
-
-.main {
-  min-height: 100vh;
-  margin-left: 250px;
-}
-
-.topbar {
-  min-height: 78px;
-  padding: 17px 32px;
-  background: rgba(255, 255, 255, .88);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  backdrop-filter: blur(12px);
-}
-
-.topbar-title {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -.45px;
-}
-
-.topbar-subtitle {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.today-label {
-  color: var(--muted);
-  font-size: 12px;
-  text-align: right;
-}
-
-.avatar {
-  width: 39px;
-  height: 39px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary);
-  font-weight: 850;
-}
-
-.content {
-  max-width: 1450px;
-  margin: 0 auto;
-  padding: 30px 32px 50px;
-}
-
-.page {
-  display: none;
-  animation: appear .2s ease;
-}
-
-.page.active {
-  display: block;
-}
-
-@keyframes appear {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.page-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.page-heading h1 {
-  margin: 0;
-  font-size: clamp(23px, 3vw, 29px);
-  line-height: 1.25;
-  letter-spacing: -1px;
-}
-
-.page-heading p {
-  margin: 7px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.btn {
-  min-height: 40px;
-  padding: 10px 15px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 700;
-  transition: transform .15s, background .15s;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-}
-
-.btn-primary {
-  color: white;
-  background: var(--primary);
-  border-color: var(--primary);
-}
-
-.btn-primary:hover {
-  background: #5148ee;
-}
-
-.btn-soft {
-  color: var(--primary);
-  background: var(--primary-light);
-  border-color: transparent;
-}
-
-.btn-danger {
-  color: var(--red);
-  background: #fff0f2;
-  border-color: #ffe0e5;
-}
-
-.btn-small {
-  min-height: 33px;
-  padding: 7px 10px;
-  font-size: 12px;
-}
-
-.card {
-  min-width: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 21px;
-  box-shadow: var(--shadow);
-}
-
-.card-title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.card-description {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-.grid {
-  display: grid;
-  gap: 18px;
-}
-
-.grid-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.grid-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.grid-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.stat-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.stat-icon {
-  width: 39px;
-  height: 39px;
-  border-radius: 13px;
-  display: grid;
-  place-items: center;
-  font-size: 19px;
-}
-
-.icon-purple {
-  color: var(--primary);
-  background: var(--primary-light);
-}
-
-.icon-green {
-  color: var(--green);
-  background: #e8f8f0;
-}
-
-.icon-orange {
-  color: var(--orange);
-  background: #fff3e5;
-}
-
-.icon-red {
-  color: var(--red);
-  background: #fff0f2;
-}
-
-.stat-value {
-  margin-top: 17px;
-  font-size: 29px;
-  line-height: 1.1;
-  font-weight: 850;
-  letter-spacing: -1px;
-  overflow-wrap: anywhere;
-}
-
-.stat-label {
-  margin-top: 7px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 9px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.badge-purple {
-  color: var(--primary);
-  background: var(--primary-light);
-}
-
-.badge-green {
-  color: var(--green);
-  background: #e8f8f0;
-}
-
-.badge-orange {
-  color: #b66a12;
-  background: #fff3e5;
-}
-
-.badge-red {
-  color: var(--red);
-  background: #fff0f2;
-}
-
-.section-gap {
-  margin-top: 22px;
-}
-
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.flex-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.small {
-  font-size: 12px;
-}
-
-.empty-state {
-  padding: 35px 15px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.empty-icon {
-  margin-bottom: 12px;
-  font-size: 34px;
-}
-
-.empty-state strong {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--text);
-  font-size: 14px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 15px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
-}
-
-.field.full {
-  grid-column: 1 / -1;
-}
-
-.field label {
-  color: #505a70;
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  min-height: 43px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: #fff;
-  color: var(--text);
-  outline: none;
-}
-
-.field textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-  border-color: var(--primary);
-}
-
-.divider {
-  height: 1px;
-  margin: 18px 0;
-  background: var(--border);
-}
-
-.progress-track {
-  height: 8px;
-  overflow: hidden;
-  background: var(--surface2);
-  border-radius: 20px;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0;
-  background: var(--primary);
-  border-radius: inherit;
-  transition: width .3s;
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.list-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  min-width: 0;
-}
-
-.list-item-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.list-item-title {
-  font-weight: 750;
-  overflow-wrap: anywhere;
-}
-
-.list-item-sub {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.check-circle {
-  width: 22px;
-  height: 22px;
-  flex: 0 0 22px;
-  display: grid;
-  place-items: center;
-  border: 1.5px solid #d7dbea;
-  border-radius: 50%;
-  background: white;
-  color: white;
-}
-
-.check-circle.done {
-  background: var(--green);
-  border-color: var(--green);
-}
-
-.mobile-menu {
-  display: none;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: white;
-  font-size: 18px;
-}
-
-@media (max-width: 1150px) {
-  .grid-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  LayoutDashboard, 
+  GraduationCap, 
+  CheckSquare, 
+  Timer, 
+  Folder, 
+  FolderPlus, 
+  FileText, 
+  File, 
+  Link as LinkIcon, 
+  ExternalLink, 
+  Eye, 
+  Calendar, 
+  Plus, 
+  Trash2, 
+  Check, 
+  Clock, 
+  BookOpen, 
+  TrendingUp, 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Volume2, 
+  VolumeX, 
+  Sparkles, 
+  ChevronRight, 
+  Award,
+  Sun,
+  Moon,
+  Zap,
+  Edit3,
+  Calculator,
+  Wallet,
+  Users,
+  Download,
+  Upload,
+  RefreshCw,
+  Search,
+  Maximize2,
+  Minimize2,
+  Tag,
+  DollarSign,
+  Mail,
+  MapPin,
+  Flame,
+  CheckCircle2,
+  AlertCircle,
+  Paperclip,
+  Video,
+  Image as ImageIcon,
+  LogOut,
+  User,
+  Lock,
+  UserPlus,
+  LogIn,
+  ShieldCheck,
+  School,
+  Menu,
+  X,
+  SlidersHorizontal,
+  MoreHorizontal
+} from 'lucide-react';
+
+// --- INITIAL DUMMY DATA FOR DEMO USER ONLY ---
+const initialSubjects = [
+  { id: '1', name: 'Informatica', code: 'INF01', color: 'bg-blue-500', target: 28 },
+  { id: '2', name: 'Matematica', code: 'MAT02', color: 'bg-purple-500', target: 27 },
+  { id: '3', name: 'Fisica', code: 'FIS01', color: 'bg-emerald-500', target: 26 },
+  { id: '4', name: 'Storia', code: 'STO03', color: 'bg-amber-500', target: 30 }
+];
+
+const initialGrades = [
+  { id: '1', subjectId: '1', val: 30, weight: 6, date: '2026-10-12', title: 'Progetto Web' },
+  { id: '2', subjectId: '1', val: 28, weight: 6, date: '2026-10-25', title: 'Algoritmi' },
+  { id: '3', subjectId: '2', val: 25, weight: 9, date: '2026-09-30', title: 'Analisi 1' },
+  { id: '4', subjectId: '3', val: 27, weight: 6, date: '2026-10-18', title: 'Fisica Generale' },
+  { id: '5', subjectId: '4', val: 29, weight: 4, date: '2026-11-02', title: 'Storia Contemporanea' }
+];
+
+const initialTasks = [
+  { id: '1', title: 'Esercizi Limiti e Continuità', subjectId: '2', dueDate: '2026-11-12', priority: 'Alta', status: 'TODO', subtasks: [{ id: 's1', title: 'Pagina 45 n.1-10', done: true }, { id: 's2', title: 'Teorema di De L\'Hopital', done: false }] },
+  { id: '2', title: 'Sviluppo Frontend React', subjectId: '1', dueDate: '2026-11-15', priority: 'Media', status: 'IN_PROGRESS', subtasks: [{ id: 's3', title: 'Setup componenti', done: true }] },
+  { id: '3', title: 'Lettura Capitolo 4 - Guerra', subjectId: '4', dueDate: '2026-11-20', priority: 'Bassa', status: 'TODO', subtasks: [] },
+  { id: '4', title: 'Relazione di laboratorio Circuiti', subjectId: '3', dueDate: '2026-11-08', priority: 'Alta', status: 'DONE', subtasks: [{ id: 's4', title: 'Grafici delle oscillazioni', done: true }] }
+];
+
+const initialFolders = [
+  { id: 'f1', name: 'Informatica & Web', color: 'border-blue-500/50' },
+  { id: 'f2', name: 'Matematica & Formule', color: 'border-purple-500/50' },
+  { id: 'f3', name: 'Presentazioni Canva & Design', color: 'border-amber-500/50' }
+];
+
+const initialFiles = [
+  { 
+    id: '1', 
+    folderId: 'f3', 
+    title: 'Presentazione Progetto Web', 
+    type: 'canva', 
+    url: 'https://www.canva.com/design/DAFxxxx/watch', 
+    embedUrl: 'https://www.canva.com/design/DAFxxxx/watch?embed', 
+    content: 'Slides Canva per la presentazione finale di Informatica.', 
+    tags: 'canva,slides,esame', 
+    date: '2026-11-01' 
+  },
+  { 
+    id: '2', 
+    folderId: 'f1', 
+    title: 'Appunti Algoritmi Grafi', 
+    type: 'note', 
+    url: '', 
+    embedUrl: '', 
+    content: 'Grafi diretti e non diretti. Visita BFS usa una coda. Visita DFS usa uno stack o ricorsione. Complessità O(V + E).', 
+    tags: 'algoritmi,esame', 
+    date: '2026-10-28' 
+  },
+  { 
+    id: '3', 
+    folderId: 'f2', 
+    title: 'Formulario Integrali (Google Docs)', 
+    type: 'drive', 
+    url: 'https://docs.google.com/document/u/0/', 
+    embedUrl: '', 
+    content: 'Link diretto al documento di formule integrali notevoli.', 
+    tags: 'math,formule', 
+    date: '2026-10-30' 
   }
+];
 
-  .grid-3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+const initialSchedule = [
+  { id: '1', day: 'Lunedì', time: '09:00 - 11:00', subject: 'Informatica', room: 'Aula A1', prof: 'Prof. Rossi' },
+  { id: '2', day: 'Lunedì', time: '11:15 - 13:15', subject: 'Matematica', room: 'Aula B2', prof: 'Prof. Bianchi' },
+  { id: '3', day: 'Martedì', time: '10:00 - 12:00', subject: 'Fisica', room: 'Lab 3', prof: 'Prof. Neri' },
+  { id: '4', day: 'Mercoledì', time: '09:00 - 11:00', subject: 'Informatica', room: 'Aula A1', prof: 'Prof. Rossi' },
+  { id: '5', day: 'Giovedì', time: '14:00 - 16:00', subject: 'Storia', room: 'Aula Magna', prof: 'Prof. Verdi' }
+];
+
+const initialNotes = [
+  { id: '1', title: 'Appunti Algoritmi Grafi', subjectId: '1', content: 'Grafi diretti e non diretti. Visita BFS usa una coda. Visita DFS usa uno stack o ricorsione. Complessità O(V + E).', tags: 'algoritmi,esame' },
+  { id: '2', title: 'Formule Integrali Notevoli', subjectId: '2', content: '∫ x^n dx = (x^(n+1))/(n+1). ∫ 1/x dx = ln|x|. Integrazione per parti: ∫ u dv = uv - ∫ v du', tags: 'formule,math' }
+];
+
+const initialExpenses = [
+  { id: '1', title: 'Libro Analisi Matematica', amount: 45, category: 'Libri', type: 'expense', date: '2026-11-01' },
+  { id: '2', title: 'Borsa di studio mensile', amount: 400, category: 'Entrate', type: 'income', date: '2026-11-02' },
+  { id: '3', title: 'Abbonamento Mezzi', amount: 35, category: 'Trasporti', type: 'expense', date: '2026-11-03' },
+  { id: '4', title: 'Pranzo Mensa', amount: 6.5, category: 'Cibo', type: 'expense', date: '2026-11-05' }
+];
+
+const initialDirectory = [
+  { id: '1', name: 'Prof. Mario Rossi', role: 'Docente Informatica', email: 'mario.rossi@unidemo.it', office: 'Edificio D, Piano 2, Stanza 204', hours: 'Mar 14:00 - 16:00', notes: 'Riceve su appuntamento previa email.' },
+  { id: '2', name: 'Laura Bianchi (Study Buddy)', role: 'Compagna di Corso', email: 'laura.b@studenti.it', office: 'Tavolo Biblioteca 3', hours: 'Lun-Ven 09:00-17:00', notes: 'Gruppo studio di Matematica e Fisica.' }
+];
+
+const quotes = [
+  "La conoscenza è l'unica ricchezza che cresce quando condivisa.",
+  "La disciplina è il ponte tra gli obiettivi e i risultati.",
+  "Fai oggi quello che gli altri non fanno, per fare domani quello che gli altri non possono.",
+  "Non è la forza, ma la costanza che produce i grandi risultati."
+];
+
+// Pre-seeded demo account
+const seedAccounts = [
+  {
+    id: 'demo_user',
+    firstName: 'Mario',
+    lastName: 'Rossi',
+    email: 'demo@student.it',
+    password: 'demo123',
+    course: 'Ingegneria Informatica'
   }
-
-  .content {
-    padding: 25px 22px 40px;
-  }
-
-  .topbar {
-    padding: 15px 22px;
-  }
-}
-
-@media (max-width: 760px) {
-  .sidebar {
-    width: 270px;
-    transform: translateX(-100%);
-    transition: transform .25s ease;
-    box-shadow: none;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-    box-shadow: 15px 0 40px rgba(20, 25, 50, .13);
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .topbar {
-    min-height: 70px;
-    padding: 12px 15px;
-  }
-
-  .mobile-menu {
-    display: grid;
-    place-items: center;
-    flex: 0 0 40px;
-  }
-
-  .topbar-left {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .topbar-title {
-    font-size: 16px;
-  }
-
-  .topbar-subtitle {
-    font-size: 10px;
-  }
-
-  .today-label {
-    display: none;
-  }
-
-  .content {
-    padding: 22px 14px 35px;
-  }
-
-  .grid-2,
-  .grid-3,
-  .grid-4 {
-    grid-template-columns: 1fr;
-  }
-
-  .page-heading {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .page-heading .btn {
-    align-self: flex-start;
-  }
-
-  .card {
-    padding: 17px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .field.full {
-    grid-column: auto;
-  }
-
-  .stat-value {
-    font-size: 25px;
-  }
-}
-</style>
-</head>
-<body>
-
-<div class="app">
-
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="brand-logo">S</div>
-      <div>
-        <div class="brand-name">STUDY PRO</div>
-        <div class="brand-subtitle">Il tuo studio, organizzato.</div>
-      </div>
-    </div>
-
-    <div>
-      <div class="nav-label">Workspace</div>
-      <nav class="nav">
-        <button class="nav-btn active" data-page="dashboard">
-          <span class="nav-icon">▦</span> Dashboard
-        </button>
-        <button class="nav-btn" data-page="tasks">
-          <span class="nav-icon">✓</span> Compiti
-        </button>
-        <button class="nav-btn" data-page="exams">
-          <span class="nav-icon">◷</span> Verifiche
-        </button>
-        <button class="nav-btn" data-page="notes">
-          <span class="nav-icon">▤</span> Appunti digitali
-        </button>
-        <button class="nav-btn" data-page="timetable">
-          <span class="nav-icon">▦</span> Orario scolastico
-        </button>
-        <button class="nav-btn" data-page="timer">
-          <span class="nav-icon">⏱</span> Timer studio
-        </button>
-      </nav>
-    </div>
-
-    <div>
-      <div class="nav-label">Personale</div>
-      <nav class="nav">
-        <button class="nav-btn" data-page="planner">
-          <span class="nav-icon">▣</span> Pianificazione
-        </button>
-        <button class="nav-btn" data-page="profile">
-          <span class="nav-icon">⚙</span> Il mio profilo
-        </button>
-      </nav>
-    </div>
-
-    <div class="sidebar-bottom">
-      <strong>✦ Il tuo spazio di studio</strong>
-      <p>Organizza le lezioni, prepara le verifiche e raggiungi i tuoi obiettivi un giorno alla volta.</p>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <button class="mobile-menu" id="mobileMenu" aria-label="Apri menu">☰</button>
-
-      <div class="topbar-left">
-        <div class="topbar-title" id="topbarTitle">Dashboard</div>
-        <div class="topbar-subtitle">Il tuo percorso scolastico, sotto controllo.</div>
-      </div>
-
-      <div class="topbar-right">
-        <div class="today-label" id="todayLabel"></div>
-        <div class="avatar" id="userAvatar">S</div>
-      </div>
-    </header>
-
-    <div class="content">
-
-      <!-- DASHBOARD -->
-      <section class="page active" id="page-dashboard">
-        <div class="page-heading">
-          <div>
-            <h1 id="welcomeTitle">Ciao! 👋</h1>
-            <p>Ecco cosa succede oggi nel tuo studio.</p>
-          </div>
-          <button class="btn btn-primary" onclick="showPage('tasks')">
-            + Nuovo compito
-          </button>
-        </div>
-
-        <div class="grid grid-4">
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="muted small">Compiti da fare</span>
-              <span class="stat-icon icon-purple">✓</span>
-            </div>
-            <div class="stat-value" id="statTasks">0</div>
-            <div class="stat-label">Attività ancora aperte</div>
-          </div>
-
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="muted small">Verifiche future</span>
-              <span class="stat-icon icon-orange">◷</span>
-            </div>
-            <div class="stat-value" id="statExams">0</div>
-            <div class="stat-label">Date da preparare</div>
-          </div>
-
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="muted small">Ore di studio</span>
-              <span class="stat-icon icon-green">⏱</span>
-            </div>
-            <div class="stat-value" id="statHours">0h</div>
-            <div class="stat-label">Sessioni completate</div>
-          </div>
-
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="muted small">Appunti salvati</span>
-              <span class="stat-icon icon-red">▤</span>
-            </div>
-            <div class="stat-value" id="statNotes">0</div>
-            <div class="stat-label">Nel tuo archivio</div>
-          </div>
-        </div>
-
-        <div class="grid grid-2 section-gap">
-          <div class="card">
-            <div class="flex-between">
-              <div>
-                <h3 class="card-title">📚 Compiti in programma</h3>
-                <div class="card-description">Le attività da completare.</div>
-              </div>
-              <button class="btn btn-small" onclick="showPage('tasks')">Vedi tutti</button>
-            </div>
-            <div class="divider"></div>
-            <div id="dashboardTasks" class="list">
-              <div class="empty-state">
-                <div class="empty-icon">📝</div>
-                <strong>Nessun compito inserito</strong>
-                Aggiungi il tuo primo compito.
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="flex-between">
-              <div>
-                <h3 class="card-title">🎯 Prossime verifiche</h3>
-                <div class="card-description">Non farti trovare impreparato.</div>
-              </div>
-              <button class="btn btn-small" onclick="showPage('exams')">Vedi tutte</button>
-            </div>
-            <div class="divider"></div>
-            <div id="dashboardExams" class="list">
-              <div class="empty-state">
-                <div class="empty-icon">📅</div>
-                <strong>Nessuna verifica programmata</strong>
-                Aggiungi una data importante.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-2 section-gap">
-          <div class="card">
-            <div class="flex-between">
-              <div>
-                <h3 class="card-title">📈 Il tuo obiettivo</h3>
-                <div class="card-description">Monitora il tempo dedicato allo studio.</div>
-              </div>
-              <span class="badge badge-purple">Settimanale</span>
-            </div>
-
-            <div style="margin-top:24px" class="flex-between">
-              <span class="muted small">Tempo di studio</span>
-              <strong id="weeklyHours">0h / 10h</strong>
-            </div>
-            <div class="progress-track" style="margin-top:10px">
-              <div class="progress-fill" id="weeklyProgress"></div>
-            </div>
-            <p class="muted small" id="weeklyMessage" style="margin-bottom:0">
-              Ogni sessione ti avvicina al tuo obiettivo.
-            </p>
-          </div>
-
-          <div class="card">
-            <h3 class="card-title">⚡ Accesso rapido</h3>
-            <div class="card-description">Vai direttamente a quello che ti serve.</div>
-            <div class="grid grid-2" style="margin-top:17px">
-              <button class="btn" onclick="showPage('timer')">⏱ Timer studio</button>
-              <button class="btn" onclick="showPage('notes')">📝 Nuovi appunti</button>
-              <button class="btn" onclick="showPage('exams')">📅 Verifica</button>
-              <button class="btn" onclick="showPage('timetable')">🏫 Orario</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- COMPITI -->
-      <section class="page" id="page-tasks">
-        <div class="page-heading">
-          <div>
-            <h1>Compiti 📝</h1>
-            <p>Registra le attività, le materie e le scadenze.</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title">Aggiungi un compito</h3>
-          <div class="card-description">Inserisci i dettagli dell'attività da svolgere.</div>
-
-          <form id="taskForm" style="margin-top:20px">
-            <div class="form-grid">
-              <div class="field">
-                <label for="taskSubject">Materia</label>
-                <input id="taskSubject" required maxlength="70" placeholder="Es. Matematica">
-              </div>
-
-              <div class="field">
-                <label for="taskTitle">Compito da svolgere</label>
-                <input id="taskTitle" required maxlength="180" placeholder="Es. Esercizi pagina 45">
-              </div>
-
-              <div class="field">
-                <label for="taskDate">Scadenza</label>
-                <input id="taskDate" type="date" required>
-              </div>
-
-              <div class="field">
-                <label for="taskPriority">Priorità</label>
-                <select id="taskPriority">
-                  <option value="Normale">Normale</option>
-                  <option value="Alta">Alta</option>
-                  <option value="Urgente">Urgente</option>
-                </select>
-              </div>
-
-              <div class="field full">
-                <label for="taskDescription">Descrizione (facoltativa)</label>
-                <textarea id="taskDescription" maxlength="1000" placeholder="Aggiungi dettagli, pagine o esercizi..."></textarea>
-              </div>
-            </div>
-
-            <div class="flex-wrap" style="margin-top:17px">
-              <button class="btn btn-primary" type="submit">+ Salva compito</button>
-              <button class="btn" type="reset">Pulisci campi</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card section-gap">
-          <div class="flex-between">
-            <div>
-              <h3 class="card-title">I tuoi compiti</h3>
-              <div class="card-description">Segna come completate le attività già svolte.</div>
-            </div>
-            <span class="badge badge-purple" id="taskCount">0 compiti</span>
-          </div>
-
-          <div class="flex-wrap" style="margin-top:17px">
-            <button class="btn btn-small task-filter active" data-filter="all">Tutti</button>
-            <button class="btn btn-small task-filter" data-filter="open">Da fare</button>
-            <button class="btn btn-small task-filter" data-filter="done">Completati</button>
-          </div>
-
-          <div class="divider"></div>
-          <div id="tasksList" class="list"></div>
-        </div>
-      </section>
-
-      <!-- VERIFICHE -->
-      <section class="page" id="page-exams">
-        <div class="page-heading">
-          <div>
-            <h1>Verifiche e interrogazioni 🎯</h1>
-            <p>Organizza le date e tieni sotto controllo il conto alla rovescia.</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title">Aggiungi una verifica</h3>
-          <div class="card-description">La data verrà usata per calcolare i giorni rimanenti.</div>
-
-          <form id="examForm" style="margin-top:20px">
-            <div class="form-grid">
-              <div class="field">
-                <label for="examSubject">Materia</label>
-                <input id="examSubject" required maxlength="70" placeholder="Es. Storia">
-              </div>
-
-              <div class="field">
-                <label for="examTitle">Argomento</label>
-                <input id="examTitle" required maxlength="180" placeholder="Es. Rivoluzione francese">
-              </div>
-
-              <div class="field">
-                <label for="examDate">Data della verifica</label>
-                <input id="examDate" type="date" required>
-              </div>
-
-              <div class="field">
-                <label for="examType">Tipo</label>
-                <select id="examType">
-                  <option value="Verifica scritta">Verifica scritta</option>
-                  <option value="Interrogazione">Interrogazione</option>
-                  <option value="Test">Test</option>
-                  <option value="Presentazione">Presentazione</option>
-                  <option value="Altro">Altro</option>
-                </select>
-              </div>
-
-              <div class="field full">
-                <label for="examNotes">Argomenti da studiare (facoltativo)</label>
-                <textarea id="examNotes" maxlength="1500" placeholder="Capitoli, pagine, formule, argomenti..."></textarea>
-              </div>
-            </div>
-
-            <div class="flex-wrap" style="margin-top:17px">
-              <button class="btn btn-primary" type="submit">+ Salva verifica</button>
-              <button class="btn" type="reset">Pulisci campi</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card section-gap">
-          <div class="flex-between">
-            <div>
-              <h3 class="card-title">Calendario delle verifiche</h3>
-              <div class="card-description">Le verifiche più vicine vengono mostrate per prime.</div>
-            </div>
-            <span class="badge badge-orange" id="examCount">0 verifiche</span>
-          </div>
-
-          <div class="divider"></div>
-          <div id="examsList" class="list"></div>
-        </div>
-      </section>
-
-      <!-- FINE PARTE 2 -->
-
-      <!-- APPUNTI DIGITALI -->
-      <section class="page" id="page-notes">
-        <div class="page-heading">
-          <div>
-            <h1>Appunti digitali 📚</h1>
-            <p>Raccogli appunti, formule, schemi e riassunti in un unico posto.</p>
-          </div>
-          <button class="btn btn-primary" onclick="document.getElementById('noteTitle').focus()">
-            + Nuovo appunto
-          </button>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title">Crea un appunto</h3>
-          <div class="card-description">Puoi scrivere, incollare testi e organizzare i contenuti per materia.</div>
-
-          <form id="noteForm" style="margin-top:20px">
-            <div class="form-grid">
-              <div class="field">
-                <label for="noteTitle">Titolo</label>
-                <input id="noteTitle" required maxlength="150" placeholder="Es. Equazioni di secondo grado">
-              </div>
-
-              <div class="field">
-                <label for="noteSubject">Materia</label>
-                <input id="noteSubject" required maxlength="70" placeholder="Es. Matematica">
-              </div>
-
-              <div class="field full">
-                <label for="noteContent">Contenuto degli appunti</label>
-                <textarea id="noteContent" required maxlength="30000" rows="9" placeholder="Scrivi qui gli appunti, le formule, i riassunti e gli schemi..."></textarea>
-              </div>
-
-              <div class="field full">
-                <label for="noteTags">Parole chiave (facoltative)</label>
-                <input id="noteTags" maxlength="250" placeholder="Es. formule, equazioni, esercizi">
-              </div>
-            </div>
-
-            <div class="flex-wrap" style="margin-top:17px">
-              <button class="btn btn-primary" type="submit">💾 Salva appunto</button>
-              <button class="btn" type="reset">Pulisci campi</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card section-gap">
-          <div class="flex-between">
-            <div>
-              <h3 class="card-title">Il mio archivio</h3>
-              <div class="card-description">Cerca e riapri gli appunti salvati.</div>
-            </div>
-            <span class="badge badge-purple" id="noteCount">0 appunti</span>
-          </div>
-
-          <div class="field" style="margin-top:17px">
-            <label for="noteSearch">Cerca negli appunti</label>
-            <input id="noteSearch" placeholder="Cerca titolo, materia o contenuto...">
-          </div>
-
-          <div class="divider"></div>
-          <div id="notesList" class="grid grid-2"></div>
-        </div>
-
-        <div class="card section-gap">
-          <h3 class="card-title">📷 Importa appunti da una foto</h3>
-          <div class="card-description">
-            Seleziona una fotografia di appunti scritti a mano o stampati.
-            La lettura automatica del testo verrà collegata nella parte dedicata all'OCR.
-          </div>
-
-          <div class="field" style="margin-top:17px">
-            <label for="notePhoto">Fotografia o immagine</label>
-            <input id="notePhoto" type="file" accept="image/*">
-          </div>
-
-          <div id="notePhotoPreview" style="margin-top:14px"></div>
-
-          <div class="flex-wrap" style="margin-top:15px">
-            <button class="btn btn-soft" type="button" id="preparePhotoBtn">
-              📄 Prepara immagine
-            </button>
-          </div>
-
-          <p class="muted small" style="margin-bottom:0">
-            Nota: selezionare un'immagine non basta per estrarre automaticamente il testo.
-            Per riconoscere scrittura a mano, formule e schemi serve un motore OCR compatibile.
-          </p>
-        </div>
-      </section>
-
-      <!-- ORARIO SCOLASTICO -->
-      <section class="page" id="page-timetable">
-        <div class="page-heading">
-          <div>
-            <h1>Orario scolastico 🏫</h1>
-            <p>Costruisci il tuo orario settimanale personalizzato.</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title">Aggiungi una lezione</h3>
-          <div class="card-description">Scegli giorno, materia, aula e orario.</div>
-
-          <form id="lessonForm" style="margin-top:20px">
-            <div class="form-grid">
-              <div class="field">
-                <label for="lessonDay">Giorno</label>
-                <select id="lessonDay" required>
-                  <option value="1">Lunedì</option>
-                  <option value="2">Martedì</option>
-                  <option value="3">Mercoledì</option>
-                  <option value="4">Giovedì</option>
-                  <option value="5">Venerdì</option>
-                  <option value="6">Sabato</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="lessonSubject">Materia</label>
-                <input id="lessonSubject" required maxlength="70" placeholder="Es. Inglese">
-              </div>
-
-              <div class="field">
-                <label for="lessonStart">Ora di inizio</label>
-                <input id="lessonStart" type="time" required value="08:00">
-              </div>
-
-              <div class="field">
-                <label for="lessonEnd">Ora di fine</label>
-                <input id="lessonEnd" type="time" required value="09:00">
-              </div>
-
-              <div class="field">
-                <label for="lessonRoom">Aula (facoltativa)</label>
-                <input id="lessonRoom" maxlength="40" placeholder="Es. Aula 12">
-              </div>
-
-              <div class="field">
-                <label for="lessonTeacher">Docente (facoltativo)</label>
-                <input id="lessonTeacher" maxlength="80" placeholder="Nome docente">
-              </div>
-            </div>
-
-            <div class="flex-wrap" style="margin-top:17px">
-              <button class="btn btn-primary" type="submit">+ Aggiungi lezione</button>
-              <button class="btn" type="reset">Pulisci campi</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card section-gap">
-          <div class="flex-between">
-            <div>
-              <h3 class="card-title">La mia settimana</h3>
-              <div class="card-description">Le lezioni sono ordinate per ora di inizio.</div>
-            </div>
-            <button class="btn btn-small" id="printTimetableBtn" type="button">🖨️ Stampa orario</button>
-          </div>
-
-          <div class="divider"></div>
-          <div id="timetableList"></div>
-        </div>
-      </section>
-
-      <!-- TIMER STUDIO -->
-      <section class="page" id="page-timer">
-        <div class="page-heading">
-          <div>
-            <h1>Timer studio ⏱</h1>
-            <p>Concentrati su una materia e misura il tempo dedicato allo studio.</p>
-          </div>
-        </div>
-
-        <div class="grid grid-2">
-          <div class="card">
-            <div class="flex-between">
-              <div>
-                <h3 class="card-title">Sessione di concentrazione</h3>
-                <div class="card-description">Imposta una durata e inizia a studiare.</div>
-              </div>
-              <span class="badge badge-purple">Focus</span>
-            </div>
-
-            <div class="field" style="margin-top:22px">
-              <label for="timerSubject">Materia della sessione</label>
-              <input id="timerSubject" maxlength="70" placeholder="Es. Scienze">
-            </div>
-
-            <div class="field" style="margin-top:15px">
-              <label for="timerDuration">Durata della sessione</label>
-              <select id="timerDuration">
-                <option value="15">15 minuti</option>
-                <option value="25" selected>25 minuti</option>
-                <option value="30">30 minuti</option>
-                <option value="45">45 minuti</option>
-                <option value="50">50 minuti</option>
-                <option value="60">60 minuti</option>
-                <option value="90">90 minuti</option>
-              </select>
-            </div>
-
-            <div style="text-align:center;padding:28px 0 18px">
-              <div id="timerDisplay" style="font-size:clamp(48px,8vw,72px);font-weight:850;letter-spacing:-3px;font-variant-numeric:tabular-nums">
-                25:00
-              </div>
-              <div id="timerStatus" class="muted small" style="margin-top:8px">
-                Pronto per iniziare
-              </div>
-            </div>
-
-            <div class="progress-track">
-              <div class="progress-fill" id="timerProgress"></div>
-            </div>
-
-            <div class="flex-wrap" style="justify-content:center;margin-top:22px">
-              <button class="btn btn-primary" id="timerStartBtn" type="button">▶ Inizia</button>
-              <button class="btn" id="timerPauseBtn" type="button" disabled>Ⅱ Pausa</button>
-              <button class="btn btn-danger" id="timerResetBtn" type="button">↺ Reset</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3 class="card-title">💡 Metodo Pomodoro</h3>
-            <div class="card-description">Un modo semplice per organizzare le sessioni.</div>
-
-            <div class="list" style="margin-top:20px">
-              <div class="list-item">
-                <div class="stat-icon icon-purple">1</div>
-                <div class="list-item-main">
-                  <div class="list-item-title">Scegli un obiettivo</div>
-                  <div class="list-item-sub">Decidi cosa vuoi imparare o completare.</div>
-                </div>
-              </div>
-
-              <div class="list-item">
-                <div class="stat-icon icon-green">2</div>
-                <div class="list-item-main">
-                  <div class="list-item-title">Elimina le distrazioni</div>
-                  <div class="list-item-sub">Metti da parte il telefono e concentrati.</div>
-                </div>
-              </div>
-
-              <div class="list-item">
-                <div class="stat-icon icon-orange">3</div>
-                <div class="list-item-main">
-                  <div class="list-item-title">Fai una pausa</div>
-                  <div class="list-item-sub">Dopo la sessione, riposati qualche minuto.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <h3 class="card-title">📊 Sessioni completate</h3>
-            <div class="stat-value" id="timerSessions">0</div>
-            <div class="stat-label">Sessioni registrate</div>
-            <p class="muted small" style="margin-bottom:0">
-              Le sessioni completate verranno conteggiate nel riepilogo della dashboard.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- FINE PARTE 3 -->
-
-      <!-- PIANIFICAZIONE -->
-      <section class="page" id="page-planner">
-        <div class="page-heading">
-          <div>
-            <h1>Pianificazione 📅</h1>
-            <p>Organizza le tue attività e prepara la settimana in anticipo.</p>
-          </div>
-        </div>
-
-        <div class="grid grid-2">
-          <div class="card">
-            <h3 class="card-title">🎯 I tuoi obiettivi</h3>
-            <div class="card-description">Definisci quello che vuoi raggiungere.</div>
-
-            <form id="goalForm" style="margin-top:20px">
-              <div class="field">
-                <label for="goalTitle">Obiettivo</label>
-                <input id="goalTitle" required maxlength="150" placeholder="Es. Ripassare matematica">
-              </div>
-
-              <div class="field" style="margin-top:14px">
-                <label for="goalDate">Entro quando?</label>
-                <input id="goalDate" type="date" required>
-              </div>
-
-              <div class="field" style="margin-top:14px">
-                <label for="goalDetails">Dettagli (facoltativi)</label>
-                <textarea id="goalDetails" maxlength="1000" placeholder="Descrivi il risultato che vuoi ottenere..."></textarea>
-              </div>
-
-              <button class="btn btn-primary" type="submit" style="margin-top:15px">
-                + Aggiungi obiettivo
-              </button>
-            </form>
-          </div>
-
-          <div class="card">
-            <div class="flex-between">
-              <div>
-                <h3 class="card-title">I miei obiettivi</h3>
-                <div class="card-description">Segui i tuoi progressi.</div>
-              </div>
-              <span class="badge badge-purple" id="goalCount">0 obiettivi</span>
-            </div>
-
-            <div class="divider"></div>
-            <div id="goalsList" class="list"></div>
-          </div>
-        </div>
-
-        <div class="card section-gap">
-          <div class="flex-between">
-            <div>
-              <h3 class="card-title">📋 Riepilogo attività</h3>
-              <div class="card-description">Controlla rapidamente cosa devi ancora fare.</div>
-            </div>
-            <button class="btn btn-small" onclick="showPage('tasks')">Apri compiti</button>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="grid grid-3">
-            <div>
-              <div class="stat-label">Compiti aperti</div>
-              <div class="stat-value" id="plannerOpenTasks">0</div>
-            </div>
-            <div>
-              <div class="stat-label">Verifiche nei prossimi 7 giorni</div>
-              <div class="stat-value" id="plannerUpcomingExams">0</div>
-            </div>
-            <div>
-              <div class="stat-label">Obiettivi raggiunti</div>
-              <div class="stat-value" id="plannerCompletedGoals">0</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- PROFILO -->
-      <section class="page" id="page-profile">
-        <div class="page-heading">
-          <div>
-            <h1>Il mio profilo ⚙️</h1>
-            <p>Personalizza STUDY PRO in base alle tue esigenze scolastiche.</p>
-          </div>
-        </div>
-
-        <div class="grid grid-2">
-          <div class="card">
-            <h3 class="card-title">👤 Informazioni personali</h3>
-            <div class="card-description">Imposta il nome visualizzato nell'app.</div>
-
-            <form id="profileForm" style="margin-top:20px">
-              <div class="field">
-                <label for="profileName">Nome</label>
-                <input id="profileName" maxlength="70" placeholder="Come vuoi essere chiamato?">
-              </div>
-
-              <div class="field" style="margin-top:15px">
-                <label for="profileSchool">Scuola (facoltativa)</label>
-                <input id="profileSchool" maxlength="120" placeholder="Nome della scuola">
-              </div>
-
-              <div class="field" style="margin-top:15px">
-                <label for="profileClass">Classe (facoltativa)</label>
-                <input id="profileClass" maxlength="30" placeholder="Es. 3ª A">
-              </div>
-
-              <button class="btn btn-primary" type="submit" style="margin-top:17px">
-                Salva profilo
-              </button>
-            </form>
-          </div>
-
-          <div class="card">
-            <h3 class="card-title">🎓 Preferenze di studio</h3>
-            <div class="card-description">Configura il tuo percorso personale.</div>
-
-            <form id="preferencesForm" style="margin-top:20px">
-              <div class="field">
-                <label for="studyLevel">Livello scolastico</label>
-                <select id="studyLevel">
-                  <option value="medie">Scuola media</option>
-                  <option value="superiori" selected>Scuola superiore</option>
-                  <option value="universita">Università</option>
-                  <option value="altro">Altro</option>
-                </select>
-              </div>
-
-              <div class="field" style="margin-top:15px">
-                <label for="weeklyGoal">Obiettivo di studio settimanale</label>
-                <select id="weeklyGoal">
-                  <option value="3">3 ore</option>
-                  <option value="5">5 ore</option>
-                  <option value="7">7 ore</option>
-                  <option value="10" selected>10 ore</option>
-                  <option value="15">15 ore</option>
-                  <option value="20">20 ore</option>
-                </select>
-              </div>
-
-              <div class="field" style="margin-top:15px">
-                <label for="studyStyle">Metodo di studio preferito</label>
-                <select id="studyStyle">
-                  <option value="pomodoro">Metodo Pomodoro</option>
-                  <option value="riassunti">Riassunti e schemi</option>
-                  <option value="esercizi">Esercizi pratici</option>
-                  <option value="lettura">Lettura e ripetizione</option>
-                  <option value="misto">Metodo misto</option>
-                </select>
-              </div>
-
-              <button class="btn btn-primary" type="submit" style="margin-top:17px">
-                Salva preferenze
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div class="card section-gap">
-          <h3 class="card-title">💾 Dati dell'applicazione</h3>
-          <div class="card-description">
-            I dati di questa versione vengono salvati nel browser del dispositivo.
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="flex-between" style="align-items:flex-start">
-            <div style="flex:1">
-              <strong>Esporta i miei dati</strong>
-              <p class="muted small">
-                Crea una copia JSON dei compiti, delle verifiche, degli appunti,
-                dell'orario e delle preferenze.
-              </p>
-            </div>
-            <button class="btn btn-soft" type="button" id="exportDataBtn">
-              Esporta JSON
-            </button>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="flex-between" style="align-items:flex-start">
-            <div style="flex:1">
-              <strong>Importa un backup</strong>
-              <p class="muted small">
-                Ripristina i dati da un backup JSON precedentemente esportato.
-              </p>
-            </div>
-            <button class="btn" type="button" id="importDataBtn">
-              Importa backup
-            </button>
-            <input type="file" id="importDataFile" accept=".json,application/json" hidden>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="flex-between" style="align-items:flex-start">
-            <div style="flex:1">
-              <strong style="color:var(--red)">Cancella tutti i dati</strong>
-              <p class="muted small">
-                Elimina i dati salvati localmente. Questa operazione non può essere annullata.
-              </p>
-            </div>
-            <button class="btn btn-danger" type="button" id="clearDataBtn">
-              Cancella dati
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- AREA NOTIFICHE -->
-      <div id="toast" role="status" aria-live="polite" style="
-        position:fixed;
-        z-index:100;
-        right:20px;
-        bottom:20px;
-        max-width:calc(100vw - 40px);
-        padding:13px 18px;
-        border-radius:13px;
-        background:#20263a;
-        color:#fff;
-        box-shadow:0 8px 30px rgba(0,0,0,.15);
-        opacity:0;
-        transform:translateY(10px);
-        pointer-events:none;
-        transition:opacity .2s,transform .2s;
-      "></div>
-
-    </div>
-  </main>
-</div>
-
-<!-- FINE PARTE 4 -->
-
-<script>
-"use strict";
-
-/* =========================================
-   STUDY PRO - DATI E FUNZIONI DI BASE
-========================================= */
-
-const STORAGE_KEY = "studyProData_v1";
-
-const defaultData = {
-  tasks: [],
-  exams: [],
-  notes: [],
-  lessons: [],
-  goals: [],
-  sessions: [],
-  profile: {
-    name: "",
-    school: "",
-    className: "",
-    level: "superiori",
-    weeklyGoal: 10,
-    studyStyle: "pomodoro"
-  }
-};
-
-let data = loadData();
-let currentTaskFilter = "all";
-let timerInterval = null;
-let timerRemaining = 25 * 60;
-let timerTotal = 25 * 60;
-let timerRunning = false;
-let timerStartedAt = null;
-let timerSessionSubject = "";
-let timerElapsed = 0;
-let photoPreviewUrl = null;
-
-const $ = id => document.getElementById(id);
-
-function uid() {
-  return Date.now().toString(36) +
-    Math.random().toString(36).slice(2, 9);
-}
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
-
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return structuredClone(defaultData);
-
-    const saved = JSON.parse(raw);
-
-    return {
-      ...structuredClone(defaultData),
-      ...saved,
-      tasks: Array.isArray(saved.tasks) ? saved.tasks : [],
-      exams: Array.isArray(saved.exams) ? saved.exams : [],
-      notes: Array.isArray(saved.notes) ? saved.notes : [],
-      lessons: Array.isArray(saved.lessons) ? saved.lessons : [],
-      goals: Array.isArray(saved.goals) ? saved.goals : [],
-      sessions: Array.isArray(saved.sessions) ? saved.sessions : [],
-      profile: {
-        ...defaultData.profile,
-        ...(saved.profile || {})
-      }
-    };
-  } catch (error) {
-    console.error("Errore nel caricamento dei dati:", error);
-    return structuredClone(defaultData);
-  }
-}
-
-function saveData() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return true;
-  } catch (error) {
-    console.error("Errore nel salvataggio:", error);
-    toast("Impossibile salvare i dati. Spazio disponibile insufficiente?");
-    return false;
-  }
-}
-
-function toast(message) {
-  const el = $("toast");
-  if (!el) return;
-
-  el.textContent = message;
-  el.style.opacity = "1";
-  el.style.transform = "translateY(0)";
-
-  clearTimeout(toast.timeout);
-  toast.timeout = setTimeout(() => {
-    el.style.opacity = "0";
-    el.style.transform = "translateY(10px)";
-  }, 2800);
-}
-
-function localDateString(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function parseLocalDate(value) {
-  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return null;
-  }
-
-  const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
-    return null;
-  }
-
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function formatDate(value) {
-  const date = parseLocalDate(value);
-  if (!date) return "Data non impostata";
-
-  return date.toLocaleDateString("it-IT", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
+];
+
+export default function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('sh_theme') || 'dark');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Auth state
+  const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem('sh_users')) || seedAccounts);
+  const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem('sh_current_user')) || null);
+  const [authMode, setAuthMode] = useState('login');
+
+  // Form input states
+  const [authForm, setAuthForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    course: ''
   });
-}
+  const [authError, setAuthError] = useState('');
 
-function dayDifference(value) {
-  const target = parseLocalDate(value);
-  if (!target) return null;
+  // Per-user key prefix helper
+  const userPrefix = currentUser ? `sh_user_${currentUser.id}_` : null;
 
-  const today = parseLocalDate(localDateString());
-  return Math.round((target - today) / 86400000);
-}
+  // App State stored locally per user
+  const [subjects, setSubjects] = useState([]);
+  const [grades, setGrades] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [hubFiles, setHubFiles] = useState([]);
+  const [schedule, setSchedule] = useState([]);
+  const [notes, setNotes] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [directory, setDirectory] = useState([]);
+  const [todayStudyMinutes, setTodayStudyMinutes] = useState(0);
+  const [studyStreak, setStudyStreak] = useState(1);
 
-function plural(number, singular, pluralForm) {
-  return `${number} ${number === 1 ? singular : pluralForm}`;
-}
+  // Load User Data when active user changes
+  useEffect(() => {
+    localStorage.setItem('sh_users', JSON.stringify(users));
+    localStorage.setItem('sh_current_user', JSON.stringify(currentUser));
 
-/* =========================================
-   NAVIGAZIONE
-========================================= */
-
-const pageTitles = {
-  dashboard: "Dashboard",
-  tasks: "Compiti",
-  exams: "Verifiche",
-  notes: "Appunti digitali",
-  timetable: "Orario scolastico",
-  timer: "Timer studio",
-  planner: "Pianificazione",
-  profile: "Il mio profilo"
-};
-
-function showPage(pageName) {
-  if (!pageTitles[pageName]) return;
-
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.toggle("active", page.id === `page-${pageName}`);
-  });
-
-  document.querySelectorAll(".nav-btn").forEach(button => {
-    button.classList.toggle(
-      "active",
-      button.dataset.page === pageName
-    );
-  });
-
-  $("topbarTitle").textContent = pageTitles[pageName];
-  $("sidebar").classList.remove("open");
-
-  if (pageName === "dashboard") renderDashboard();
-  if (pageName === "tasks") renderTasks();
-  if (pageName === "exams") renderExams();
-  if (pageName === "notes") renderNotes();
-  if (pageName === "timetable") renderTimetable();
-  if (pageName === "planner") renderPlanner();
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-document.querySelectorAll(".nav-btn").forEach(button => {
-  button.addEventListener("click", () => {
-    showPage(button.dataset.page);
-  });
-});
-
-$("mobileMenu").addEventListener("click", () => {
-  $("sidebar").classList.toggle("open");
-});
-
-document.addEventListener("click", event => {
-  if (
-    window.innerWidth <= 760 &&
-    $("sidebar").classList.contains("open") &&
-    !$("sidebar").contains(event.target) &&
-    !$("mobileMenu").contains(event.target)
-  ) {
-    $("sidebar").classList.remove("open");
-  }
-});
-
-/* =========================================
-   PROFILO E PREFERENZE
-========================================= */
-
-function renderProfile() {
-  $("profileName").value = data.profile.name || "";
-  $("profileSchool").value = data.profile.school || "";
-  $("profileClass").value = data.profile.className || "";
-
-  $("studyLevel").value = data.profile.level || "superiori";
-  $("weeklyGoal").value = String(data.profile.weeklyGoal || 10);
-  $("studyStyle").value = data.profile.studyStyle || "pomodoro";
-
-  updateGreeting();
-}
-
-function updateGreeting() {
-  const name = data.profile.name.trim();
-
-  $("welcomeTitle").textContent = name
-    ? `Ciao ${name}! 👋`
-    : "Ciao! 👋";
-
-  $("userAvatar").textContent = name
-    ? name.charAt(0).toUpperCase()
-    : "S";
-}
-
-$("profileForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  data.profile.name = $("profileName").value.trim();
-  data.profile.school = $("profileSchool").value.trim();
-  data.profile.className = $("profileClass").value.trim();
-
-  saveData();
-  updateGreeting();
-  toast("Profilo salvato!");
-});
-
-$("preferencesForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  data.profile.level = $("studyLevel").value;
-  data.profile.weeklyGoal = Number($("weeklyGoal").value);
-  data.profile.studyStyle = $("studyStyle").value;
-
-  saveData();
-  renderDashboard();
-  toast("Preferenze aggiornate!");
-});
-
-/* =========================================
-   COMPITI
-========================================= */
-
-$("taskForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const subject = $("taskSubject").value.trim();
-  const title = $("taskTitle").value.trim();
-  const date = $("taskDate").value;
-
-  if (!subject || !title || !parseLocalDate(date)) {
-    toast("Controlla materia, compito e scadenza.");
-    return;
-  }
-
-  data.tasks.push({
-    id: uid(),
-    subject,
-    title,
-    date,
-    priority: $("taskPriority").value,
-    description: $("taskDescription").value.trim(),
-    done: false,
-    createdAt: new Date().toISOString()
-  });
-
-  saveData();
-  $("taskForm").reset();
-
-  renderTasks();
-  renderDashboard();
-  renderPlanner();
-
-  toast("Compito aggiunto!");
-});
-
-document.querySelectorAll(".task-filter").forEach(button => {
-  button.addEventListener("click", () => {
-    currentTaskFilter = button.dataset.filter;
-
-    document.querySelectorAll(".task-filter").forEach(item => {
-      item.classList.toggle("active", item === button);
-    });
-
-    renderTasks();
-  });
-});
-
-function toggleTask(id) {
-  const task = data.tasks.find(item => item.id === id);
-  if (!task) return;
-
-  task.done = !task.done;
-
-  saveData();
-  renderTasks();
-  renderDashboard();
-  renderPlanner();
-}
-
-function deleteTask(id) {
-  if (!confirm("Vuoi eliminare questo compito?")) return;
-
-  data.tasks = data.tasks.filter(task => task.id !== id);
-
-  saveData();
-  renderTasks();
-  renderDashboard();
-  renderPlanner();
-
-  toast("Compito eliminato.");
-}
-
-function renderTasks() {
-  const list = $("tasksList");
-
-  let tasks = [...data.tasks].sort((a, b) => {
-    if (a.done !== b.done) return a.done ? 1 : -1;
-    return (a.date || "").localeCompare(b.date || "");
-  });
-
-  if (currentTaskFilter === "open") {
-    tasks = tasks.filter(task => !task.done);
-  } else if (currentTaskFilter === "done") {
-    tasks = tasks.filter(task => task.done);
-  }
-
-  $("taskCount").textContent = plural(
-    data.tasks.length,
-    "compito",
-    "compiti"
-  );
-
-  if (!tasks.length) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📝</div>
-        <strong>Nessun compito in questa sezione</strong>
-        Aggiungi un compito o cambia filtro.
-      </div>`;
-    return;
-  }
-
-  list.innerHTML = tasks.map(task => {
-    const diff = dayDifference(task.date);
-
-    let dueLabel = formatDate(task.date);
-    if (!task.done && diff !== null) {
-      if (diff < 0) dueLabel += " · Scaduto";
-      else if (diff === 0) dueLabel += " · Oggi";
-      else if (diff === 1) dueLabel += " · Domani";
+    if (currentUser) {
+      const prefix = `sh_user_${currentUser.id}_`;
+      const isDemo = currentUser.id === 'demo_user';
+      
+      setSubjects(JSON.parse(localStorage.getItem(`${prefix}subjects`)) || (isDemo ? initialSubjects : []));
+      setGrades(JSON.parse(localStorage.getItem(`${prefix}grades`)) || (isDemo ? initialGrades : []));
+      setTasks(JSON.parse(localStorage.getItem(`${prefix}tasks`)) || (isDemo ? initialTasks : []));
+      setFolders(JSON.parse(localStorage.getItem(`${prefix}folders`)) || (isDemo ? initialFolders : [{ id: 'f1', name: 'Appunti Generali', color: 'border-blue-500/50' }]));
+      setHubFiles(JSON.parse(localStorage.getItem(`${prefix}hubfiles`)) || (isDemo ? initialFiles : []));
+      setSchedule(JSON.parse(localStorage.getItem(`${prefix}schedule`)) || (isDemo ? initialSchedule : []));
+      setNotes(JSON.parse(localStorage.getItem(`${prefix}notes`)) || (isDemo ? initialNotes : []));
+      setExpenses(JSON.parse(localStorage.getItem(`${prefix}expenses`)) || (isDemo ? initialExpenses : []));
+      setDirectory(JSON.parse(localStorage.getItem(`${prefix}directory`)) || (isDemo ? initialDirectory : []));
+      setTodayStudyMinutes(Number(localStorage.getItem(`${prefix}studyminutes`)) || (isDemo ? 45 : 0));
+      setStudyStreak(Number(localStorage.getItem(`${prefix}streak`)) || (isDemo ? 3 : 1));
     }
+  }, [currentUser, users]);
 
-    const priorityClass = task.priority === "Urgente"
-      ? "badge-red"
-      : task.priority === "Alta"
-        ? "badge-orange"
-        : "badge-purple";
+  // Sync LocalStorage per active user
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}subjects`, JSON.stringify(subjects)); }, [subjects, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}grades`, JSON.stringify(grades)); }, [grades, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}tasks`, JSON.stringify(tasks)); }, [tasks, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}folders`, JSON.stringify(folders)); }, [folders, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}hubfiles`, JSON.stringify(hubFiles)); }, [hubFiles, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}schedule`, JSON.stringify(schedule)); }, [schedule, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}notes`, JSON.stringify(notes)); }, [notes, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}expenses`, JSON.stringify(expenses)); }, [expenses, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}directory`, JSON.stringify(directory)); }, [directory, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}studyminutes`, todayStudyMinutes.toString()); }, [todayStudyMinutes, userPrefix]);
+  useEffect(() => { if (userPrefix) localStorage.setItem(`${userPrefix}streak`, studyStreak.toString()); }, [studyStreak, userPrefix]);
+  useEffect(() => { localStorage.setItem('sh_theme', theme); }, [theme]);
 
-    return `
-      <div class="list-item">
-        <button
-          class="check-circle ${task.done ? "done" : ""}"
-          type="button"
-          onclick="toggleTask('${task.id}')"
-          aria-label="${task.done ? "Segna come da fare" : "Segna come completato"}"
-        >${task.done ? "✓" : ""}</button>
-
-        <div class="list-item-main">
-          <div class="list-item-title" style="${task.done ? "text-decoration:line-through;opacity:.55" : ""}">
-            ${escapeHTML(task.title)}
-          </div>
-          <div class="list-item-sub">
-            ${escapeHTML(task.subject)} · ${escapeHTML(dueLabel)}
-          </div>
-          ${task.description ? `
-            <div class="list-item-sub">${escapeHTML(task.description)}</div>
-          ` : ""}
-        </div>
-
-        <span class="badge ${priorityClass}">
-          ${escapeHTML(task.priority || "Normale")}
-        </span>
-
-        <button class="btn btn-small btn-danger"
-          type="button"
-          onclick="deleteTask('${task.id}')"
-          aria-label="Elimina compito">×</button>
-      </div>`;
-  }).join("");
-}
-
-/* =========================================
-   VERIFICHE E CONTO ALLA ROVESCIA
-========================================= */
-
-$("examForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const subject = $("examSubject").value.trim();
-  const title = $("examTitle").value.trim();
-  const date = $("examDate").value;
-
-  if (!subject || !title || !parseLocalDate(date)) {
-    toast("Controlla i dati della verifica.");
-    return;
-  }
-
-  const diff = dayDifference(date);
-  if (diff === null || diff < 0) {
-    toast("Scegli una data di oggi o futura.");
-    return;
-  }
-
-  data.exams.push({
-    id: uid(),
-    subject,
-    title,
-    date,
-    type: $("examType").value,
-    notes: $("examNotes").value.trim(),
-    createdAt: new Date().toISOString()
-  });
-
-  saveData();
-  $("examForm").reset();
-
-  renderExams();
-  renderDashboard();
-  renderPlanner();
-
-  toast("Verifica aggiunta!");
-});
-
-function deleteExam(id) {
-  if (!confirm("Vuoi eliminare questa verifica?")) return;
-
-  data.exams = data.exams.filter(exam => exam.id !== id);
-
-  saveData();
-  renderExams();
-  renderDashboard();
-  renderPlanner();
-
-  toast("Verifica eliminata.");
-}
-
-function renderExams() {
-  const list = $("examsList");
-
-  const exams = [...data.exams].sort((a, b) =>
-    (a.date || "").localeCompare(b.date || "")
-  );
-
-  $("examCount").textContent = plural(
-    exams.length,
-    "verifica",
-    "verifiche"
-  );
-
-  if (!exams.length) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <strong>Ancora nessuna verifica</strong>
-        Inserisci la prossima data importante.
-      </div>`;
-    return;
-  }
-
-  list.innerHTML = exams.map(exam => {
-    const diff = dayDifference(exam.date);
-
-    let countdown = "Data non disponibile";
-    let badgeClass = "badge-purple";
-
-    if (diff === 0) {
-      countdown = "È oggi!";
-      badgeClass = "badge-red";
-    } else if (diff === 1) {
-      countdown = "Domani";
-      badgeClass = "badge-red";
-    } else if (diff > 1) {
-      countdown = `Mancano ${diff} giorni`;
-      badgeClass = diff <= 7 ? "badge-orange" : "badge-green";
-    } else if (diff < 0) {
-      countdown = "Data passata";
-      badgeClass = "badge-red";
+  // Auth Functions
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setAuthError('');
+    const found = users.find(u => u.email.toLowerCase() === authForm.email.toLowerCase() && u.password === authForm.password);
+    if (found) {
+      setCurrentUser(found);
+      setAuthForm({ firstName: '', lastName: '', email: '', password: '', course: '' });
+    } else {
+      setAuthError('Credenziali non valide. Controlla email e password.');
     }
-
-    return `
-      <div class="list-item">
-        <div class="stat-icon icon-orange">📚</div>
-
-        <div class="list-item-main">
-          <div class="list-item-title">${escapeHTML(exam.subject)} — ${escapeHTML(exam.title)}</div>
-          <div class="list-item-sub">
-            ${escapeHTML(exam.type)} · ${escapeHTML(formatDate(exam.date))}
-          </div>
-          ${exam.notes ? `
-            <div class="list-item-sub">${escapeHTML(exam.notes)}</div>
-          ` : ""}
-        </div>
-
-        <span class="badge ${badgeClass}">${escapeHTML(countdown)}</span>
-
-        <button class="btn btn-small btn-danger"
-          type="button"
-          onclick="deleteExam('${exam.id}')"
-          aria-label="Elimina verifica">×</button>
-      </div>`;
-  }).join("");
-}
-
-/* =========================================
-   FINE PARTE 5
-========================================= */
-</script>
-
-<script>
-/* =========================================
-   APPUNTI DIGITALI
-========================================= */
-
-$("noteForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const title = $("noteTitle").value.trim();
-  const subject = $("noteSubject").value.trim();
-  const content = $("noteContent").value.trim();
-
-  if (!title || !subject || !content) {
-    toast("Compila titolo, materia e contenuto.");
-    return;
-  }
-
-  data.notes.push({
-    id: uid(),
-    title,
-    subject,
-    content,
-    tags: $("noteTags").value.trim(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  });
-
-  saveData();
-  $("noteForm").reset();
-  renderNotes();
-  renderDashboard();
-  toast("Appunto salvato!");
-});
-
-$("noteSearch").addEventListener("input", renderNotes);
-
-function deleteNote(id) {
-  if (!confirm("Vuoi eliminare questo appunto?")) return;
-
-  data.notes = data.notes.filter(note => note.id !== id);
-  saveData();
-  renderNotes();
-  renderDashboard();
-  toast("Appunto eliminato.");
-}
-
-function editNote(id) {
-  const note = data.notes.find(item => item.id === id);
-  if (!note) return;
-
-  $("noteTitle").value = note.title || "";
-  $("noteSubject").value = note.subject || "";
-  $("noteContent").value = note.content || "";
-  $("noteTags").value = note.tags || "";
-
-  const form = $("noteForm");
-  form.dataset.editing = id;
-
-  showPage("notes");
-  $("noteTitle").focus();
-  toast("Modifica l'appunto e premi Salva appunto.");
-}
-
-const originalNoteFormSubmit = $("noteForm").onsubmit;
-
-$("noteForm").addEventListener("submit", event => {
-  const editingId = $("noteForm").dataset.editing;
-  if (!editingId) return;
-
-  event.preventDefault();
-
-  const note = data.notes.find(item => item.id === editingId);
-  if (!note) {
-    delete $("noteForm").dataset.editing;
-    return;
-  }
-
-  note.title = $("noteTitle").value.trim();
-  note.subject = $("noteSubject").value.trim();
-  note.content = $("noteContent").value.trim();
-  note.tags = $("noteTags").value.trim();
-  note.updatedAt = new Date().toISOString();
-
-  saveData();
-  delete $("noteForm").dataset.editing;
-  $("noteForm").reset();
-  renderNotes();
-  renderDashboard();
-  toast("Appunto aggiornato!");
-});
-
-function renderNotes() {
-  const list = $("notesList");
-  const search = $("noteSearch").value.trim().toLowerCase();
-
-  const notes = [...data.notes]
-    .filter(note => {
-      const text = [
-        note.title, note.subject, note.content, note.tags
-      ].join(" ").toLowerCase();
-
-      return text.includes(search);
-    })
-    .sort((a, b) =>
-      (b.updatedAt || b.createdAt || "")
-        .localeCompare(a.updatedAt || a.createdAt || "")
-    );
-
-  $("noteCount").textContent = plural(
-    data.notes.length, "appunto", "appunti"
-  );
-
-  if (!notes.length) {
-    list.innerHTML = `
-      <div class="empty-state" style="grid-column:1/-1">
-        <div class="empty-icon">📚</div>
-        <strong>Nessun appunto trovato</strong>
-        Crea un appunto oppure prova un'altra ricerca.
-      </div>`;
-    return;
-  }
-
-  list.innerHTML = notes.map(note => `
-    <div class="card">
-      <div class="flex-between" style="align-items:flex-start">
-        <div style="min-width:0">
-          <h3 class="card-title">${escapeHTML(note.title)}</h3>
-          <div class="card-description">
-            ${escapeHTML(note.subject)}
-          </div>
-        </div>
-        <span class="stat-icon icon-purple">▤</span>
-      </div>
-
-      <p style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:150px;overflow:auto;margin:16px 0">
-        ${escapeHTML(note.content)}
-      </p>
-
-      ${note.tags ? `
-        <div class="card-description">
-          🏷️ ${escapeHTML(note.tags)}
-        </div>` : ""}
-
-      <div class="divider"></div>
-
-      <div class="flex-wrap">
-        <button class="btn btn-small btn-soft"
-          onclick="editNote('${note.id}')">Modifica</button>
-
-        <button class="btn btn-small"
-          onclick="downloadNote('${note.id}')">Esporta TXT</button>
-
-        <button class="btn btn-small btn-danger"
-          onclick="deleteNote('${note.id}')">Elimina</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-function downloadFile(filename, content, type) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function downloadNote(id) {
-  const note = data.notes.find(item => item.id === id);
-  if (!note) return;
-
-  const content =
-    `${note.title}\nMateria: ${note.subject}\n` +
-    `Parole chiave: ${note.tags || "-"}\n\n${note.content}`;
-
-  downloadFile(
-    (note.title || "appunto").replace(/[^\w\- ]/g, "_") + ".txt",
-    content,
-    "text/plain;charset=utf-8"
-  );
-}
-
-/* =========================================
-   IMPORTAZIONE FOTO APPUNTI
-========================================= */
-
-$("notePhoto").addEventListener("change", () => {
-  const file = $("notePhoto").files[0];
-  const preview = $("notePhotoPreview");
-
-  if (photoPreviewUrl) {
-    URL.revokeObjectURL(photoPreviewUrl);
-    photoPreviewUrl = null;
-  }
-
-  if (!file) {
-    preview.innerHTML = "";
-    return;
-  }
-
-  if (!file.type.startsWith("image/")) {
-    preview.textContent = "Seleziona un'immagine valida.";
-    return;
-  }
-
-  if (file.size > 12 * 1024 * 1024) {
-    preview.textContent = "L'immagine supera il limite di 12 MB.";
-    $("notePhoto").value = "";
-    return;
-  }
-
-  photoPreviewUrl = URL.createObjectURL(file);
-
-  const image = document.createElement("img");
-  image.src = photoPreviewUrl;
-  image.alt = "Anteprima degli appunti";
-  image.style.cssText =
-    "display:block;max-width:100%;max-height:420px;" +
-    "object-fit:contain;border-radius:12px;border:1px solid var(--border)";
-
-  preview.replaceChildren(image);
-});
-
-$("preparePhotoBtn").addEventListener("click", () => {
-  const file = $("notePhoto").files[0];
-
-  if (!file) {
-    toast("Seleziona prima una fotografia.");
-    return;
-  }
-
-  toast("Foto pronta: l'estrazione OCR richiede un servizio aggiuntivo.");
-});
-
-/* =========================================
-   ORARIO SCOLASTICO
-========================================= */
-
-const weekdayNames = {
-  1: "Lunedì",
-  2: "Martedì",
-  3: "Mercoledì",
-  4: "Giovedì",
-  5: "Venerdì",
-  6: "Sabato"
-};
-
-$("lessonForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const start = $("lessonStart").value;
-  const end = $("lessonEnd").value;
-
-  if (!start || !end || start >= end) {
-    toast("L'ora di fine deve essere successiva all'inizio.");
-    return;
-  }
-
-  data.lessons.push({
-    id: uid(),
-    day: Number($("lessonDay").value),
-    subject: $("lessonSubject").value.trim(),
-    start,
-    end,
-    room: $("lessonRoom").value.trim(),
-    teacher: $("lessonTeacher").value.trim()
-  });
-
-  saveData();
-  $("lessonForm").reset();
-  $("lessonStart").value = "08:00";
-  $("lessonEnd").value = "09:00";
-
-  renderTimetable();
-  toast("Lezione aggiunta!");
-});
-
-function deleteLesson(id) {
-  if (!confirm("Vuoi eliminare questa lezione?")) return;
-
-  data.lessons = data.lessons.filter(item => item.id !== id);
-  saveData();
-  renderTimetable();
-  toast("Lezione eliminata.");
-}
-
-function renderTimetable() {
-  const container = $("timetableList");
-
-  if (!data.lessons.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🏫</div>
-        <strong>Orario ancora vuoto</strong>
-        Aggiungi le lezioni della tua settimana.
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = Object.entries(weekdayNames).map(([day, name]) => {
-    const lessons = data.lessons
-      .filter(item => item.day === Number(day))
-      .sort((a, b) => a.start.localeCompare(b.start));
-
-    return `
-      <div style="margin-bottom:22px">
-        <div class="flex-between" style="margin-bottom:10px">
-          <h3 class="card-title">${name}</h3>
-          <span class="badge badge-purple">
-            ${lessons.length} ${lessons.length === 1 ? "lezione" : "lezioni"}
-          </span>
-        </div>
-
-        ${lessons.length ? `
-          <div class="list">
-            ${lessons.map(lesson => `
-              <div class="list-item">
-                <div class="stat-icon icon-purple">📘</div>
-                <div class="list-item-main">
-                  <div class="list-item-title">
-                    ${escapeHTML(lesson.start)}–${escapeHTML(lesson.end)}
-                    · ${escapeHTML(lesson.subject)}
-                  </div>
-                  <div class="list-item-sub">
-                    ${lesson.room ? "Aula " + escapeHTML(lesson.room) : ""}
-                    ${lesson.room && lesson.teacher ? " · " : ""}
-                    ${lesson.teacher ? escapeHTML(lesson.teacher) : ""}
-                  </div>
-                </div>
-                <button class="btn btn-small btn-danger"
-                  onclick="deleteLesson('${lesson.id}')">×</button>
-              </div>
-            `).join("")}
-          </div>
-        ` : `<p class="muted small">Nessuna lezione.</p>`}
-      </div>`;
-  }).join("");
-}
-
-$("printTimetableBtn").addEventListener("click", () => {
-  window.print();
-});
-
-/* =========================================
-   TIMER STUDIO
-========================================= */
-
-function formatTimer(seconds) {
-  const safe = Math.max(0, Math.ceil(seconds));
-  const minutes = Math.floor(safe / 60);
-  const secs = safe % 60;
-
-  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-}
-
-function updateTimerDisplay() {
-  $("timerDisplay").textContent = formatTimer(timerRemaining);
-
-  const completed = timerTotal > 0
-    ? ((timerTotal - timerRemaining) / timerTotal) * 100
-    : 0;
-
-  $("timerProgress").style.width =
-    `${Math.max(0, Math.min(100, completed))}%`;
-
-  $("timerStartBtn").disabled = timerRunning;
-  $("timerPauseBtn").disabled = !timerRunning;
-}
-
-function stopTimerInterval() {
-  if (timerInterval !== null) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-}
-
-function resetTimer() {
-  stopTimerInterval();
-
-  timerRunning = false;
-  timerStartedAt = null;
-  timerElapsed = 0;
-
-  timerTotal = Number($("timerDuration").value) * 60;
-  timerRemaining = timerTotal;
-  timerSessionSubject = $("timerSubject").value.trim();
-
-  $("timerStatus").textContent = "Pronto per iniziare";
-  updateTimerDisplay();
-}
-
-function completeTimerSession() {
-  stopTimerInterval();
-
-  timerRunning = false;
-  timerRemaining = 0;
-
-  const durationMinutes = Math.round(timerTotal / 60);
-
-  data.sessions.push({
-    id: uid(),
-    subject: timerSessionSubject || "Studio",
-    durationMinutes,
-    date: localDateString(),
-    completedAt: new Date().toISOString()
-  });
-
-  saveData();
-
-  $("timerStatus").textContent = "Sessione completata! 🎉";
-  updateTimerDisplay();
-  renderDashboard();
-
-  $("timerSessions").textContent = data.sessions.length;
-  toast("Ottimo lavoro! Sessione registrata.");
-}
-
-function timerTick() {
-  if (!timerRunning) return;
-
-  const elapsed = (Date.now() - timerStartedAt) / 1000;
-  timerRemaining = Math.max(0, timerTotal - timerElapsed - elapsed);
-
-  updateTimerDisplay();
-
-  if (timerRemaining <= 0) {
-    completeTimerSession();
-  }
-}
-
-$("timerStartBtn").addEventListener("click", () => {
-  if (timerRunning) return;
-
-  if (timerRemaining <= 0) resetTimer();
-
-  timerSessionSubject = $("timerSubject").value.trim();
-
-  timerStartedAt = Date.now();
-  timerRunning = true;
-
-  $("timerStatus").textContent = "Concentrazione in corso...";
-  stopTimerInterval();
-  timerInterval = setInterval(timerTick, 250);
-
-  updateTimerDisplay();
-});
-
-$("timerPauseBtn").addEventListener("click", () => {
-  if (!timerRunning) return;
-
-  const elapsed = (Date.now() - timerStartedAt) / 1000;
-  timerElapsed += elapsed;
-  timerRemaining = Math.max(0, timerTotal - timerElapsed);
-
-  stopTimerInterval();
-  timerRunning = false;
-
-  $("timerStatus").textContent = "In pausa";
-  updateTimerDisplay();
-});
-
-$("timerResetBtn").addEventListener("click", () => {
-  resetTimer();
-  toast("Timer azzerato.");
-});
-
-$("timerDuration").addEventListener("change", () => {
-  if (!timerRunning) resetTimer();
-});
-
-$("timerSubject").addEventListener("change", () => {
-  if (!timerRunning) {
-    timerSessionSubject = $("timerSubject").value.trim();
-  }
-});
-
-/* =========================================
-   OBIETTIVI
-========================================= */
-
-$("goalForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const title = $("goalTitle").value.trim();
-  const date = $("goalDate").value;
-
-  if (!title || !parseLocalDate(date)) {
-    toast("Inserisci un obiettivo e una data valida.");
-    return;
-  }
-
-  data.goals.push({
-    id: uid(),
-    title,
-    date,
-    details: $("goalDetails").value.trim(),
-    done: false,
-    createdAt: new Date().toISOString()
-  });
-
-  saveData();
-  $("goalForm").reset();
-
-  renderPlanner();
-  toast("Obiettivo aggiunto!");
-});
-
-function toggleGoal(id) {
-  const goal = data.goals.find(item => item.id === id);
-  if (!goal) return;
-
-  goal.done = !goal.done;
-
-  saveData();
-  renderPlanner();
-  toast(goal.done ? "Obiettivo raggiunto!" : "Obiettivo riaperto.");
-}
-
-function deleteGoal(id) {
-  if (!confirm("Vuoi eliminare questo obiettivo?")) return;
-
-  data.goals = data.goals.filter(item => item.id !== id);
-  saveData();
-  renderPlanner();
-  toast("Obiettivo eliminato.");
-}
-
-function renderPlanner() {
-  const goalsList = $("goalsList");
-
-  const goals = [...data.goals].sort((a, b) => {
-    if (a.done !== b.done) return a.done ? 1 : -1;
-    return (a.date || "").localeCompare(b.date || "");
-  });
-
-  $("goalCount").textContent = plural(
-    goals.length, "obiettivo", "obiettivi"
-  );
-
-  if (!goals.length) {
-    goalsList.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🎯</div>
-        <strong>Nessun obiettivo</strong>
-        Aggiungi un obiettivo personale.
-      </div>`;
-  } else {
-    goalsList.innerHTML = goals.map(goal => `
-      <div class="list-item">
-        <button class="check-circle ${goal.done ? "done" : ""}"
-          onclick="toggleGoal('${goal.id}')"
-          aria-label="Cambia stato obiettivo">${goal.done ? "✓" : ""}</button>
-
-        <div class="list-item-main">
-          <div class="list-item-title"
-            style="${goal.done ? "text-decoration:line-through;opacity:.6" : ""}">
-            ${escapeHTML(goal.title)}
-          </div>
-          <div class="list-item-sub">
-            Scadenza: ${escapeHTML(formatDate(goal.date))}
-          </div>
-          ${goal.details ? `
-            <div class="list-item-sub">${escapeHTML(goal.details)}</div>
-          ` : ""}
-        </div>
-
-        <button class="btn btn-small btn-danger"
-          onclick="deleteGoal('${goal.id}')">×</button>
-      </div>
-    `).join("");
-  }
-
-  $("plannerOpenTasks").textContent =
-    data.tasks.filter(task => !task.done).length;
-
-  $("plannerUpcomingExams").textContent =
-    data.exams.filter(exam => {
-      const diff = dayDifference(exam.date);
-      return diff !== null && diff >= 0 && diff <= 7;
-    }).length;
-
-  $("plannerCompletedGoals").textContent =
-    data.goals.filter(goal => goal.done).length;
-}
-
-/* =========================================
-   DASHBOARD INTELLIGENTE
-========================================= */
-
-function renderDashboard() {
-  const openTasks = data.tasks.filter(task => !task.done);
-
-  const today = localDateString();
-  const todayDate = parseLocalDate(today);
-
-  const upcomingExams = data.exams
-    .filter(exam => {
-      const diff = dayDifference(exam.date);
-      return diff !== null && diff >= 0;
-    })
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  const weeklySessions = data.sessions.filter(session => {
-    const date = parseLocalDate(session.date);
-    if (!date || !todayDate) return false;
-
-    const daysAgo = Math.floor((todayDate - date) / 86400000);
-    return daysAgo >= 0 && daysAgo < 7;
-  });
-
-  const weeklyMinutes = weeklySessions.reduce(
-    (sum, session) => sum + Number(session.durationMinutes || 0), 0
-  );
-
-  const weeklyGoalMinutes =
-    Math.max(1, Number(data.profile.weeklyGoal) || 10) * 60;
-
-  $("statTasks").textContent = openTasks.length;
-  $("statExams").textContent = upcomingExams.length;
-  $("statNotes").textContent = data.notes.length;
-
-  const totalMinutes = data.sessions.reduce(
-    (sum, session) => sum + Number(session.durationMinutes || 0), 0
-  );
-
-  $("statHours").textContent =
-    `${Math.floor(totalMinutes / 60)}h` +
-    (totalMinutes % 60 ? ` ${totalMinutes % 60}m` : "");
-
-  $("weeklyHours").textContent =
-    `${Math.floor(weeklyMinutes / 60)}h ${weeklyMinutes % 60}m / ${data.profile.weeklyGoal || 10}h`;
-
-  const progress = Math.min(100, weeklyMinutes / weeklyGoalMinutes * 100);
-  $("weeklyProgress").style.width = `${progress}%`;
-
-  $("weeklyMessage").textContent = progress >= 100
-    ? "Obiettivo settimanale raggiunto! Complimenti! 🎉"
-    : `Hai completato il ${Math.round(progress)}% del tuo obiettivo settimanale.`;
-
-  const taskContainer = $("dashboardTasks");
-
-  const visibleTasks = [...openTasks]
-    .sort((a, b) => (a.date || "").localeCompare(b.date || ""))
-    .slice(0, 5);
-
-  taskContainer.innerHTML = visibleTasks.length
-    ? visibleTasks.map(task => `
-      <div class="list-item">
-        <button class="check-circle"
-          onclick="toggleTask('${task.id}')"
-          aria-label="Completa compito"></button>
-        <div class="list-item-main">
-          <div class="list-item-title">${escapeHTML(task.title)}</div>
-          <div class="list-item-sub">
-            ${escapeHTML(task.subject)} · ${escapeHTML(formatDate(task.date))}
-          </div>
-        </div>
-        <span class="badge ${
-          task.priority === "Urgente" ? "badge-red" :
-          task.priority === "Alta" ? "badge-orange" : "badge-purple"
-        }">${escapeHTML(task.priority || "Normale")}</span>
-      </div>
-    `).join("")
-    : `
-      <div class="empty-state">
-        <div class="empty-icon">🎉</div>
-        <strong>Nessun compito aperto</strong>
-        Hai completato tutto oppure non hai ancora aggiunto attività.
-      </div>`;
-
-  const examContainer = $("dashboardExams");
-  const visibleExams = upcomingExams.slice(0, 5);
-
-  examContainer.innerHTML = visibleExams.length
-    ? visibleExams.map(exam => {
-      const diff = dayDifference(exam.date);
-      const label = diff === 0 ? "Oggi" :
-        diff === 1 ? "Domani" : `${diff} giorni`;
-
-      return `
-        <div class="list-item">
-          <div class="stat-icon icon-orange">📅</div>
-          <div class="list-item-main">
-            <div class="list-item-title">
-              ${escapeHTML(exam.subject)} — ${escapeHTML(exam.title)}
-            </div>
-            <div class="list-item-sub">
-              ${escapeHTML(formatDate(exam.date))}
-            </div>
-          </div>
-          <span class="badge ${diff <= 2 ? "badge-red" : "badge-orange"}">
-            ${escapeHTML(label)}
-          </span>
-        </div>`;
-    }).join("")
-    : `
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <strong>Nessuna verifica futura</strong>
-        Inserisci le prossime date importanti.
-      </div>`;
-
-  updateGreeting();
-  $("timerSessions").textContent = data.sessions.length;
-}
-
-/* =========================================
-   BACKUP E RIPRISTINO
-========================================= */
-
-$("exportDataBtn").addEventListener("click", () => {
-  const backup = {
-    app: "STUDY PRO",
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    data
   };
 
-  downloadFile(
-    `study-pro-backup-${localDateString()}.json`,
-    JSON.stringify(backup, null, 2),
-    "application/json"
-  );
+  const handleRegister = (e) => {
+    e.preventDefault();
+    setAuthError('');
 
-  toast("Backup preparato.");
-});
-
-$("importDataBtn").addEventListener("click", () => {
-  $("importDataFile").click();
-});
-
-$("importDataFile").addEventListener("change", async event => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  try {
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error("Il file supera il limite di 10 MB.");
-    }
-
-    const parsed = JSON.parse(await file.text());
-    const incoming = parsed.data || parsed;
-
-    const arrays = [
-      "tasks", "exams", "notes", "lessons", "goals", "sessions"
-    ];
-
-    for (const key of arrays) {
-      if (incoming[key] !== undefined && !Array.isArray(incoming[key])) {
-        throw new Error(`Il campo ${key} non è valido.`);
-      }
-    }
-
-    if (parsed.app && parsed.app !== "STUDY PRO") {
-      throw new Error("Questo backup non appartiene a STUDY PRO.");
-    }
-
-    if (!confirm(
-      "Importare questo backup? I dati attuali verranno sostituiti."
-    )) return;
-
-    const clean = structuredClone(defaultData);
-
-    for (const key of arrays) {
-      if (Array.isArray(incoming[key])) {
-        clean[key] = incoming[key];
-      }
-    }
-
-    clean.profile = {
-      ...defaultData.profile,
-      ...(incoming.profile || {})
-    };
-
-    const previous = data;
-    data = clean;
-
-    if (!saveData()) {
-      data = previous;
+    if (!authForm.firstName || !authForm.lastName || !authForm.email || !authForm.password || !authForm.course) {
+      setAuthError('Compila tutti i campi obbligatori.');
       return;
     }
 
-    renderAll();
-    renderProfile();
-    toast("Backup importato correttamente!");
-  } catch (error) {
-    alert("Impossibile importare il backup: " + error.message);
-  } finally {
-    event.target.value = "";
-  }
-});
+    if (authForm.password.length < 6) {
+      setAuthError('La password deve contenere almeno 6 caratteri.');
+      return;
+    }
 
-$("clearDataBtn").addEventListener("click", () => {
-  const confirmed = confirm(
-    "ATTENZIONE: vuoi eliminare tutti i dati di STUDY PRO da questo browser? Questa operazione non può essere annullata."
+    const exists = users.find(u => u.email.toLowerCase() === authForm.email.toLowerCase());
+    if (exists) {
+      setAuthError('Email già registrata. Effettua il login.');
+      return;
+    }
+
+    const newUser = {
+      id: `usr_${Date.now()}`,
+      firstName: authForm.firstName,
+      lastName: authForm.lastName,
+      email: authForm.email,
+      password: authForm.password,
+      course: authForm.course
+    };
+
+    setUsers([...users, newUser]);
+    setCurrentUser(newUser);
+
+    const prefix = `sh_user_${newUser.id}_`;
+    localStorage.setItem(`${prefix}subjects`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}grades`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}tasks`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}folders`, JSON.stringify([{ id: 'f1', name: 'Appunti Generali', color: 'border-blue-500/50' }]));
+    localStorage.setItem(`${prefix}hubfiles`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}schedule`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}notes`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}expenses`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}directory`, JSON.stringify([]));
+    localStorage.setItem(`${prefix}studyminutes`, '0');
+    localStorage.setItem(`${prefix}streak`, '1');
+
+    setAuthForm({ firstName: '', lastName: '', email: '', password: '', course: '' });
+  };
+
+  const handleQuickDemoLogin = () => {
+    const demoUser = users.find(u => u.id === 'demo_user') || seedAccounts[0];
+    setCurrentUser(demoUser);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setActiveTab('dashboard');
+    setMobileMenuOpen(false);
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Buongiorno 🌅';
+    if (hour < 18) return 'Buon Pomeriggio ☀️';
+    return 'Buona Sera 🌙';
+  };
+
+  const calculateGPA = () => {
+    if (grades.length === 0) return { weighted: 0, arithmetic: 0, totalCredits: 0, graduationBase: 0 };
+    const sumWeighted = grades.reduce((acc, g) => acc + (g.val * g.weight), 0);
+    const sumCredits = grades.reduce((acc, g) => acc + Number(g.weight), 0);
+    const sumArith = grades.reduce((acc, g) => acc + Number(g.val), 0);
+
+    const weightedVal = sumCredits ? (sumWeighted / sumCredits) : 0;
+
+    return {
+      weighted: weightedVal.toFixed(2),
+      arithmetic: (sumArith / grades.length).toFixed(2),
+      totalCredits: sumCredits,
+      graduationBase: Math.round((weightedVal / 30) * 110)
+    };
+  };
+
+  const gpa = calculateGPA();
+  const pendingTasks = tasks.filter(t => t.status !== 'DONE').length;
+
+  const exportDataJSON = () => {
+    const data = { user: currentUser, subjects, grades, tasks, folders, hubFiles, schedule, notes, expenses, directory, todayStudyMinutes, studyStreak };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `StudentHub_${currentUser?.firstName}_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+  };
+
+  const importDataJSON = (e) => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(e.target.files[0], "UTF-8");
+    fileReader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.subjects) setSubjects(parsed.subjects);
+        if (parsed.grades) setGrades(parsed.grades);
+        if (parsed.tasks) setTasks(parsed.tasks);
+        if (parsed.folders) setFolders(parsed.folders);
+        if (parsed.hubFiles) setHubFiles(parsed.hubFiles);
+        if (parsed.schedule) setSchedule(parsed.schedule);
+        if (parsed.notes) setNotes(parsed.notes);
+        if (parsed.expenses) setExpenses(parsed.expenses);
+        if (parsed.directory) setDirectory(parsed.directory);
+      } catch (err) {
+        alert("Errore durante l'importazione del file JSON.");
+      }
+    };
+  };
+
+  const clearCurrentUserData = () => {
+    setSubjects([]);
+    setGrades([]);
+    setTasks([]);
+    setFolders([{ id: 'f1', name: 'Appunti Generali', color: 'border-blue-500/50' }]);
+    setHubFiles([]);
+    setSchedule([]);
+    setNotes([]);
+    setExpenses([]);
+    setDirectory([]);
+    setTodayStudyMinutes(0);
+    setStudyStreak(1);
+  };
+
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'filehub', label: 'Appunti & Files', icon: Folder },
+    { id: 'tasks', label: 'Compiti', icon: CheckSquare },
+    { id: 'grades', label: 'Voti & Media', icon: GraduationCap },
+    { id: 'pomodoro', label: 'Timer Focus', icon: Timer },
+    { id: 'schedule', label: 'Orario Lezioni', icon: Calendar },
+    { id: 'notes', label: 'Note Veloci', icon: FileText },
+    { id: 'budget', label: 'Spese Budget', icon: Wallet },
+    { id: 'directory', label: 'Professori', icon: Users }
+  ];
+
+  if (!currentUser) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'}`}>
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex p-3 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl shadow-lg shadow-indigo-500/30 mb-2">
+              <GraduationCap className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
+              StudentHub Pro
+            </h1>
+            <p className="text-xs text-slate-400">La Suite Integrata per la gestione accademica dello studente</p>
+          </div>
+
+          <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl backdrop-blur-xl transition-all ${theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'}`}>
+            <div className="flex bg-slate-800/60 p-1 rounded-xl mb-6 border border-slate-700/50">
+              <button
+                type="button"
+                onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+                  authMode === 'login' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <LogIn className="w-3.5 h-3.5" /> Accedi
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('register'); setAuthError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+                  authMode === 'register' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5" /> Registrati
+              </button>
+            </div>
+
+            {authError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            {authMode === 'login' ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Email Studente</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+                    <input 
+                      type="email" 
+                      placeholder="es. mario.rossi@student.it"
+                      value={authForm.email}
+                      onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Password</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••"
+                      value={authForm.password}
+                      onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition"
+                >
+                  Entra nel tuo Hub
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-3">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-1">Nome</label>
+                    <input 
+                      type="text" 
+                      placeholder="Mario"
+                      value={authForm.firstName}
+                      onChange={e => setAuthForm({ ...authForm, firstName: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-1">Cognome</label>
+                    <input 
+                      type="text" 
+                      placeholder="Rossi"
+                      value={authForm.lastName}
+                      onChange={e => setAuthForm({ ...authForm, lastName: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Corso di Studi / Scuola</label>
+                  <div className="relative">
+                    <School className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                    <input 
+                      type="text" 
+                      placeholder="es. Liceo / Università"
+                      value={authForm.course}
+                      onChange={e => setAuthForm({ ...authForm, course: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Email</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                    <input 
+                      type="email" 
+                      placeholder="mario.rossi@studenti.it"
+                      value={authForm.email}
+                      onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Password (min. 6 caratteri)</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••"
+                      value={authForm.password}
+                      onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
+                      className="w-full bg-slate-800/80 border border-slate-700/70 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full py-2.5 mt-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition"
+                >
+                  Crea Account Nuova Iscrizione
+                </button>
+              </form>
+            )}
+
+            <div className="mt-6 pt-5 border-t border-slate-800 text-center space-y-3">
+              <span className="text-[11px] text-slate-400">Vuoi provare l'app con dati di esempio?</span>
+              <button 
+                type="button"
+                onClick={handleQuickDemoLogin}
+                className="w-full py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Accedi come Utente Demo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen font-sans transition-colors duration-300 flex flex-col ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'}`}>
+      <header className={`lg:hidden flex items-center justify-between px-4 py-3 border-b shrink-0 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-indigo-600 rounded-xl text-white">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="font-extrabold text-sm leading-tight bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">StudentHub</h1>
+            <p className="text-[9px] text-slate-400 uppercase font-semibold">{currentUser.firstName}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-amber-500" />}
+          </button>
+          
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl bg-slate-800 text-slate-300"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </header>
+
+      <div className="flex-1 flex h-[calc(100vh-57px)] lg:h-screen overflow-hidden relative">
+        <aside className={`hidden lg:flex w-64 border-r flex-col justify-between p-4 shrink-0 ${theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+          <div>
+            <div className="flex items-center gap-3 px-3 py-3.5 mb-2">
+              <div className="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl shadow-lg shadow-indigo-500/30">
+                <GraduationCap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="font-extrabold text-lg leading-tight bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">StudentHub</h1>
+                <p className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">Suite Pro</p>
+              </div>
+            </div>
+
+            <div className="mb-4 px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md">
+                {currentUser.firstName[0]}{currentUser.lastName[0]}
+              </div>
+              <div className="truncate">
+                <p className="text-xs font-bold text-slate-200 truncate">{currentUser.firstName} {currentUser.lastName}</p>
+                <p className="text-[10px] text-slate-400 truncate">{currentUser.course}</p>
+              </div>
+            </div>
+
+            <nav className="space-y-1 overflow-y-auto max-h-[calc(100vh-290px)] pr-1">
+              {navItems.map(item => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-medium text-xs transition-all duration-200 ${
+                      isActive 
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
+                        : `${theme === 'dark' ? 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' : 'text-slate-600 hover:bg-slate-100'}`
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : ''}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="pt-3 border-t border-slate-800/40 space-y-2">
+            <button 
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                theme === 'dark' ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                {theme === 'dark' ? <Moon className="w-3.5 h-3.5 text-amber-400" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
+                Tema {theme === 'dark' ? 'Scuro' : 'Chiaro'}
+              </span>
+            </button>
+
+            <div className="flex gap-1.5 pt-1">
+              <button 
+                onClick={exportDataJSON}
+                className="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold rounded-lg flex items-center justify-center gap-1"
+              >
+                <Download className="w-3 h-3 text-emerald-400" /> Backup
+              </button>
+              
+              <label className="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold rounded-lg flex items-center justify-center gap-1 cursor-pointer">
+                <Upload className="w-3 h-3 text-indigo-400" /> Importa
+                <input type="file" accept=".json" onChange={importDataJSON} className="hidden" />
+              </label>
+
+              <button 
+                onClick={clearCurrentUserData}
+                className="p-1.5 bg-slate-800 hover:bg-red-900/50 text-slate-400 hover:text-red-400 rounded-lg"
+              >
+                <RefreshCw className="w-3 h-3" />
+              </button>
+            </div>
+
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/20 transition"
+            >
+              <LogOut className="w-3.5 h-3.5" /> Disconnetti
+            </button>
+          </div>
+        </aside>
+
+        {mobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex justify-end">
+            <div className={`w-4/5 max-w-xs h-full p-5 space-y-5 flex flex-col justify-between ${theme === 'dark' ? 'bg-slate-900' : 'bg-white'}`}>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b pb-3 border-slate-800">
+                  <span className="font-bold text-sm">Menu Completo</span>
+                  <button onClick={() => setMobileMenuOpen(false)} className="text-slate-400"><X className="w-5 h-5" /></button>
+                </div>
+
+                <div className="space-y-1 overflow-y-auto max-h-[60vh]">
+                  {navItems.map(item => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition ${
+                          activeTab === item.id ? 'bg-indigo-600 text-white font-bold' : 'text-slate-300 hover:bg-slate-800'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t pt-4 border-slate-800">
+                <button 
+                  onClick={clearCurrentUserData}
+                  className="w-full py-2 bg-slate-800 hover:bg-red-900/40 text-red-400 text-xs font-semibold rounded-xl flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Azzera Dati Account
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full py-2 bg-red-600 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-3.5 h-3.5" /> Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 lg:pb-8">
+          <div className="max-w-6xl mx-auto space-y-8">
+            {activeTab === 'dashboard' && (
+              <DashboardView 
+                gpa={gpa} 
+                pendingTasks={pendingTasks} 
+                todayStudyMinutes={todayStudyMinutes}
+                studyStreak={studyStreak}
+                tasks={tasks}
+                subjects={subjects}
+                grades={grades}
+                schedule={schedule}
+                expenses={expenses}
+                greeting={getGreeting()}
+                currentUser={currentUser}
+                setActiveTab={setActiveTab}
+              />
+            )}
+
+            {activeTab === 'grades' && (
+              <GradesView 
+                subjects={subjects} 
+                setSubjects={setSubjects} 
+                grades={grades} 
+                setGrades={setGrades} 
+                gpa={gpa}
+              />
+            )}
+
+            {activeTab === 'tasks' && (
+              <TasksView 
+                tasks={tasks} 
+                setTasks={setTasks} 
+                subjects={subjects} 
+              />
+            )}
+
+            {activeTab === 'pomodoro' && (
+              <PomodoroView 
+                todayStudyMinutes={todayStudyMinutes} 
+                setTodayStudyMinutes={setTodayStudyMinutes}
+                studyStreak={studyStreak}
+                setStudyStreak={setStudyStreak}
+              />
+            )}
+
+            {activeTab === 'filehub' && (
+              <FileHubView 
+                folders={folders} 
+                setFolders={setFolders} 
+                files={hubFiles} 
+                setFiles={setHubFiles}
+              />
+            )}
+
+            {activeTab === 'schedule' && (
+              <ScheduleView 
+                schedule={schedule} 
+                setSchedule={setSchedule} 
+                subjects={subjects} 
+              />
+            )}
+
+            {activeTab === 'notes' && (
+              <NotesView 
+                notes={notes} 
+                setNotes={setNotes} 
+                subjects={subjects}
+              />
+            )}
+
+            {activeTab === 'budget' && (
+              <BudgetView 
+                expenses={expenses} 
+                setExpenses={setExpenses} 
+              />
+            )}
+
+            {activeTab === 'directory' && (
+              <DirectoryView 
+                directory={directory} 
+                setDirectory={setDirectory} 
+              />
+            )}
+          </div>
+        </main>
+
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 border-t z-30 px-2 py-1.5 flex items-center justify-around backdrop-blur-lg bg-slate-900/95 border-slate-800">
+          {[
+            { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
+            { id: 'filehub', label: 'Appunti', icon: Folder },
+            { id: 'tasks', label: 'Compiti', icon: CheckSquare },
+            { id: 'grades', label: 'Voti', icon: GraduationCap },
+            { id: 'pomodoro', label: 'Focus', icon: Timer }
+          ].map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition ${
+                  isActive ? 'text-indigo-400 font-bold' : 'text-slate-400'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''}`} />
+                <span className="text-[10px]">{item.label}</span>
+              </button>
+            );
+          })}
+          
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center gap-1 px-3 py-1.5 text-slate-400"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[10px]">Altro</span>
+          </button>
+        </nav>
+      </div>
+    </div>
   );
-
-  if (!confirmed) return;
-
-  data = structuredClone(defaultData);
-
-  if (!saveData()) {
-    toast("Non è stato possibile salvare la modifica.");
-    return;
-  }
-
-  resetTimer();
-  renderAll();
-  renderProfile();
-  toast("Dati locali cancellati.");
-});
-
-/* =========================================
-   INIZIALIZZAZIONE
-========================================= */
-
-function renderAll() {
-  renderTasks();
-  renderExams();
-  renderNotes();
-  renderTimetable();
-  renderPlanner();
-  renderDashboard();
 }
 
-function initializeApp() {
-  $("todayLabel").textContent = new Date().toLocaleDateString("it-IT", {
-    weekday: "short",
-    day: "numeric",
-    month: "short"
-  });
+// ==================== 1. DASHBOARD VIEW ====================
+function DashboardView({ gpa, pendingTasks, todayStudyMinutes, studyStreak, tasks, subjects, schedule, expenses, greeting, currentUser, setActiveTab }) {
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  const totalBalance = expenses.reduce((acc, curr) => curr.type === 'income' ? acc + curr.amount : acc - curr.amount, 0);
 
-  $("taskDate").value = localDateString();
-  $("examDate").value = localDateString();
-  $("goalDate").value = localDateString();
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-indigo-900/50 via-slate-900 to-slate-900 border border-indigo-500/20">
+        <div>
+          <h2 className="text-2xl font-black text-white">{greeting}, {currentUser.firstName}! 👋</h2>
+          <p className="text-xs text-slate-400 mt-1">{currentUser.course} — Pronto per raggiungere i tuoi obiettivi di studio oggi?</p>
+          <div className="mt-3 flex items-center gap-2 text-amber-300 text-xs bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20 w-fit">
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span className="italic">"{quote}"</span>
+          </div>
+        </div>
+        <button 
+          onClick={() => setActiveTab('pomodoro')}
+          className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2 shrink-0 self-start md:self-center"
+        >
+          <Play className="w-4 h-4 fill-white" /> Avvia Sessione Focus
+        </button>
+      </div>
 
-  renderProfile();
-  renderAll();
-  resetTimer();
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-indigo-400">
+            <span className="text-xs font-bold uppercase tracking-wider">Media Voti</span>
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <p className="text-2xl font-black text-white">{gpa.weighted || '0.00'}</p>
+          <p className="text-[10px] text-slate-400">Base Laurea: <strong className="text-indigo-300">{gpa.graduationBase}/110</strong></p>
+        </div>
 
-  console.log("STUDY PRO avviato correttamente.");
+        <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-amber-400">
+            <span className="text-xs font-bold uppercase tracking-wider">Compiti Sospesi</span>
+            <CheckSquare className="w-5 h-5" />
+          </div>
+          <p className="text-2xl font-black text-white">{pendingTasks}</p>
+          <p className="text-[10px] text-slate-400">Attività da completare</p>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-emerald-400">
+            <span className="text-xs font-bold uppercase tracking-wider">Studio Oggi</span>
+            <Timer className="w-5 h-5" />
+          </div>
+          <p className="text-2xl font-black text-white">{todayStudyMinutes}m</p>
+          <p className="text-[10px] text-slate-400 flex items-center gap-1">
+            <Flame className="w-3 h-3 text-orange-400 inline" /> Streak: <strong>{studyStreak} giorni</strong>
+          </p>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-purple-400">
+            <span className="text-xs font-bold uppercase tracking-wider">Saldo Budget</span>
+            <Wallet className="w-5 h-5" />
+          </div>
+          <p className="text-2xl font-black text-white">€{totalBalance.toFixed(2)}</p>
+          <p className="text-[10px] text-slate-400">Gestione finanziaria</p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm text-slate-200 flex items-center gap-2">
+              <CheckSquare className="w-4 h-4 text-indigo-400" /> Compiti Urgenti
+            </h3>
+            <button onClick={() => setActiveTab('tasks')} className="text-xs text-indigo-400 hover:underline">Vedi Tutti</button>
+          </div>
+          {tasks.filter(t => t.status !== 'DONE').slice(0, 3).length === 0 ? (
+            <p className="text-xs text-slate-500 py-4 text-center">Nessun compito in sospeso! 🎉</p>
+          ) : (
+            <div className="space-y-2">
+              {tasks.filter(t => t.status !== 'DONE').slice(0, 3).map(task => (
+                <div key={task.id} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-slate-200">{task.title}</p>
+                    <p className="text-[10px] text-slate-400">Scadenza: {task.dueDate}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${task.priority === 'Alta' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                    {task.priority}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm text-slate-200 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-emerald-400" /> Orario Oggi
+            </h3>
+            <button onClick={() => setActiveTab('schedule')} className="text-xs text-indigo-400 hover:underline">Orario Completo</button>
+          </div>
+          {schedule.length === 0 ? (
+            <p className="text-xs text-slate-500 py-4 text-center">Nessuna lezione programmata.</p>
+          ) : (
+            <div className="space-y-2">
+              {schedule.slice(0, 3).map(item => (
+                <div key={item.id} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-slate-200">{item.subject}</p>
+                    <p className="text-[10px] text-slate-400">{item.day} — {item.time}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-300 bg-slate-700/50 px-2 py-1 rounded">
+                    {item.room}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-initializeApp();
-</script>
+// ==================== 2. GRADES VIEW ====================
+function GradesView({ subjects, setSubjects, grades, setGrades, gpa }) {
+  const [newSubject, setNewSubject] = useState({ name: '', code: '', target: 28 });
+  const [newGrade, setNewGrade] = useState({ subjectId: '', val: 28, weight: 6, title: '', date: new Date().toISOString().split('T')[0] });
+  const [targetGraduation, setTargetGraduation] = useState(105);
+  const [remainingCredits, setRemainingCredits] = useState(30);
 
-<style>
-/* Miglioramenti finali per dispositivi mobili e stampa */
+  const addSubject = (e) => {
+    e.preventDefault();
+    if (!newSubject.name) return;
+    setSubjects([...subjects, { ...newSubject, id: Date.now().toString(), color: 'bg-indigo-500' }]);
+    setNewSubject({ name: '', code: '', target: 28 });
+  };
 
-.task-filter.active {
-  background: var(--primary-light);
-  color: var(--primary);
-  border-color: transparent;
+  const addGrade = (e) => {
+    e.preventDefault();
+    if (!newGrade.subjectId || !newGrade.val) return;
+    setGrades([...grades, { ...newGrade, id: Date.now().toString(), val: Number(newGrade.val), weight: Number(newGrade.weight) }]);
+    setNewGrade({ subjectId: '', val: 28, weight: 6, title: '', date: new Date().toISOString().split('T')[0] });
+  };
+
+  const deleteGrade = (id) => {
+    setGrades(grades.filter(g => g.id !== id));
+  };
+
+  const reqAverage = remainingCredits > 0 
+    ? (((targetGraduation * 30 / 110) * (gpa.totalCredits + Number(remainingCredits)) - (gpa.weighted * gpa.totalCredits)) / Number(remainingCredits)).toFixed(2)
+    : 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-4">
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+          <p className="text-xs text-slate-400 font-semibold uppercase">Media Ponderata</p>
+          <p className="text-3xl font-black text-indigo-400 mt-1">{gpa.weighted || '0.00'}</p>
+        </div>
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+          <p className="text-xs text-slate-400 font-semibold uppercase">Media Aritmetica</p>
+          <p className="text-3xl font-black text-purple-400 mt-1">{gpa.arithmetic || '0.00'}</p>
+        </div>
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+          <p className="text-xs text-slate-400 font-semibold uppercase">Crediti Totali Acquisiti</p>
+          <p className="text-3xl font-black text-emerald-400 mt-1">{gpa.totalCredits} CFU</p>
+        </div>
+      </div>
+
+      <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+        <h3 className="font-bold text-sm text-slate-200 flex items-center gap-2">
+          <Calculator className="w-4 h-4 text-amber-400" /> Simulatore Voto di Laurea Target
+        </h3>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Voto Laurea Desiderato</label>
+            <input 
+              type="number" 
+              value={targetGraduation} 
+              onChange={e => setTargetGraduation(Number(e.target.value))}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">CFU Mancanti alla Laurea</label>
+            <input 
+              type="number" 
+              value={remainingCredits} 
+              onChange={e => setRemainingCredits(Number(e.target.value))}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+            />
+          </div>
+          <div className="p-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex flex-col justify-center text-center">
+            <span className="text-[10px] text-slate-300">Media necessaria nei prossimi esami:</span>
+            <span className="text-xl font-extrabold text-indigo-300">{reqAverage > 30 ? 'Non fattibile (>30)' : reqAverage < 18 ? 'Fattibile (<18)' : `${reqAverage} / 30`}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <form onSubmit={addSubject} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <h3 className="font-bold text-sm text-slate-200">Aggiungi Materia</h3>
+          <input 
+            type="text" 
+            placeholder="Nome Materia (es. Analisi 1)" 
+            value={newSubject.name} 
+            onChange={e => setNewSubject({ ...newSubject, name: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" 
+            required 
+          />
+          <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold">Salva Materia</button>
+        </form>
+
+        <form onSubmit={addGrade} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <h3 className="font-bold text-sm text-slate-200">Registra Voto Esame</h3>
+          <select 
+            value={newGrade.subjectId} 
+            onChange={e => setNewGrade({ ...newGrade, subjectId: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" 
+            required
+          >
+            <option value="">Seleziona Materia</option>
+            {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <div className="grid grid-cols-2 gap-2">
+            <input 
+              type="number" 
+              placeholder="Voto (18-30)" 
+              value={newGrade.val} 
+              onChange={e => setNewGrade({ ...newGrade, val: e.target.value })}
+              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" 
+            />
+            <input 
+              type="number" 
+              placeholder="CFU / Peso" 
+              value={newGrade.weight} 
+              onChange={e => setNewGrade({ ...newGrade, weight: e.target.value })}
+              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" 
+            />
+          </div>
+          <button type="submit" className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold">Aggiungi Voto Libretto</button>
+        </form>
+      </div>
+
+      <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+        <h3 className="font-bold text-sm text-slate-200">Libretto Voti Registrati</h3>
+        {grades.length === 0 ? (
+          <p className="text-xs text-slate-500 py-4 text-center">Nessun voto registrato.</p>
+        ) : (
+          <div className="space-y-2">
+            {grades.map(g => {
+              const sub = subjects.find(s => s.id === g.subjectId);
+              return (
+                <div key={g.id} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-slate-200">{sub ? sub.name : 'Materia'}</p>
+                    <p className="text-[10px] text-slate-400">Peso: {g.weight} CFU — Data: {g.date}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-black text-indigo-400">{g.val}</span>
+                    <button onClick={() => deleteGrade(g.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
-@media print {
-  body {
-    background: white;
-    color: black;
-  }
+// ==================== 3. TASKS VIEW ====================
+function TasksView({ tasks, setTasks, subjects }) {
+  const [newTask, setNewTask] = useState({ title: '', subjectId: '', dueDate: '', priority: 'Media', status: 'TODO' });
 
-  .sidebar,
-  .topbar,
-  .page-heading button,
-  #lessonForm,
-  #printTimetableBtn,
-  .btn,
-  .check-circle {
-    display: none !important;
-  }
+  const addTask = (e) => {
+    e.preventDefault();
+    if (!newTask.title) return;
+    setTasks([...tasks, { ...newTask, id: Date.now().toString(), subtasks: [] }]);
+    setNewTask({ title: '', subjectId: '', dueDate: '', priority: 'Media', status: 'TODO' });
+  };
 
-  .main {
-    margin: 0;
-  }
+  const toggleTaskStatus = (id) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, status: t.status === 'DONE' ? 'TODO' : 'DONE' } : t));
+  };
 
-  .content {
-    max-width: none;
-    padding: 0;
-  }
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(t => t.id !== id));
+  };
 
-  .page {
-    display: none !important;
-  }
+  return (
+    <div className="space-y-6">
+      <form onSubmit={addTask} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 className="font-bold text-sm text-slate-200">Nuovo Compito / Progetto</h3>
+        <input 
+          type="text" 
+          placeholder="Titolo compito..." 
+          value={newTask.title}
+          onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+          required 
+        />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <input 
+            type="date" 
+            value={newTask.dueDate} 
+            onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
+            className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" 
+          />
+          <select 
+            value={newTask.priority} 
+            onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
+            className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+          >
+            <option value="Bassa">Bassa Priorità</option>
+            <option value="Media">Media Priorità</option>
+            <option value="Alta">Alta Priorità</option>
+          </select>
+          <button type="submit" className="col-span-2 sm:col-span-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold">Aggiungi Task</button>
+        </div>
+      </form>
 
-  #page-timetable {
-    display: block !important;
-  }
-
-  #page-timetable .card {
-    box-shadow: none;
-    border: none;
-    padding: 0;
-  }
-
-  #page-timetable .card > .flex-between {
-    display: none;
-  }
-
-  #page-timetable .list-item {
-    break-inside: avoid;
-  }
+      <div className="space-y-3">
+        {tasks.length === 0 ? (
+          <p className="text-xs text-slate-500 py-4 text-center">Nessun compito registrato.</p>
+        ) : (
+          tasks.map(task => (
+            <div key={task.id} className={`p-4 rounded-xl border flex items-center justify-between transition ${task.status === 'DONE' ? 'bg-slate-900/40 border-slate-800/40 opacity-60' : 'bg-slate-900 border-slate-800'}`}>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => toggleTaskStatus(task.id)} 
+                  className={`w-5 h-5 rounded-lg border flex items-center justify-center ${task.status === 'DONE' ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-600'}`}
+                >
+                  {task.status === 'DONE' && <Check className="w-3.5 h-3.5" />}
+                </button>
+                <div>
+                  <p className={`text-xs font-bold ${task.status === 'DONE' ? 'line-through text-slate-400' : 'text-slate-200'}`}>{task.title}</p>
+                  <p className="text-[10px] text-slate-400">Scadenza: {task.dueDate || 'Nessuna'} — Priorità: {task.priority}</p>
+                </div>
+              </div>
+              <button onClick={() => deleteTask(task.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
-</style>
 
-</body>
-</html>
+// ==================== 4. POMODORO VIEW ====================
+function PomodoroView({ todayStudyMinutes, setTodayStudyMinutes, studyStreak }) {
+  const [minutes, setMinutes] = useState(25);
+  const [seconds, setSeconds] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    let interval = null;
+    if (isActive) {
+      interval = setInterval(() => {
+        if (seconds > 0) {
+          setSeconds(seconds - 1);
+        } else if (minutes > 0) {
+          setMinutes(minutes - 1);
+          setSeconds(59);
+        } else {
+          setIsActive(false);
+          setTodayStudyMinutes(prev => prev + 25);
+          alert("Sessione di studio completata! Ottimo lavoro.");
+        }
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isActive, minutes, seconds, setTodayStudyMinutes]);
+
+  const resetTimer = () => {
+    setIsActive(false);
+    setMinutes(25);
+    setSeconds(0);
+  };
+
+  return (
+    <div className="space-y-6 text-center">
+      <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 max-w-md mx-auto space-y-6">
+        <h3 className="font-black text-lg text-slate-200 flex items-center justify-center gap-2">
+          <Timer className="w-5 h-5 text-indigo-400" /> Pomodoro Timer
+        </h3>
+
+        <div className="text-6xl font-black text-indigo-400 tracking-wider">
+          {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+        </div>
+
+        <div className="flex justify-center gap-4">
+          <button 
+            onClick={() => setIsActive(!isActive)} 
+            className={`px-6 py-3 rounded-2xl text-white font-bold text-xs flex items-center gap-2 shadow-lg ${isActive ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'}`}
+          >
+            {isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isActive ? 'Pausa' : 'Avvia Studio'}
+          </button>
+          <button onClick={resetTimer} className="p-3 rounded-2xl bg-slate-800 text-slate-300 hover:bg-slate-700">
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="pt-4 border-t border-slate-800 text-xs text-slate-400">
+          Studio Totale Oggi: <strong className="text-emerald-400">{todayStudyMinutes} minuti</strong>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== 5. FILE HUB VIEW ====================
+function FileHubView({ folders, setFolders, files, setFiles }) {
+  const [selectedFolder, setSelectedFolder] = useState(folders[0]?.id || 'f1');
+  const [newFolderName, setNewFolderName] = useState('');
+  const [newFile, setNewFile] = useState({ title: '', type: 'note', url: '', content: '' });
+
+  const addFolder = (e) => {
+    e.preventDefault();
+    if (!newFolderName) return;
+    setFolders([...folders, { id: `f_${Date.now()}`, name: newFolderName, color: 'border-indigo-500/50' }]);
+    setNewFolderName('');
+  };
+
+  const addFile = (e) => {
+    e.preventDefault();
+    if (!newFile.title) return;
+    setFiles([...files, { ...newFile, id: Date.now().toString(), folderId: selectedFolder, date: new Date().toISOString().split('T')[0] }]);
+    setNewFile({ title: '', type: 'note', url: '', content: '' });
+  };
+
+  const deleteFile = (id) => {
+    setFiles(files.filter(f => f.id !== id));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {folders.map(f => (
+          <button 
+            key={f.id} 
+            onClick={() => setSelectedFolder(f.id)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition ${selectedFolder === f.id ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'}`}
+          >
+            {f.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <form onSubmit={addFolder} className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex gap-2">
+          <input 
+            type="text" 
+            placeholder="Nuova Cartella..." 
+            value={newFolderName}
+            onChange={e => setNewFolderName(e.target.value)}
+            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+          />
+          <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Crea</button>
+        </form>
+
+        <form onSubmit={addFile} className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+          <input 
+            type="text" 
+            placeholder="Titolo Risorsa / Appunto" 
+            value={newFile.title}
+            onChange={e => setNewFile({ ...newFile, title: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+            required
+          />
+          <input 
+            type="text" 
+            placeholder="URL (Canva, Drive, Link) opzionale" 
+            value={newFile.url}
+            onChange={e => setNewFile({ ...newFile, url: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200"
+          />
+          <textarea 
+            placeholder="Contenuto o note..." 
+            value={newFile.content}
+            onChange={e => setNewFile({ ...newFile, content: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 h-16"
+          />
+          <button type="submit" className="w-full py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Aggiungi ad Appunti</button>
+        </form>
+      </div>
+
+      <div className="space-y-3">
+        {files.filter(f => f.folderId === selectedFolder).length === 0 ? (
+          <p className="text-xs text-slate-500 py-6 text-center">Nessun file in questa cartella.</p>
+        ) : (
+          files.filter(f => f.folderId === selectedFolder).map(file => (
+            <div key={file.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-200">{file.title}</p>
+                <button onClick={() => deleteFile(file.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+              </div>
+              {file.content && <p className="text-xs text-slate-400">{file.content}</p>}
+              {file.url && (
+                <a href={file.url} target="_blank" rel="noreferrer" className="text-xs text-indigo-400 flex items-center gap-1 hover:underline">
+                  <ExternalLink className="w-3.5 h-3.5" /> Apri Link Esterno
+                </a>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ==================== 6. SCHEDULE VIEW ====================
+function ScheduleView({ schedule, setSchedule }) {
+  const [newItem, setNewItem] = useState({ day: 'Lunedì', time: '09:00 - 11:00', subject: '', room: '', prof: '' });
+
+  const addItem = (e) => {
+    e.preventDefault();
+    if (!newItem.subject) return;
+    setSchedule([...schedule, { ...newItem, id: Date.now().toString() }]);
+    setNewItem({ day: 'Lunedì', time: '09:00 - 11:00', subject: '', room: '', prof: '' });
+  };
+
+  const deleteItem = (id) => {
+    setSchedule(schedule.filter(s => s.id !== id));
+  };
+
+  return (
+    <div className="space-y-6">
+      <form onSubmit={addItem} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 className="font-bold text-sm text-slate-200">Aggiungi Lezione ad Orario</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <select value={newItem.day} onChange={e => setNewItem({ ...newItem, day: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+            {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'].map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <input type="text" placeholder="Orario (es. 09:00-11:00)" value={newItem.time} onChange={e => setNewItem({ ...newItem, time: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" />
+          <input type="text" placeholder="Materia" value={newItem.subject} onChange={e => setNewItem({ ...newItem, subject: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" required />
+          <input type="text" placeholder="Aula" value={newItem.room} onChange={e => setNewItem({ ...newItem, room: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" />
+        </div>
+        <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold">Inserisci in Orario</button>
+      </form>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {schedule.map(item => (
+          <div key={item.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center">
+            <div>
+              <span className="text-[10px] font-bold uppercase text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">{item.day}</span>
+              <p className="text-xs font-bold text-slate-200 mt-1">{item.subject}</p>
+              <p className="text-[10px] text-slate-400">{item.time} — Aula: {item.room}</p>
+            </div>
+            <button onClick={() => deleteItem(item.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==================== 7. NOTES VIEW ====================
+function NotesView({ notes, setNotes }) {
+  const [newNote, setNewNote] = useState({ title: '', content: '' });
+
+  const addNote = (e) => {
+    e.preventDefault();
+    if (!newNote.title) return;
+    setNotes([...notes, { ...newNote, id: Date.now().toString() }]);
+    setNewNote({ title: '', content: '' });
+  };
+
+  const deleteNote = (id) => {
+    setNotes(notes.filter(n => n.id !== id));
+  };
+
+  return (
+    <div className="space-y-6">
+      <form onSubmit={addNote} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 className="font-bold text-sm text-slate-200">Nuova Nota Veloce</h3>
+        <input 
+          type="text" 
+          placeholder="Titolo della nota..." 
+          value={newNote.title} 
+          onChange={e => setNewNote({ ...newNote, title: e.target.value })}
+          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" 
+          required 
+        />
+        <textarea 
+          placeholder="Scrivi qui i tuoi appunti..." 
+          value={newNote.content} 
+          onChange={e => setNewNote({ ...newNote, content: e.target.value })}
+          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 h-24"
+        />
+        <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold">Salva Nota</button>
+      </form>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {notes.map(n => (
+          <div key={n.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+            <div className="flex justify-between items-center">
+              <h4 className="text-xs font-bold text-slate-200">{n.title}</h4>
+              <button onClick={() => deleteNote(n.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+            </div>
+            <p className="text-xs text-slate-400 whitespace-pre-wrap">{n.content}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==================== 8. BUDGET VIEW ====================
+function BudgetView({ expenses, setExpenses }) {
+  const [newExp, setNewExp] = useState({ title: '', amount: '', type: 'expense', category: 'Varie' });
+
+  const addExp = (e) => {
+    e.preventDefault();
+    if (!newExp.title || !newExp.amount) return;
+    setExpenses([...expenses, { ...newExp, id: Date.now().toString(), amount: Number(newExp.amount), date: new Date().toISOString().split('T')[0] }]);
+    setNewExp({ title: '', amount: '', type: 'expense', category: 'Varie' });
+  };
+
+  const deleteExp = (id) => {
+    setExpenses(expenses.filter(e => e.id !== id));
+  };
+
+  const balance = expenses.reduce((acc, curr) => curr.type === 'income' ? acc + curr.amount : acc - curr.amount, 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+        <p className="text-xs text-slate-400 uppercase font-semibold">Saldo Netto Studente</p>
+        <p className={`text-4xl font-black mt-1 ${balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>€{balance.toFixed(2)}</p>
+      </div>
+
+      <form onSubmit={addExp} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 className="font-bold text-sm text-slate-200">Registra Entrata / Uscita</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <input type="text" placeholder="Descrizione" value={newExp.title} onChange={e => setNewExp({ ...newExp, title: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" required />
+          <input type="number" placeholder="Importo €" value={newExp.amount} onChange={e => setNewExp({ ...newExp, amount: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" required />
+          <select value={newExp.type} onChange={e => setNewExp({ ...newExp, type: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+            <option value="expense">Uscita / Spesa</option>
+            <option value="income">Entrata / Guadagno</option>
+          </select>
+          <button type="submit" className="py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold">Aggiungi</button>
+        </div>
+      </form>
+
+      <div className="space-y-2">
+        {expenses.map(exp => (
+          <div key={exp.id} className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-200">{exp.title}</p>
+              <p className="text-[10px] text-slate-400">{exp.date}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-black ${exp.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {exp.type === 'income' ? '+' : '-'}€{exp.amount.toFixed(2)}
+              </span>
+              <button onClick={() => deleteExp(exp.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==================== 9. DIRECTORY VIEW ====================
+function DirectoryView({ directory, setDirectory }) {
+  const [newContact, setNewContact] = useState({ name: '', role: '', email: '', hours: '' });
+
+  const addContact = (e) => {
+    e.preventDefault();
+    if (!newContact.name) return;
+    setDirectory([...directory, { ...newContact, id: Date.now().toString() }]);
+    setNewContact({ name: '', role: '', email: '', hours: '' });
+  };
+
+  const deleteContact = (id) => {
+    setDirectory(directory.filter(d => d.id !== id));
+  };
+
+  return (
+    <div className="space-y-6">
+      <form onSubmit={addContact} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 className="font-bold text-sm text-slate-200">Aggiungi Docente / Contatto</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <input type="text" placeholder="Nome Completo" value={newContact.name} onChange={e => setNewContact({ ...newContact, name: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" required />
+          <input type="text" placeholder="Ruolo / Materia" value={newContact.role} onChange={e => setNewContact({ ...newContact, role: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" />
+          <input type="email" placeholder="Email" value={newContact.email} onChange={e => setNewContact({ ...newContact, email: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" />
+          <input type="text" placeholder="Orari Ricevimento" value={newContact.hours} onChange={e => setNewContact({ ...newContact, hours: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200" />
+        </div>
+        <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold">Salva Contatto</button>
+      </form>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {directory.map(c => (
+          <div key={c.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-start">
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold text-slate-200">{c.name}</h4>
+              <p className="text-[10px] text-indigo-400 font-semibold">{c.role}</p>
+              {c.email && <p className="text-[10px] text-slate-400 flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</p>}
+              {c.hours && <p className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {c.hours}</p>}
+            </div>
+            <button onClick={() => deleteContact(c.id)} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
