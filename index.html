@@ -3,40 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Hub Pro - Suite per lo Studente</title>
+  <title>Student Hub Pro - Suite Completa</title>
   
-  <!-- Tailwind CSS per la grafica e lo stile -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Icone Lucide -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- Librerie React e Babel per far girare il codice React direttamente nel file HTML -->
+  <!-- React & Babel -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 antialiased">
 
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect } = React;
 
-    // --- UTENTI DI DEFAULT ---
     const INITIAL_USERS = [
       { id: 'demo-user', name: 'Marco Rossi', email: 'demo@student.it', password: 'demo123', major: 'Informatica & Digital Media' }
     ];
 
-    // --- DATI ACCOUNT DEMO ---
-    const DEMO_DATA = {
+    const INITIAL_DEMO_DATA = {
       grades: [
         { id: 1, subject: 'Programmazione Web', grade: 28, cfu: 9, date: '2026-02-15' },
         { id: 2, subject: 'Analisi Matematica I', grade: 24, cfu: 12, date: '2026-01-20' },
@@ -54,7 +49,7 @@
         { id: 'file1', folderId: 'f2', title: 'Presentazione Progetto Design', type: 'canva', url: 'https://www.canva.com', date: '2026-11-01', description: 'Template Canva' }
       ],
       notes: [
-        { id: 'n1', title: 'Appunti Lezione State Management', subject: 'Programmazione Web', content: 'Lo stato locale in React si gestisce con useState...', tags: ['React', 'Esame'], date: '2026-11-05' }
+        { id: 'n1', title: 'Appunti State Management', subject: 'Programmazione Web', content: 'Lo stato locale in React si gestisce con useState...', tags: ['React', 'Esame'], date: '2026-11-05' }
       ],
       expenses: [
         { id: 1, type: 'uscita', category: 'Libri', title: 'Manuale Algoritmi', amount: 45.00, date: '2026-11-02' },
@@ -80,8 +75,14 @@
       const [userData, setUserData] = useState(() => {
         if (!currentUser) return EMPTY_USER_DATA;
         const saved = localStorage.getItem(`sh_data_${currentUser.id}`);
-        return saved ? JSON.parse(saved) : (currentUser.id === 'demo-user' ? DEMO_DATA : EMPTY_USER_DATA);
+        return saved ? JSON.parse(saved) : (currentUser.id === 'demo-user' ? INITIAL_DEMO_DATA : EMPTY_USER_DATA);
       });
+
+      // Stati locali per interazioni aggiuntive
+      const [newGrade, setNewGrade] = useState({ subject: '', grade: '', cfu: '', date: '' });
+      const [newTask, setNewTask] = useState({ title: '', subject: '', dueDate: '', priority: 'media' });
+      const [newNote, setNewNote] = useState({ title: '', subject: '', content: '', tags: '' });
+      const [newExpense, setNewExpense] = useState({ type: 'uscita', category: 'Libri', title: '', amount: '', date: '' });
 
       useEffect(() => {
         if (currentUser) {
@@ -103,17 +104,17 @@
         if (found) {
           setCurrentUser(found);
           const savedData = localStorage.getItem(`sh_data_${found.id}`);
-          setUserData(savedData ? JSON.parse(savedData) : (found.id === 'demo-user' ? DEMO_DATA : EMPTY_USER_DATA));
+          setUserData(savedData ? JSON.parse(savedData) : (found.id === 'demo-user' ? INITIAL_DEMO_DATA : EMPTY_USER_DATA));
           setAuthError('');
         } else {
-          setAuthError('Credenziali non valide. Prova con demo@student.it / demo123');
+          setAuthError('Credenziali non valide. Prova demo@student.it / demo123');
         }
       };
 
       const handleRegister = (e) => {
         e.preventDefault();
         if (!authForm.name || !authForm.email || !authForm.password) {
-          setAuthError('Compila tutti i campi richiesti.');
+          setAuthError('Compila tutti i campi obbligatori.');
           return;
         }
         const users = JSON.parse(localStorage.getItem('sh_users') || JSON.stringify(INITIAL_USERS));
@@ -122,8 +123,7 @@
           return;
         }
         const newUser = { id: 'usr_' + Date.now(), name: authForm.name, email: authForm.email, password: authForm.password, major: authForm.major || 'Studente' };
-        const updatedUsers = [...users, newUser];
-        localStorage.setItem('sh_users', JSON.stringify(updatedUsers));
+        localStorage.setItem('sh_users', JSON.stringify([...users, newUser]));
         setCurrentUser(newUser);
         setUserData(EMPTY_USER_DATA);
         localStorage.setItem(`sh_data_${newUser.id}`, JSON.stringify(EMPTY_USER_DATA));
@@ -135,17 +135,16 @@
         setAuthForm({ name: '', email: '', password: '', major: '' });
       };
 
-      // SCHERMATA LOGIN & REGISTRAZIONE
       if (!currentUser) {
         return (
           <div class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md border border-slate-100">
+            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
               <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-lg shadow-indigo-500/30">
                   <i data-lucide="graduation-cap" class="w-9 h-9"></i>
                 </div>
                 <h1 class="text-2xl font-bold text-slate-800">Student Hub Pro</h1>
-                <p class="text-slate-500 text-sm mt-1">Accedi per gestire la tua vita universitaria</p>
+                <p class="text-slate-500 text-sm mt-1">La tua suite universitaria completa</p>
               </div>
 
               {authError && <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold border border-red-200">{authError}</div>}
@@ -154,38 +153,34 @@
                 {authMode === 'register' && (
                   <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Nome Completo *</label>
-                    <input type="text" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} placeholder="Es. Marco Rossi" />
+                    <input type="text" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} placeholder="Es. Mario Rossi" />
                   </div>
                 )}
                 <div>
                   <label class="block text-xs font-bold text-slate-600 mb-1">Email *</label>
-                  <input type="email" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} placeholder="demo@student.it" />
+                  <input type="email" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} placeholder="demo@student.it" />
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-600 mb-1">Password *</label>
-                  <input type="password" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} placeholder="••••••••" />
+                  <input type="password" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} placeholder="••••••••" />
                 </div>
                 {authMode === 'register' && (
                   <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Corso di Studi</label>
-                    <input type="text" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={authForm.major} onChange={e => setAuthForm({...authForm, major: e.target.value})} placeholder="Es. Informatica, Medicina..." />
+                    <input type="text" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.major} onChange={e => setAuthForm({...authForm, major: e.target.value})} placeholder="Es. Ingegneria, Economia..." />
                   </div>
                 )}
-
                 <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition">
-                  {authMode === 'login' ? 'Accedi' : 'Crea Account Azzerato'}
+                  {authMode === 'login' ? 'Accedi' : 'Crea Nuovo Account Pulito'}
                 </button>
               </form>
 
               <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col gap-2 text-center text-xs font-medium">
                 <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} class="text-indigo-600 hover:underline">
-                  {authMode === 'login' ? 'Nuovo utente? Registrati qui' : 'Hai un account? Accedi'}
+                  {authMode === 'login' ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
                 </button>
-                <button onClick={() => {
-                  setCurrentUser(INITIAL_USERS[0]);
-                  setUserData(DEMO_DATA);
-                }} class="text-slate-500 hover:text-slate-800">
-                  ⚡ Entra subito con l'Account Demo
+                <button onClick={() => { setCurrentUser(INITIAL_USERS[0]); setUserData(INITIAL_DEMO_DATA); }} class="text-slate-500 hover:text-slate-800">
+                  ⚡ Entra subito come Demo
                 </button>
               </div>
             </div>
@@ -193,10 +188,9 @@
         );
       }
 
-      // APP PRINCIPALE
       return (
         <div class="min-h-screen flex flex-col md:flex-row pb-16 md:pb-0">
-          {/* Sidebar Desktop */}
+          {/* Sidebar */}
           <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-slate-300 min-h-screen p-4 border-r border-slate-800">
             <div class="flex items-center gap-3 px-2 py-3 mb-6 border-b border-slate-800">
               <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/30">
@@ -213,9 +207,9 @@
                 { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
                 { id: 'grades', label: 'Voti & Media', icon: 'award' },
                 { id: 'tasks', label: 'Compiti & Kanban', icon: 'check-square' },
-                { id: 'files', label: 'Hub Appunti & File', icon: 'folder-open' },
-                { id: 'notes', label: 'Note Veloci', icon: 'file-text' },
-                { id: 'expenses', label: 'Gestione Spese', icon: 'wallet' },
+                { id: 'files', label: 'Cartelle & Canva', icon: 'folder-open' },
+                { id: 'notes', label: 'Note & Sintesi', icon: 'file-text' },
+                { id: 'expenses', label: 'Spese Studente', icon: 'wallet' },
               ].map(item => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)} class={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition ${activeTab === item.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}>
                   <i data-lucide={item.icon} class="w-5 h-5"></i>
@@ -247,7 +241,7 @@
               </button>
             </header>
 
-            {/* VISTA DASHBOARD */}
+            {/* DASHBOARD */}
             {activeTab === 'dashboard' && (
               <div class="space-y-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -262,7 +256,7 @@
                     <p class="text-3xl font-extrabold text-indigo-600 mt-1">{userData.tasks.filter(t => t.status !== 'done').length}</p>
                   </div>
                   <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase">File Salvati</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase">File & Canva</p>
                     <p class="text-3xl font-extrabold text-emerald-600 mt-1">{userData.files.length}</p>
                   </div>
                   <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
@@ -272,44 +266,163 @@
                 </div>
 
                 <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-500/20">
-                  <h3 class="font-bold text-xl mb-2">🚀 Spazio di Lavoro Attivo!</h3>
+                  <h3 class="font-bold text-xl mb-2">🚀 Spazio di Lavoro Studente Pronto!</h3>
                   <p class="text-indigo-100 text-sm max-w-2xl leading-relaxed">
-                    Puoi gestire i tuoi voti, organizzare i compiti con il tabellone Kanban, salvare i link di Canva e Notion, o prendere appunti veloci. Tutti i tuoi dati sono al sicuro nel tuo account!
+                    Tutti i moduli sono attivi: registra i voti, gestisci le scadenze con il Kanban, organizza i tuoi progetti Canva e tieni traccia delle spese universitarie.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* VISTA VOTI */}
+            {/* VOTI E MEDIA */}
             {activeTab === 'grades' && (
-              <div class="space-y-4">
+              <div class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Registro Voti</h3>
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Aggiungi Nuovo Voto</h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if(!newGrade.subject || !newGrade.grade) return;
+                    setUserData({...userData, grades: [...userData.grades, { id: Date.now(), ...newGrade }]});
+                    setNewGrade({ subject: '', grade: '', cfu: '', date: '' });
+                  }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <input type="text" placeholder="Materia" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.subject} onChange={e => setNewGrade({...newGrade, subject: e.target.value})} required />
+                    <input type="number" placeholder="Voto (es. 28)" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.grade} onChange={e => setNewGrade({...newGrade, grade: e.target.value})} required />
+                    <input type="number" placeholder="CFU (es. 9)" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.cfu} onChange={e => setNewGrade({...newGrade, cfu: e.target.value})} />
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md shadow-indigo-500/20">Aggiungi Voto</button>
+                  </form>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Registro Esami</h3>
                   <div class="space-y-3">
                     {userData.grades.map(g => (
                       <div key={g.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
                         <div>
                           <p class="font-bold text-slate-800">{g.subject}</p>
-                          <p class="text-xs text-slate-400">{g.cfu} CFU • {g.date}</p>
+                          <p class="text-xs text-slate-400">{g.cfu || 6} CFU</p>
                         </div>
-                        <span class="px-3.5 py-1.5 bg-indigo-600 text-white font-extrabold rounded-xl text-sm shadow-md shadow-indigo-500/20">{g.grade}</span>
+                        <span class="px-3.5 py-1.5 bg-indigo-600 text-white font-extrabold rounded-xl text-sm">{g.grade}</span>
                       </div>
                     ))}
-                    {userData.grades.length === 0 && <p class="text-slate-400 text-sm italic">Nessun voto registrato.</p>}
+                    {userData.grades.length === 0 && <p class="text-slate-400 text-sm italic">Nessun esame registrato.</p>}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* VISTA ALTRO */}
-            {activeTab !== 'dashboard' && activeTab !== 'grades' && (
-              <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm min-h-[350px] flex items-center justify-center text-center">
-                <div>
-                  <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+            {/* COMPITI KANBAN */}
+            {activeTab === 'tasks' && (
+              <div class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Nuovo Compito / Progetto</h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if(!newTask.title) return;
+                    setUserData({...userData, tasks: [...userData.tasks, { id: Date.now(), ...newTask, status: 'todo', checklist: [] }]});
+                    setNewTask({ title: '', subject: '', dueDate: '', priority: 'media' });
+                  }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <input type="text" placeholder="Titolo attività" class="px-3 py-2 border rounded-xl text-sm" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} required />
+                    <input type="text" placeholder="Materia" class="px-3 py-2 border rounded-xl text-sm" value={newTask.subject} onChange={e => setNewTask({...newTask, subject: e.target.value})} />
+                    <input type="date" class="px-3 py-2 border rounded-xl text-sm" value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} />
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Crea Task</button>
+                  </form>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['todo', 'in_progress', 'done'].map(status => (
+                    <div key={status} class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                      <h4 class="font-bold text-sm text-slate-700 uppercase mb-3">{status === 'todo' ? '📌 Da Fare' : status === 'in_progress' ? '⚡ In Corso' : '✅ Completati'}</h4>
+                      <div class="space-y-3">
+                        {userData.tasks.filter(t => t.status === status).map(t => (
+                          <div key={t.id} class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-2">
+                            <p class="font-bold text-slate-800 text-sm">{t.title}</p>
+                            <p class="text-xs text-slate-400">{t.subject}</p>
+                            <div class="flex gap-2 mt-2">
+                              {status !== 'todo' && <button onClick={() => {
+                                const updated = userData.tasks.map(item => item.id === t.id ? {...item, status: status === 'done' ? 'in_progress' : 'todo'} : item);
+                                setUserData({...userData, tasks: updated});
+                              }} class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold">Indietro</button>}
+                              {status !== 'done' && <button onClick={() => {
+                                const updated = userData.tasks.map(item => item.id === t.id ? {...item, status: status === 'todo' ? 'in_progress' : 'done'} : item);
+                                setUserData({...userData, tasks: updated});
+                              }} class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded font-bold">Avanza</button>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CARTELLE & FILE CANVA */}
+            {activeTab === 'files' && (
+              <div class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Cartelle & Risorse (Canva, Drive, Link)</h3>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {userData.folders.map(f => (
+                      <div key={f.id} class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div class={`w-10 h-10 ${f.color} rounded-xl flex items-center justify-center text-white font-bold`}>
+                            <i data-lucide="folder" class="w-5 h-5"></i>
+                          </div>
+                          <div>
+                            <h4 class="font-bold text-slate-800">{f.name}</h4>
+                            <p class="text-xs text-slate-400">{userData.files.filter(fi => fi.folderId === f.id).length} file collegati</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <h3 class="font-bold text-lg text-slate-800 capitalize">Sezione {activeTab}</h3>
-                  <p class="text-slate-500 text-sm max-w-sm mt-1">Questa sezione è pronta all'uso nel tuo nuovo file unico index.html!</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Elenco File & Link Canva</h3>
+                  <div class="space-y-3">
+                    {userData.files.map(file => (
+                      <div key={file.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <div>
+                          <p class="font-bold text-slate-800">{file.title}</p>
+                          <a href={file.url} target="_blank" class="text-xs text-indigo-600 font-semibold hover:underline">Apri risorsa esterna ↗</a>
+                        </div>
+                        <span class="px-2.5 py-1 bg-pink-100 text-pink-700 font-bold rounded-lg text-xs uppercase">{file.type}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NOTE & SPESE */}
+            {activeTab === 'notes' && (
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-lg text-slate-800">Note Veloci</h3>
+                {userData.notes.map(n => (
+                  <div key={n.id} class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-800">{n.title}</h4>
+                    <p class="text-sm text-slate-600 mt-1">{n.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'expenses' && (
+              <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-lg text-slate-800">Spese e Budget Studente</h3>
+                <div class="space-y-3">
+                  {userData.expenses.map(ex => (
+                    <div key={ex.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                      <div>
+                        <p class="font-bold text-slate-800">{ex.title}</p>
+                        <p class="text-xs text-slate-400">{ex.category} • {ex.date}</p>
+                      </div>
+                      <span class={`font-extrabold text-sm ${ex.type === 'entrata' ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {ex.type === 'entrata' ? '+' : '-'}€{ex.amount.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -323,8 +436,9 @@
               { id: 'tasks', icon: 'check-square', label: 'Tasks' },
               { id: 'files', icon: 'folder-open', label: 'File' },
               { id: 'notes', icon: 'file-text', label: 'Note' },
+              { id: 'expenses', icon: 'wallet', label: 'Spese' },
             ].map(item => (
-              <button key={item.id} onClick={() => setActiveTab(item.id)} class={`flex flex-col items-center py-1 px-3 text-[10px] font-bold ${activeTab === item.id ? 'text-indigo-400' : ''}`}>
+              <button key={item.id} onClick={() => setActiveTab(item.id)} class={`flex flex-col items-center py-1 px-2 text-[10px] font-bold ${activeTab === item.id ? 'text-indigo-400' : ''}`}>
                 <i data-lucide={item.icon} class="w-5 h-5 mb-0.5"></i>
                 {item.label}
               </button>
