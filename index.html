@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Hub Pro - Suite Completa</title>
-  
+  <title>Student Hub Pro - Suite Globale per lo Studente</title>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -17,15 +17,16 @@
   <style>
     body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
 
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     const INITIAL_USERS = [
       { id: 'demo-user', name: 'Marco Rossi', email: 'demo@student.it', password: 'demo123', major: 'Informatica & Digital Media' }
@@ -38,7 +39,7 @@
         { id: 3, subject: 'Basi di Dati', grade: 30, cfu: 6, date: '2026-06-10' }
       ],
       tasks: [
-        { id: 1, title: 'Progetto Finale React', subject: 'Programmazione Web', dueDate: '2026-11-20', status: 'in_progress', priority: 'alta', checklist: [{ text: 'Layout Mobile', done: true }, { text: 'Autenticazione', done: false }] },
+        { id: 1, title: 'Progetto Finale React', subject: 'Programmazione Web', dueDate: '2026-11-20', status: 'in_progress', priority: 'alta', checklist: [{ id: 'c1', text: 'Layout Mobile', done: true }, { id: 'c2', text: 'Autenticazione', done: false }] },
         { id: 2, title: 'Esercizi Derivate', subject: 'Analisi Matematica I', dueDate: '2026-11-15', status: 'todo', priority: 'media', checklist: [] }
       ],
       folders: [
@@ -46,7 +47,7 @@
         { id: 'f2', name: 'Materiale Canva & Graphic Design', color: 'bg-pink-500' }
       ],
       files: [
-        { id: 'file1', folderId: 'f2', title: 'Presentazione Progetto Design', type: 'canva', url: 'https://www.canva.com', date: '2026-11-01', description: 'Template Canva' }
+        { id: 'file1', folderId: 'f2', title: 'Presentazione Progetto Design', type: 'canva', url: 'https://www.canva.com', date: '2026-11-01', description: 'Template Canva per la discussione' }
       ],
       notes: [
         { id: 'n1', title: 'Appunti State Management', subject: 'Programmazione Web', content: 'Lo stato locale in React si gestisce con useState...', tags: ['React', 'Esame'], date: '2026-11-05' }
@@ -54,11 +55,18 @@
       expenses: [
         { id: 1, type: 'uscita', category: 'Libri', title: 'Manuale Algoritmi', amount: 45.00, date: '2026-11-02' },
         { id: 2, type: 'entrata', category: 'Tutoring', title: 'Ripetizioni Matematica', amount: 80.00, date: '2026-11-04' }
+      ],
+      professors: [
+        { id: 1, name: 'Prof. Mario Bianchi', subject: 'Programmazione Web', email: 'mario.bianchi@unifi.it', office: 'Stanza 304, Edificio F', officeHours: 'Martedì 14:00 - 16:00' }
+      ],
+      schedule: [
+        { id: 1, day: 'Lunedì', subject: 'Programmazione Web', time: '09:00 - 11:00', room: 'Aula 3' },
+        { id: 2, day: 'Mercoledì', subject: 'Analisi Matematica I', time: '11:00 - 13:00', room: 'Aula Magna' }
       ]
     };
 
     const EMPTY_USER_DATA = {
-      grades: [], tasks: [], folders: [{ id: 'f1', name: 'Generale', color: 'bg-indigo-500' }], files: [], notes: [], expenses: []
+      grades: [], tasks: [], folders: [{ id: 'f1', name: 'Generale', color: 'bg-indigo-500' }], files: [], notes: [], expenses: [], professors: [], schedule: []
     };
 
     function App() {
@@ -78,11 +86,36 @@
         return saved ? JSON.parse(saved) : (currentUser.id === 'demo-user' ? INITIAL_DEMO_DATA : EMPTY_USER_DATA);
       });
 
-      // Stati locali per interazioni aggiuntive
+      // Form local states
       const [newGrade, setNewGrade] = useState({ subject: '', grade: '', cfu: '', date: '' });
+      const [targetGraduation, setTargetGraduation] = useState(105);
+      const [remainingCfu, setRemainingCfu] = useState(30);
+
       const [newTask, setNewTask] = useState({ title: '', subject: '', dueDate: '', priority: 'media' });
+      const [newFolder, setNewFolder] = useState({ name: '', color: 'bg-indigo-500' });
+      const [newFile, setNewFile] = useState({ folderId: 'f1', title: '', type: 'link', url: '', description: '' });
       const [newNote, setNewNote] = useState({ title: '', subject: '', content: '', tags: '' });
       const [newExpense, setNewExpense] = useState({ type: 'uscita', category: 'Libri', title: '', amount: '', date: '' });
+      const [newProf, setNewProf] = useState({ name: '', subject: '', email: '', office: '', officeHours: '' });
+      const [newSchedule, setNewSchedule] = useState({ day: 'Lunedì', subject: '', time: '', room: '' });
+
+      // Pomodoro Timer State
+      const [pomoTime, setPomoTime] = useState(25 * 60);
+      const [pomoActive, setPomoActive] = useState(false);
+      const [pomoMode, setPomoMode] = useState('work'); // 'work' or 'break'
+      const audioCtxRef = useRef(null);
+
+      useEffect(() => {
+        let interval = null;
+        if (pomoActive && pomoTime > 0) {
+          interval = setInterval(() => setPomoTime(t => t - 1), 1000);
+        } else if (pomoTime === 0) {
+          if (pomoMode === 'work') { setPomoMode('break'); setPomoTime(5 * 60); }
+          else { setPomoMode('work'); setPomoTime(25 * 60); }
+          setPomoActive(false);
+        }
+        return () => clearInterval(interval);
+      }, [pomoActive, pomoTime, pomoMode]);
 
       useEffect(() => {
         if (currentUser) {
@@ -97,6 +130,7 @@
         if (window.lucide) window.lucide.createIcons();
       });
 
+      // Auth Functions
       const handleLogin = (e) => {
         e.preventDefault();
         const users = JSON.parse(localStorage.getItem('sh_users') || JSON.stringify(INITIAL_USERS));
@@ -135,10 +169,52 @@
         setAuthForm({ name: '', email: '', password: '', major: '' });
       };
 
+      const exportBackup = () => {
+        const blob = new Blob([JSON.stringify({ user: currentUser, data: userData }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `StudentHub_Backup_${currentUser.name.replace(/\s+/g, '_')}.json`;
+        a.click();
+      };
+
+      // Sound synth for Pomodoro
+      const playAmbientSound = (type) => {
+        try {
+          if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          const ctx = audioCtxRef.current;
+          if (ctx.state === 'suspended') ctx.resume();
+
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          if (type === 'rain') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, ctx.currentTime);
+            gain.gain.setValueAtTime(0.02, ctx.currentTime);
+          } else if (type === 'white') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(200, ctx.currentTime);
+            gain.gain.setValueAtTime(0.03, ctx.currentTime);
+          }
+          osc.start();
+          osc.stop(ctx.currentTime + 1.5);
+        } catch(e) {}
+      };
+
+      // Calculated stats
+      const totalCfu = userData.grades.reduce((a, b) => a + Number(b.cfu || 0), 0);
+      const avgGrade = userData.grades.length ? (userData.grades.reduce((a, b) => a + Number(b.grade), 0) / userData.grades.length).toFixed(2) : 0;
+      const graduationBase = (avgGrade * 110) / 30;
+      const requiredGrade = remainingCfu > 0 ? (((targetGraduation * (totalCfu + Number(remainingCfu)) / 110) - (avgGrade * totalCfu)) / remainingCfu).toFixed(2) : 0;
+
+      // LOGIN / REGISTRATION SCREEN
       if (!currentUser) {
         return (
           <div class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
+            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md border border-slate-100">
               <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-lg shadow-indigo-500/30">
                   <i data-lucide="graduation-cap" class="w-9 h-9"></i>
@@ -190,7 +266,7 @@
 
       return (
         <div class="min-h-screen flex flex-col md:flex-row pb-16 md:pb-0">
-          {/* Sidebar */}
+          {/* Sidebar Desktop */}
           <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-slate-300 min-h-screen p-4 border-r border-slate-800">
             <div class="flex items-center gap-3 px-2 py-3 mb-6 border-b border-slate-800">
               <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/30">
@@ -202,14 +278,16 @@
               </div>
             </div>
 
-            <nav class="flex-1 space-y-1">
+            <nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
               {[
                 { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-                { id: 'grades', label: 'Voti & Media', icon: 'award' },
+                { id: 'grades', label: 'Voti & Simulatore', icon: 'award' },
                 { id: 'tasks', label: 'Compiti & Kanban', icon: 'check-square' },
-                { id: 'files', label: 'Cartelle & Canva', icon: 'folder-open' },
-                { id: 'notes', label: 'Note & Sintesi', icon: 'file-text' },
+                { id: 'pomodoro', label: 'Timer Pomodoro', icon: 'clock' },
+                { id: 'files', label: 'Hub Cartelle & Canva', icon: 'folder-open' },
+                { id: 'notes', label: 'Note & Appunti', icon: 'file-text' },
                 { id: 'expenses', label: 'Spese Studente', icon: 'wallet' },
+                { id: 'professors', label: 'Docenti & Orario', icon: 'users' },
               ].map(item => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)} class={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition ${activeTab === item.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}>
                   <i data-lucide={item.icon} class="w-5 h-5"></i>
@@ -218,27 +296,35 @@
               ))}
             </nav>
 
-            <div class="pt-4 border-t border-slate-800 mt-auto">
-              <div class="px-3.5 py-2.5 bg-slate-800/60 rounded-xl mb-3">
+            <div class="pt-4 border-t border-slate-800 mt-auto space-y-2">
+              <button onClick={exportBackup} class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+                <i data-lucide="download" class="w-4 h-4"></i> Esporta Backup JSON
+              </button>
+              <div class="px-3.5 py-2.5 bg-slate-800/60 rounded-xl">
                 <p class="text-xs font-bold text-white truncate">{currentUser.name}</p>
                 <p class="text-[10px] text-slate-400 truncate">{currentUser.major}</p>
               </div>
               <button onClick={handleLogout} class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl transition">
-                <i data-lucide="log-out" class="w-4 h-4"></i> Esci
+                <i data-lucide="log-out" class="w-4 h-4"></i> Esci dall'Account
               </button>
             </div>
           </aside>
 
-          {/* Contenuto Principale */}
+          {/* Main Area */}
           <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
             <header class="flex justify-between items-center mb-6">
               <div>
                 <h1 class="text-2xl font-bold text-slate-900 capitalize">{activeTab}</h1>
-                <p class="text-xs md:text-sm text-slate-500">Bentornato/a, {currentUser.name}</p>
+                <p class="text-xs md:text-sm text-slate-500">Studente: {currentUser.name}</p>
               </div>
-              <button onClick={handleLogout} class="md:hidden p-2 text-slate-600 bg-white rounded-xl shadow-sm border border-slate-200">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-              </button>
+              <div class="flex items-center gap-2">
+                <button onClick={exportBackup} class="md:hidden p-2 text-slate-600 bg-white rounded-xl shadow-sm border border-slate-200" title="Esporta Backup">
+                  <i data-lucide="download" class="w-5 h-5"></i>
+                </button>
+                <button onClick={handleLogout} class="md:hidden p-2 text-slate-600 bg-white rounded-xl shadow-sm border border-slate-200">
+                  <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+              </div>
             </header>
 
             {/* DASHBOARD */}
@@ -247,53 +333,66 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
                     <p class="text-xs font-bold text-slate-400 uppercase">Media Voti</p>
-                    <p class="text-3xl font-extrabold text-slate-800 mt-1">
-                      {userData.grades.length ? (userData.grades.reduce((a, b) => a + Number(b.grade), 0) / userData.grades.length).toFixed(1) : '-'}
-                    </p>
+                    <p class="text-3xl font-extrabold text-slate-800 mt-1">{avgGrade || '-'}</p>
                   </div>
                   <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
                     <p class="text-xs font-bold text-slate-400 uppercase">Tasks In Sospeso</p>
                     <p class="text-3xl font-extrabold text-indigo-600 mt-1">{userData.tasks.filter(t => t.status !== 'done').length}</p>
                   </div>
                   <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase">File & Canva</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase">File & Risorse</p>
                     <p class="text-3xl font-extrabold text-emerald-600 mt-1">{userData.files.length}</p>
                   </div>
                   <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
                     <p class="text-xs font-bold text-slate-400 uppercase">CFU Conseguiti</p>
-                    <p class="text-3xl font-extrabold text-amber-500 mt-1">{userData.grades.reduce((a, b) => a + Number(b.cfu || 0), 0)}</p>
+                    <p class="text-3xl font-extrabold text-amber-500 mt-1">{totalCfu}</p>
                   </div>
                 </div>
 
                 <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-500/20">
-                  <h3 class="font-bold text-xl mb-2">🚀 Spazio di Lavoro Studente Pronto!</h3>
+                  <h3 class="font-bold text-xl mb-2">🚀 Spazio di Lavoro Attivo!</h3>
                   <p class="text-indigo-100 text-sm max-w-2xl leading-relaxed">
-                    Tutti i moduli sono attivi: registra i voti, gestisci le scadenze con il Kanban, organizza i tuoi progetti Canva e tieni traccia delle spese universitarie.
+                    Benvenuto nella tua suite globale. Naviga tra le sezioni per inserire esami, organizzare compiti e gestire file.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* VOTI E MEDIA */}
+            {/* VOTI & SIMULATORE */}
             {activeTab === 'grades' && (
               <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
+                    <p class="text-xs font-bold text-indigo-600 uppercase">Voto Partenza Laurea</p>
+                    <p class="text-3xl font-extrabold text-indigo-900 mt-1">{graduationBase ? graduationBase.toFixed(1) : 0} / 110</p>
+                  </div>
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                    <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Obiettivo Voto Finale</label>
+                    <input type="number" value={targetGraduation} onChange={e => setTargetGraduation(e.target.value)} class="w-full text-xl font-bold bg-slate-50 border rounded-xl p-2" />
+                  </div>
+                  <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                    <p class="text-xs font-bold text-emerald-600 uppercase">Media Necessaria nei prossimi CFU</p>
+                    <p class="text-3xl font-extrabold text-emerald-900 mt-1">{requiredGrade > 0 ? requiredGrade : 'N/D'}</p>
+                  </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Aggiungi Nuovo Voto</h3>
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Aggiungi Nuovo Esame</h3>
                   <form onSubmit={(e) => {
                     e.preventDefault();
                     if(!newGrade.subject || !newGrade.grade) return;
                     setUserData({...userData, grades: [...userData.grades, { id: Date.now(), ...newGrade }]});
                     setNewGrade({ subject: '', grade: '', cfu: '', date: '' });
                   }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" placeholder="Materia" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.subject} onChange={e => setNewGrade({...newGrade, subject: e.target.value})} required />
-                    <input type="number" placeholder="Voto (es. 28)" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.grade} onChange={e => setNewGrade({...newGrade, grade: e.target.value})} required />
+                    <input type="text" placeholder="Materia *" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.subject} onChange={e => setNewGrade({...newGrade, subject: e.target.value})} required />
+                    <input type="number" placeholder="Voto (es. 28) *" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.grade} onChange={e => setNewGrade({...newGrade, grade: e.target.value})} required />
                     <input type="number" placeholder="CFU (es. 9)" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.cfu} onChange={e => setNewGrade({...newGrade, cfu: e.target.value})} />
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md shadow-indigo-500/20">Aggiungi Voto</button>
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Registra Voto</button>
                   </form>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Registro Esami</h3>
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Libretto Esami</h3>
                   <div class="space-y-3">
                     {userData.grades.map(g => (
                       <div key={g.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
@@ -304,7 +403,7 @@
                         <span class="px-3.5 py-1.5 bg-indigo-600 text-white font-extrabold rounded-xl text-sm">{g.grade}</span>
                       </div>
                     ))}
-                    {userData.grades.length === 0 && <p class="text-slate-400 text-sm italic">Nessun esame registrato.</p>}
+                    {userData.grades.length === 0 && <p class="text-slate-400 text-sm italic">Nessun voto registrato.</p>}
                   </div>
                 </div>
               </div>
@@ -314,17 +413,17 @@
             {activeTab === 'tasks' && (
               <div class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Nuovo Compito / Progetto</h3>
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Nuova Attività / Progetto</h3>
                   <form onSubmit={(e) => {
                     e.preventDefault();
                     if(!newTask.title) return;
                     setUserData({...userData, tasks: [...userData.tasks, { id: Date.now(), ...newTask, status: 'todo', checklist: [] }]});
                     setNewTask({ title: '', subject: '', dueDate: '', priority: 'media' });
                   }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" placeholder="Titolo attività" class="px-3 py-2 border rounded-xl text-sm" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} required />
+                    <input type="text" placeholder="Titolo attività *" class="px-3 py-2 border rounded-xl text-sm" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} required />
                     <input type="text" placeholder="Materia" class="px-3 py-2 border rounded-xl text-sm" value={newTask.subject} onChange={e => setNewTask({...newTask, subject: e.target.value})} />
                     <input type="date" class="px-3 py-2 border rounded-xl text-sm" value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} />
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Crea Task</button>
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Aggiungi Task</button>
                   </form>
                 </div>
 
@@ -334,18 +433,18 @@
                       <h4 class="font-bold text-sm text-slate-700 uppercase mb-3">{status === 'todo' ? '📌 Da Fare' : status === 'in_progress' ? '⚡ In Corso' : '✅ Completati'}</h4>
                       <div class="space-y-3">
                         {userData.tasks.filter(t => t.status === status).map(t => (
-                          <div key={t.id} class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-2">
+                          <div key={t.id} class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-2">
                             <p class="font-bold text-slate-800 text-sm">{t.title}</p>
-                            <p class="text-xs text-slate-400">{t.subject}</p>
+                            <p class="text-xs text-slate-400">{t.subject || 'Generale'}</p>
                             <div class="flex gap-2 mt-2">
                               {status !== 'todo' && <button onClick={() => {
                                 const updated = userData.tasks.map(item => item.id === t.id ? {...item, status: status === 'done' ? 'in_progress' : 'todo'} : item);
                                 setUserData({...userData, tasks: updated});
-                              }} class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold">Indietro</button>}
+                              }} class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold">← Sposta</button>}
                               {status !== 'done' && <button onClick={() => {
                                 const updated = userData.tasks.map(item => item.id === t.id ? {...item, status: status === 'todo' ? 'in_progress' : 'done'} : item);
                                 setUserData({...userData, tasks: updated});
-                              }} class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded font-bold">Avanza</button>}
+                              }} class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded font-bold">Sposta →</button>}
                             </div>
                           </div>
                         ))}
@@ -356,38 +455,125 @@
               </div>
             )}
 
-            {/* CARTELLE & FILE CANVA */}
+            {/* TIMER POMODORO */}
+            {activeTab === 'pomodoro' && (
+              <div class="max-w-md mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center space-y-6">
+                <span class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-full text-xs uppercase">{pomoMode === 'work' ? '🎯 Sessione Studio' : '☕ Pausa'}</span>
+                <div class="text-6xl font-black text-slate-800 tracking-tight">
+                  {Math.floor(pomoTime / 60).toString().padStart(2, '0')}:{(pomoTime % 60).toString().padStart(2, '0')}
+                </div>
+                <div class="flex justify-center gap-3">
+                  <button onClick={() => setPomoActive(!pomoActive)} class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25">
+                    {pomoActive ? 'Pausa' : 'Avvia'}
+                  </button>
+                  <button onClick={() => { setPomoActive(false); setPomoTime(25*60); setPomoMode('work'); }} class="px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">
+                    Reset
+                  </button>
+                </div>
+                <div class="pt-4 border-t border-slate-100">
+                  <p class="text-xs font-bold text-slate-400 uppercase mb-3">Suoni Ambientali Synth</p>
+                  <div class="flex justify-center gap-2">
+                    <button onClick={() => playAmbientSound('rain')} class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-lg">🌧️ Pioggia</button>
+                    <button onClick={() => playAmbientSound('white')} class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-lg">🌊 Onde</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* HUB CARTELLE & CANVA */}
             {activeTab === 'files' && (
               <div class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Cartelle & Risorse (Canva, Drive, Link)</h3>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {userData.folders.map(f => (
-                      <div key={f.id} class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                          <div class={`w-10 h-10 ${f.color} rounded-xl flex items-center justify-center text-white font-bold`}>
-                            <i data-lucide="folder" class="w-5 h-5"></i>
-                          </div>
-                          <div>
-                            <h4 class="font-bold text-slate-800">{f.name}</h4>
-                            <p class="text-xs text-slate-400">{userData.files.filter(fi => fi.folderId === f.id).length} file collegati</p>
-                          </div>
-                        </div>
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Aggiungi Cartella</h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if(!newFolder.name) return;
+                    setUserData({...userData, folders: [...userData.folders, { id: 'f_' + Date.now(), ...newFolder }]});
+                    setNewFolder({ name: '', color: 'bg-indigo-500' });
+                  }} class="flex gap-3">
+                    <input type="text" placeholder="Nome cartella *" class="flex-1 px-3 py-2 border rounded-xl text-sm" value={newFolder.name} onChange={e => setNewFolder({...newFolder, name: e.target.value})} required />
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm px-4 py-2 shadow-md">Crea Cartella</button>
+                  </form>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {userData.folders.map(f => (
+                    <div key={f.id} class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                      <div class={`w-10 h-10 ${f.color} rounded-xl flex items-center justify-center text-white font-bold`}>
+                        <i data-lucide="folder" class="w-5 h-5"></i>
                       </div>
-                    ))}
-                  </div>
+                      <div>
+                        <h4 class="font-bold text-slate-800">{f.name}</h4>
+                        <p class="text-xs text-slate-400">{userData.files.filter(fi => fi.folderId === f.id).length} file collegati</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* NOTE */}
+            {activeTab === 'notes' && (
+              <div class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Scrivi Nuova Nota</h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if(!newNote.title) return;
+                    setUserData({...userData, notes: [...userData.notes, { id: 'n_' + Date.now(), ...newNote, date: new Date().toISOString().split('T')[0] }]});
+                    setNewNote({ title: '', subject: '', content: '', tags: '' });
+                  }} class="space-y-3">
+                    <input type="text" placeholder="Titolo nota *" class="w-full px-3 py-2 border rounded-xl text-sm" value={newNote.title} onChange={e => setNewNote({...newNote, title: e.target.value})} required />
+                    <textarea placeholder="Contenuto appunti..." class="w-full px-3 py-2 border rounded-xl text-sm h-24" value={newNote.content} onChange={e => setNewNote({...newNote, content: e.target.value})}></textarea>
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm px-4 py-2 shadow-md">Salva Nota</button>
+                  </form>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {userData.notes.map(n => (
+                    <div key={n.id} class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                      <h4 class="font-bold text-slate-800">{n.title}</h4>
+                      <p class="text-xs text-indigo-600 font-semibold mt-0.5">{n.subject || 'Generale'}</p>
+                      <p class="text-sm text-slate-600 mt-2 whitespace-pre-wrap">{n.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SPESE */}
+            {activeTab === 'expenses' && (
+              <div class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Registra Spesa / Entrata</h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if(!newExpense.title || !newExpense.amount) return;
+                    setUserData({...userData, expenses: [...userData.expenses, { id: Date.now(), ...newExpense, amount: Number(newExpense.amount) }]});
+                    setNewExpense({ type: 'uscita', category: 'Libri', title: '', amount: '', date: '' });
+                  }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <input type="text" placeholder="Descrizione *" class="px-3 py-2 border rounded-xl text-sm" value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} required />
+                    <input type="number" step="0.01" placeholder="Importo € *" class="px-3 py-2 border rounded-xl text-sm" value={newExpense.amount} onChange={e => setNewExpense({...newExpense, amount: e.target.value})} required />
+                    <select class="px-3 py-2 border rounded-xl text-sm bg-white" value={newExpense.type} onChange={e => setNewExpense({...newExpense, type: e.target.value})}>
+                      <option value="uscita">Uscita (-)</option>
+                      <option value="entrata">Entrata (+)</option>
+                    </select>
+                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Registra Transazione</button>
+                  </form>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Elenco File & Link Canva</h3>
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Storico Movimenti</h3>
                   <div class="space-y-3">
-                    {userData.files.map(file => (
-                      <div key={file.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    {userData.expenses.map(ex => (
+                      <div key={ex.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
                         <div>
-                          <p class="font-bold text-slate-800">{file.title}</p>
-                          <a href={file.url} target="_blank" class="text-xs text-indigo-600 font-semibold hover:underline">Apri risorsa esterna ↗</a>
+                          <p class="font-bold text-slate-800">{ex.title}</p>
+                          <p class="text-xs text-slate-400">{ex.category}</p>
                         </div>
-                        <span class="px-2.5 py-1 bg-pink-100 text-pink-700 font-bold rounded-lg text-xs uppercase">{file.type}</span>
+                        <span class={`font-extrabold text-sm ${ex.type === 'entrata' ? 'text-emerald-600' : 'text-red-600'}`}>
+                          {ex.type === 'entrata' ? '+' : '-'}€{Number(ex.amount).toFixed(2)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -395,34 +581,21 @@
               </div>
             )}
 
-            {/* NOTE & SPESE */}
-            {activeTab === 'notes' && (
-              <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                <h3 class="font-bold text-lg text-slate-800">Note Veloci</h3>
-                {userData.notes.map(n => (
-                  <div key={n.id} class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <h4 class="font-bold text-slate-800">{n.title}</h4>
-                    <p class="text-sm text-slate-600 mt-1">{n.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'expenses' && (
-              <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                <h3 class="font-bold text-lg text-slate-800">Spese e Budget Studente</h3>
-                <div class="space-y-3">
-                  {userData.expenses.map(ex => (
-                    <div key={ex.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <div>
-                        <p class="font-bold text-slate-800">{ex.title}</p>
-                        <p class="text-xs text-slate-400">{ex.category} • {ex.date}</p>
+            {/* DOCENTI & ORARIO */}
+            {activeTab === 'professors' && (
+              <div class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="font-bold text-lg mb-4 text-slate-800">Rubrica Docenti</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {userData.professors.map(p => (
+                      <div key={p.id} class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                        <h4 class="font-bold text-slate-800">{p.name}</h4>
+                        <p class="text-xs text-indigo-600 font-semibold">{p.subject}</p>
+                        <p class="text-xs text-slate-500">📧 {p.email}</p>
+                        <p class="text-xs text-slate-500">🏢 {p.office}</p>
                       </div>
-                      <span class={`font-extrabold text-sm ${ex.type === 'entrata' ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {ex.type === 'entrata' ? '+' : '-'}€{ex.amount.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -434,9 +607,9 @@
               { id: 'dashboard', icon: 'layout-dashboard', label: 'Dash' },
               { id: 'grades', icon: 'award', label: 'Voti' },
               { id: 'tasks', icon: 'check-square', label: 'Tasks' },
+              { id: 'pomodoro', icon: 'clock', label: 'Focus' },
               { id: 'files', icon: 'folder-open', label: 'File' },
               { id: 'notes', icon: 'file-text', label: 'Note' },
-              { id: 'expenses', icon: 'wallet', label: 'Spese' },
             ].map(item => (
               <button key={item.id} onClick={() => setActiveTab(item.id)} class={`flex flex-col items-center py-1 px-2 text-[10px] font-bold ${activeTab === item.id ? 'text-indigo-400' : ''}`}>
                 <i data-lucide={item.icon} class="w-5 h-5 mb-0.5"></i>
