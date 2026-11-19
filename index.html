@@ -1,627 +1,2472 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Hub Pro - Suite Globale per lo Studente</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Appunti Colorati, Classi & Chat</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- React & Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
-  <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
-  </style>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Rich Text Editor Styles */
+        #editor-content:empty:before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            pointer-events: none;
+            display: block;
+        }
+        #editor-content h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-top: 1.1rem;
+            margin-bottom: 0.45rem;
+            color: #0f172a;
+        }
+        #editor-content ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        #editor-content ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        #editor-content blockquote {
+            border-left: 4px solid #6366f1;
+            padding: 0.65rem 1rem;
+            font-weight: 500;
+            color: #1e293b;
+            background: #eef2ff;
+            border-radius: 0 0.75rem 0.75rem 0;
+            margin: 0.75rem 0;
+        }
+
+        /* Note Viewer Modal Styles */
+        #viewer-content h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
+            color: #0f172a;
+        }
+        #viewer-content ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        #viewer-content ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        #viewer-content blockquote {
+            border-left: 4px solid #6366f1;
+            padding: 0.65rem 1rem;
+            background: #eef2ff;
+            border-radius: 0 0.75rem 0.75rem 0;
+            margin: 0.75rem 0;
+        }
+
+        .folder-card {
+            position: relative;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .folder-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.22s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Fix iOS/Mobile native date & time inputs overflow and centering */
+        .ios-centered-picker {
+            -webkit-appearance: none;
+            appearance: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        .ios-centered-picker::-webkit-date-and-time-value {
+            text-align: center;
+            margin: 0 auto;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#F8FAFC] text-slate-800 font-sans antialiased overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-700">
 
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
-
-    const INITIAL_USERS = [
-      { id: 'demo-user', name: 'Marco Rossi', email: 'demo@student.it', password: 'demo123', major: 'Informatica & Digital Media' }
-    ];
-
-    const INITIAL_DEMO_DATA = {
-      grades: [
-        { id: 1, subject: 'Programmazione Web', grade: 28, cfu: 9, date: '2026-02-15' },
-        { id: 2, subject: 'Analisi Matematica I', grade: 24, cfu: 12, date: '2026-01-20' },
-        { id: 3, subject: 'Basi di Dati', grade: 30, cfu: 6, date: '2026-06-10' }
-      ],
-      tasks: [
-        { id: 1, title: 'Progetto Finale React', subject: 'Programmazione Web', dueDate: '2026-11-20', status: 'in_progress', priority: 'alta', checklist: [{ id: 'c1', text: 'Layout Mobile', done: true }, { id: 'c2', text: 'Autenticazione', done: false }] },
-        { id: 2, title: 'Esercizi Derivate', subject: 'Analisi Matematica I', dueDate: '2026-11-15', status: 'todo', priority: 'media', checklist: [] }
-      ],
-      folders: [
-        { id: 'f1', name: 'Programmazione Web', color: 'bg-indigo-500' },
-        { id: 'f2', name: 'Materiale Canva & Graphic Design', color: 'bg-pink-500' }
-      ],
-      files: [
-        { id: 'file1', folderId: 'f2', title: 'Presentazione Progetto Design', type: 'canva', url: 'https://www.canva.com', date: '2026-11-01', description: 'Template Canva per la discussione' }
-      ],
-      notes: [
-        { id: 'n1', title: 'Appunti State Management', subject: 'Programmazione Web', content: 'Lo stato locale in React si gestisce con useState...', tags: ['React', 'Esame'], date: '2026-11-05' }
-      ],
-      expenses: [
-        { id: 1, type: 'uscita', category: 'Libri', title: 'Manuale Algoritmi', amount: 45.00, date: '2026-11-02' },
-        { id: 2, type: 'entrata', category: 'Tutoring', title: 'Ripetizioni Matematica', amount: 80.00, date: '2026-11-04' }
-      ],
-      professors: [
-        { id: 1, name: 'Prof. Mario Bianchi', subject: 'Programmazione Web', email: 'mario.bianchi@unifi.it', office: 'Stanza 304, Edificio F', officeHours: 'Martedì 14:00 - 16:00' }
-      ],
-      schedule: [
-        { id: 1, day: 'Lunedì', subject: 'Programmazione Web', time: '09:00 - 11:00', room: 'Aula 3' },
-        { id: 2, day: 'Mercoledì', subject: 'Analisi Matematica I', time: '11:00 - 13:00', room: 'Aula Magna' }
-      ]
-    };
-
-    const EMPTY_USER_DATA = {
-      grades: [], tasks: [], folders: [{ id: 'f1', name: 'Generale', color: 'bg-indigo-500' }], files: [], notes: [], expenses: [], professors: [], schedule: []
-    };
-
-    function App() {
-      const [currentUser, setCurrentUser] = useState(() => {
-        const saved = localStorage.getItem('sh_current_user');
-        return saved ? JSON.parse(saved) : null;
-      });
-
-      const [authMode, setAuthMode] = useState('login');
-      const [authForm, setAuthForm] = useState({ name: '', email: '', password: '', major: '' });
-      const [authError, setAuthError] = useState('');
-      const [activeTab, setActiveTab] = useState('dashboard');
-
-      const [userData, setUserData] = useState(() => {
-        if (!currentUser) return EMPTY_USER_DATA;
-        const saved = localStorage.getItem(`sh_data_${currentUser.id}`);
-        return saved ? JSON.parse(saved) : (currentUser.id === 'demo-user' ? INITIAL_DEMO_DATA : EMPTY_USER_DATA);
-      });
-
-      // Form local states
-      const [newGrade, setNewGrade] = useState({ subject: '', grade: '', cfu: '', date: '' });
-      const [targetGraduation, setTargetGraduation] = useState(105);
-      const [remainingCfu, setRemainingCfu] = useState(30);
-
-      const [newTask, setNewTask] = useState({ title: '', subject: '', dueDate: '', priority: 'media' });
-      const [newFolder, setNewFolder] = useState({ name: '', color: 'bg-indigo-500' });
-      const [newFile, setNewFile] = useState({ folderId: 'f1', title: '', type: 'link', url: '', description: '' });
-      const [newNote, setNewNote] = useState({ title: '', subject: '', content: '', tags: '' });
-      const [newExpense, setNewExpense] = useState({ type: 'uscita', category: 'Libri', title: '', amount: '', date: '' });
-      const [newProf, setNewProf] = useState({ name: '', subject: '', email: '', office: '', officeHours: '' });
-      const [newSchedule, setNewSchedule] = useState({ day: 'Lunedì', subject: '', time: '', room: '' });
-
-      // Pomodoro Timer State
-      const [pomoTime, setPomoTime] = useState(25 * 60);
-      const [pomoActive, setPomoActive] = useState(false);
-      const [pomoMode, setPomoMode] = useState('work'); // 'work' or 'break'
-      const audioCtxRef = useRef(null);
-
-      useEffect(() => {
-        let interval = null;
-        if (pomoActive && pomoTime > 0) {
-          interval = setInterval(() => setPomoTime(t => t - 1), 1000);
-        } else if (pomoTime === 0) {
-          if (pomoMode === 'work') { setPomoMode('break'); setPomoTime(5 * 60); }
-          else { setPomoMode('work'); setPomoTime(25 * 60); }
-          setPomoActive(false);
-        }
-        return () => clearInterval(interval);
-      }, [pomoActive, pomoTime, pomoMode]);
-
-      useEffect(() => {
-        if (currentUser) {
-          localStorage.setItem('sh_current_user', JSON.stringify(currentUser));
-          localStorage.setItem(`sh_data_${currentUser.id}`, JSON.stringify(userData));
-        } else {
-          localStorage.removeItem('sh_current_user');
-        }
-      }, [currentUser, userData]);
-
-      useEffect(() => {
-        if (window.lucide) window.lucide.createIcons();
-      });
-
-      // Auth Functions
-      const handleLogin = (e) => {
-        e.preventDefault();
-        const users = JSON.parse(localStorage.getItem('sh_users') || JSON.stringify(INITIAL_USERS));
-        const found = users.find(u => u.email.toLowerCase() === authForm.email.toLowerCase() && u.password === authForm.password);
-        if (found) {
-          setCurrentUser(found);
-          const savedData = localStorage.getItem(`sh_data_${found.id}`);
-          setUserData(savedData ? JSON.parse(savedData) : (found.id === 'demo-user' ? INITIAL_DEMO_DATA : EMPTY_USER_DATA));
-          setAuthError('');
-        } else {
-          setAuthError('Credenziali non valide. Prova demo@student.it / demo123');
-        }
-      };
-
-      const handleRegister = (e) => {
-        e.preventDefault();
-        if (!authForm.name || !authForm.email || !authForm.password) {
-          setAuthError('Compila tutti i campi obbligatori.');
-          return;
-        }
-        const users = JSON.parse(localStorage.getItem('sh_users') || JSON.stringify(INITIAL_USERS));
-        if (users.some(u => u.email.toLowerCase() === authForm.email.toLowerCase())) {
-          setAuthError('Email già registrata!');
-          return;
-        }
-        const newUser = { id: 'usr_' + Date.now(), name: authForm.name, email: authForm.email, password: authForm.password, major: authForm.major || 'Studente' };
-        localStorage.setItem('sh_users', JSON.stringify([...users, newUser]));
-        setCurrentUser(newUser);
-        setUserData(EMPTY_USER_DATA);
-        localStorage.setItem(`sh_data_${newUser.id}`, JSON.stringify(EMPTY_USER_DATA));
-        setAuthError('');
-      };
-
-      const handleLogout = () => {
-        setCurrentUser(null);
-        setAuthForm({ name: '', email: '', password: '', major: '' });
-      };
-
-      const exportBackup = () => {
-        const blob = new Blob([JSON.stringify({ user: currentUser, data: userData }, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `StudentHub_Backup_${currentUser.name.replace(/\s+/g, '_')}.json`;
-        a.click();
-      };
-
-      // Sound synth for Pomodoro
-      const playAmbientSound = (type) => {
-        try {
-          if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-          const ctx = audioCtxRef.current;
-          if (ctx.state === 'suspended') ctx.resume();
-
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-
-          if (type === 'rain') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(120, ctx.currentTime);
-            gain.gain.setValueAtTime(0.02, ctx.currentTime);
-          } else if (type === 'white') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(200, ctx.currentTime);
-            gain.gain.setValueAtTime(0.03, ctx.currentTime);
-          }
-          osc.start();
-          osc.stop(ctx.currentTime + 1.5);
-        } catch(e) {}
-      };
-
-      // Calculated stats
-      const totalCfu = userData.grades.reduce((a, b) => a + Number(b.cfu || 0), 0);
-      const avgGrade = userData.grades.length ? (userData.grades.reduce((a, b) => a + Number(b.grade), 0) / userData.grades.length).toFixed(2) : 0;
-      const graduationBase = (avgGrade * 110) / 30;
-      const requiredGrade = remainingCfu > 0 ? (((targetGraduation * (totalCfu + Number(remainingCfu)) / 110) - (avgGrade * totalCfu)) / remainingCfu).toFixed(2) : 0;
-
-      // LOGIN / REGISTRATION SCREEN
-      if (!currentUser) {
-        return (
-          <div class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md border border-slate-100">
-              <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-lg shadow-indigo-500/30">
-                  <i data-lucide="graduation-cap" class="w-9 h-9"></i>
+    <!-- ===================================================================== -->
+    <!-- SCREEN 1: AUTHENTICATION (LOGIN / REGISTRAZIONE)                      -->
+    <!-- ===================================================================== -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/70 border border-slate-200/80 p-7 sm:p-9 space-y-6 fade-in">
+            
+            <!-- Logo & Intro -->
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+                    <i class="ph-bold ph-folders text-3xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-slate-800">Student Hub Pro</h1>
-                <p class="text-slate-500 text-sm mt-1">La tua suite universitaria completa</p>
-              </div>
+                <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">StudyFlow</h1>
+                <p class="text-sm text-slate-500">Appunti colorati, classi condivise e chat con i tuoi compagni.</p>
+            </div>
 
-              {authError && <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold border border-red-200">{authError}</div>}
+            <!-- Auth Mode Switcher -->
+            <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-2xl">
+                <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-900 shadow-2xs transition-all">
+                    Accedi
+                </button>
+                <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-all">
+                    Registrati
+                </button>
+            </div>
 
-              <form onSubmit={authMode === 'login' ? handleLogin : handleRegister} class="space-y-4">
-                {authMode === 'register' && (
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Nome Completo *</label>
-                    <input type="text" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} placeholder="Es. Mario Rossi" />
-                  </div>
-                )}
+            <!-- Error / Info Alert -->
+            <div id="auth-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+                <i class="ph-fill ph-warning-circle text-base shrink-0"></i>
+                <span id="auth-error-msg">Errore di autenticazione</span>
+            </div>
+
+            <!-- Email/Password Form -->
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="register-name-group" class="hidden">
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Nome o Nickname</label>
+                    <div class="relative">
+                        <i class="ph ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="auth-name" placeholder="Es. Marco Rossi" 
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-medium">
+                    </div>
+                </div>
+
                 <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Email *</label>
-                  <input type="email" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} placeholder="demo@student.it" />
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Email</label>
+                    <div class="relative">
+                        <i class="ph ph-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="email" id="auth-email" required placeholder="studente@scuola.it" 
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-medium">
+                    </div>
                 </div>
+
                 <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Password *</label>
-                  <input type="password" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} placeholder="••••••••" />
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i class="ph ph-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="password" id="auth-password" required minlength="6" placeholder="Minimo 6 caratteri" 
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-medium">
+                    </div>
                 </div>
-                {authMode === 'register' && (
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Corso di Studi</label>
-                    <input type="text" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500" value={authForm.major} onChange={e => setAuthForm({...authForm, major: e.target.value})} placeholder="Es. Ingegneria, Economia..." />
-                  </div>
-                )}
-                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition">
-                  {authMode === 'login' ? 'Accedi' : 'Crea Nuovo Account Pulito'}
-                </button>
-              </form>
 
-              <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col gap-2 text-center text-xs font-medium">
-                <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} class="text-indigo-600 hover:underline">
-                  {authMode === 'login' ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-500/20 transition-all active:scale-[0.99]">
+                    Accedi a StudyFlow
                 </button>
-                <button onClick={() => { setCurrentUser(INITIAL_USERS[0]); setUserData(INITIAL_DEMO_DATA); }} class="text-slate-500 hover:text-slate-800">
-                  ⚡ Entra subito come Demo
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      }
+            </form>
 
-      return (
-        <div class="min-h-screen flex flex-col md:flex-row pb-16 md:pb-0">
-          {/* Sidebar Desktop */}
-          <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-slate-300 min-h-screen p-4 border-r border-slate-800">
-            <div class="flex items-center gap-3 px-2 py-3 mb-6 border-b border-slate-800">
-              <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/30">
-                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-              </div>
-              <div>
-                <h2 class="font-bold text-white text-base leading-tight">Student Hub</h2>
-                <p class="text-xs text-indigo-400 font-semibold">Pro Suite</p>
-              </div>
+            <div class="relative flex py-1 items-center">
+                <div class="grow border-t border-slate-200"></div>
+                <span class="shrink mx-3 text-[11px] font-bold uppercase text-slate-400">oppure</span>
+                <div class="grow border-t border-slate-200"></div>
             </div>
 
-            <nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
-              {[
-                { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-                { id: 'grades', label: 'Voti & Simulatore', icon: 'award' },
-                { id: 'tasks', label: 'Compiti & Kanban', icon: 'check-square' },
-                { id: 'pomodoro', label: 'Timer Pomodoro', icon: 'clock' },
-                { id: 'files', label: 'Hub Cartelle & Canva', icon: 'folder-open' },
-                { id: 'notes', label: 'Note & Appunti', icon: 'file-text' },
-                { id: 'expenses', label: 'Spese Studente', icon: 'wallet' },
-                { id: 'professors', label: 'Docenti & Orario', icon: 'users' },
-              ].map(item => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)} class={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition ${activeTab === item.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}>
-                  <i data-lucide={item.icon} class="w-5 h-5"></i>
-                  {item.label}
-                </button>
-              ))}
-            </nav>
+            <!-- Quick Guest / Instant Access -->
+            <button type="button" onclick="handleGuestLogin()" class="w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all">
+                <i class="ph-duotone ph-rocket-launch text-indigo-600 text-lg"></i>
+                <span>Entra subito come Ospite</span>
+            </button>
+        </div>
+    </div>
 
-            <div class="pt-4 border-t border-slate-800 mt-auto space-y-2">
-              <button onClick={exportBackup} class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
-                <i data-lucide="download" class="w-4 h-4"></i> Esporta Backup JSON
-              </button>
-              <div class="px-3.5 py-2.5 bg-slate-800/60 rounded-xl">
-                <p class="text-xs font-bold text-white truncate">{currentUser.name}</p>
-                <p class="text-[10px] text-slate-400 truncate">{currentUser.major}</p>
-              </div>
-              <button onClick={handleLogout} class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl transition">
-                <i data-lucide="log-out" class="w-4 h-4"></i> Esci dall'Account
-              </button>
+    <!-- ===================================================================== -->
+    <!-- SCREEN 2: CLASS LOBBY (CREA CLASSE / ENTRA CON CODICE / PERSONALE)     -->
+    <!-- ===================================================================== -->
+    <div id="class-lobby-screen" class="hidden min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-indigo-50/40 to-purple-50/40">
+        <div class="w-full max-w-3xl space-y-6 fade-in">
+            
+            <!-- Top User Bar -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 px-5 py-3.5 flex items-center justify-between shadow-2xs">
+                <div class="flex items-center gap-3">
+                    <div id="lobby-user-avatar" class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-display font-extrabold flex items-center justify-center text-sm">
+                        ST
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">Benvenuto su StudyFlow,</p>
+                        <h2 id="lobby-user-name" class="font-display font-bold text-sm sm:text-base text-slate-900">Studente</h2>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 transition-colors">
+                    <i class="ph-bold ph-sign-out"></i>
+                    <span>Esci</span>
+                </button>
             </div>
-          </aside>
 
-          {/* Main Area */}
-          <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
-            <header class="flex justify-between items-center mb-6">
-              <div>
-                <h1 class="text-2xl font-bold text-slate-900 capitalize">{activeTab}</h1>
-                <p class="text-xs md:text-sm text-slate-500">Studente: {currentUser.name}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button onClick={exportBackup} class="md:hidden p-2 text-slate-600 bg-white rounded-xl shadow-sm border border-slate-200" title="Esporta Backup">
-                  <i data-lucide="download" class="w-5 h-5"></i>
+            <!-- Main Heading -->
+            <div class="text-center space-y-1.5 pt-2">
+                <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Scegli il tuo Spazio di Studio</h1>
+                <p class="text-sm text-slate-500 max-w-lg mx-auto">Crea una classe e condividi il codice con i tuoi compagni per studiare insieme, oppure entra in una classe già esistente.</p>
+            </div>
+
+            <!-- Existing Classes (if user already joined some) -->
+            <div id="lobby-existing-classes-box" class="hidden bg-white rounded-3xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
+                <h3 class="font-display font-bold text-sm text-slate-800 flex items-center gap-2">
+                    <i class="ph-duotone ph-users-three text-indigo-600 text-lg"></i>
+                    <span>Le tue Classi già attive</span>
+                </h3>
+                <div id="lobby-classes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                </div>
+            </div>
+
+            <!-- Two Main Cards: Create Class vs Join Class -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                
+                <!-- Card A: Create New Class -->
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
+                            <i class="ph-duotone ph-plus-circle"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-extrabold text-slate-900">Crea una nuova Classe</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Genera automaticamente un <b>codice invito univoco</b> da inviare ai compagni di classe per condividere cartelle, appunti, calendario e chat.</p>
+                        
+                        <div class="pt-2">
+                            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Nome della Classe</label>
+                            <input type="text" id="create-class-name" placeholder="Es. 4ª B - Liceo Scientifico" 
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-semibold">
+                        </div>
+                    </div>
+
+                    <button onclick="handleCreateClass()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm shadow-indigo-500/20 transition-all flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-sparkle"></i>
+                        <span>Crea Classe e Genera Codice</span>
+                    </button>
+                </div>
+
+                <!-- Card B: Join Existing Class -->
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl">
+                            <i class="ph-duotone ph-key"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-extrabold text-slate-900">Entra con un Codice</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Hai ricevuto un codice invito da un compagno di classe? Inseriscilo qui sotto per accedere subito alla classe e alla chat di gruppo.</p>
+                        
+                        <div class="pt-2">
+                            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Codice Invito Classe</label>
+                            <input type="text" id="join-class-code" placeholder="Es. CLS-8492" uppercase
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-extrabold uppercase tracking-wider text-center bg-slate-50">
+                        </div>
+                    </div>
+
+                    <button onclick="handleJoinClass()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-sign-in"></i>
+                        <span>Entra nella Classe</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Personal Workspace Option -->
+            <div class="text-center pt-1">
+                <button onclick="enterPersonalWorkspace()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600 shadow-2xs transition-all">
+                    <i class="ph-duotone ph-folder-lock text-indigo-500 text-base"></i>
+                    <span>Continua nel mio Spazio Personale (senza classe)</span>
                 </button>
-                <button onClick={handleLogout} class="md:hidden p-2 text-slate-600 bg-white rounded-xl shadow-sm border border-slate-200">
-                  <i data-lucide="log-out" class="w-5 h-5"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SCREEN 3: MAIN STUDYFLOW APPLICATION                                  -->
+    <!-- ===================================================================== -->
+    <div id="main-app-screen" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Mobile Backdrop -->
+        <div id="mobile-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200/80 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none">
+            
+            <!-- Brand Header -->
+            <div class="p-4 flex items-center justify-between border-b border-slate-100">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="setView('folders')">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                        <i class="ph-bold ph-folders text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-extrabold text-lg text-slate-900 tracking-tight leading-none">StudyFlow</h1>
+                        <span class="text-[11px] font-medium text-slate-400">Appunti & Classe</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-400 hover:bg-slate-100">
+                    <i class="ph ph-x text-lg"></i>
                 </button>
-              </div>
+            </div>
+
+            <!-- Active Class Switcher & Invite Code Box -->
+            <div class="p-3 border-b border-slate-100 bg-slate-50/70">
+                <div class="bg-white rounded-2xl border border-slate-200/80 p-3 space-y-2 shadow-2xs">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <span id="sidebar-workspace-type" class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Classe Attiva</span>
+                            <h3 id="sidebar-workspace-name" class="font-display font-bold text-sm text-slate-900 truncate">Spazio Personale</h3>
+                        </div>
+                        <button onclick="openClassLobby()" title="Cambia o crea classe" class="p-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-colors shrink-0">
+                            <i class="ph-bold ph-arrows-left-right text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Invite Code Pill (visible only when inside a shared class) -->
+                    <div id="sidebar-invite-box" class="hidden pt-1 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div class="text-[11px] text-slate-500">
+                            Codice: <span id="sidebar-class-code" class="font-mono font-extrabold text-slate-900 bg-indigo-50 px-1.5 py-0.5 rounded">CLS-0000</span>
+                        </div>
+                        <button onclick="copyClassCode()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                            <i class="ph-bold ph-copy"></i> Copia
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary Navigation -->
+            <div class="p-3 space-y-1">
+                <button onclick="setView('folders')" id="nav-folders" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-indigo-50 text-indigo-700">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-duotone ph-folder-notch-open text-lg"></i>
+                        <span>Dashboard Cartelle</span>
+                    </div>
+                    <span id="badge-folders-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">0</span>
+                </button>
+
+                <button onclick="setView('chat')" id="nav-chat" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100/80 transition-all">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-duotone ph-chats-circle text-lg text-emerald-500"></i>
+                        <span>Chat di Classe</span>
+                    </div>
+                    <span id="badge-chat-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">0</span>
+                </button>
+
+                <button onclick="setView('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100/80 transition-all">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-duotone ph-calendar-dots text-lg text-rose-500"></i>
+                        <span>Calendario Scolastico</span>
+                    </div>
+                    <span id="badge-upcoming" class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">0</span>
+                </button>
+            </div>
+
+            <!-- Quick Folders List -->
+            <div class="px-5 pt-3 pb-1.5 flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Cartelle Materie</span>
+                <button onclick="openFolderModal()" title="Nuova cartella" class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                    <i class="ph-bold ph-plus text-sm"></i>
+                </button>
+            </div>
+
+            <div id="sidebar-folders-list" class="flex-1 overflow-y-auto px-3 space-y-1 pb-3">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- User Profile & Logout Footer -->
+            <div class="p-3 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div id="sidebar-user-avatar" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-display font-bold text-xs flex items-center justify-center shrink-0">
+                        ST
+                    </div>
+                    <div class="min-w-0">
+                        <p id="sidebar-user-name" class="text-xs font-bold text-slate-800 truncate">Studente</p>
+                        <p id="sidebar-user-status" class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Online
+                        </p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" title="Disconnetti" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                    <i class="ph-bold ph-sign-out text-base"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ===================================================================== -->
+        <!-- MAIN WORKSPACE AREA                                                   -->
+        <!-- ===================================================================== -->
+        <main class="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-hidden">
+            
+            <!-- Top Header Bar -->
+            <header class="h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/70 px-4 lg:px-8 flex items-center justify-between gap-4 shrink-0 z-20">
+                <div class="flex items-center gap-3 flex-1 max-w-xl">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100">
+                        <i class="ph-bold ph-list text-xl"></i>
+                    </button>
+                    
+                    <!-- Search Bar -->
+                    <div class="relative w-full">
+                        <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+                        <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Cerca tra le cartelle e gli appunti..." 
+                               class="w-full pl-10 pr-9 py-2 bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-300 rounded-xl text-sm outline-none transition-all placeholder:text-slate-400">
+                        <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+                            <i class="ph-bold ph-x text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Header Quick Actions -->
+                <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                    <button onclick="openFolderModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-xs font-bold transition-all">
+                        <i class="ph-bold ph-folder-plus text-indigo-600 text-sm"></i>
+                        <span class="hidden sm:inline">Nuova Cartella</span>
+                    </button>
+                    <button onclick="openNewNote()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-sm shadow-indigo-500/20 transition-all">
+                        <i class="ph-bold ph-plus"></i>
+                        <span>Nuovo Appunto</span>
+                    </button>
+                </div>
             </header>
 
-            {/* DASHBOARD */}
-            {activeTab === 'dashboard' && (
-              <div class="space-y-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Media Voti</p>
-                    <p class="text-3xl font-extrabold text-slate-800 mt-1">{avgGrade || '-'}</p>
-                  </div>
-                  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Tasks In Sospeso</p>
-                    <p class="text-3xl font-extrabold text-indigo-600 mt-1">{userData.tasks.filter(t => t.status !== 'done').length}</p>
-                  </div>
-                  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase">File & Risorse</p>
-                    <p class="text-3xl font-extrabold text-emerald-600 mt-1">{userData.files.length}</p>
-                  </div>
-                  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase">CFU Conseguiti</p>
-                    <p class="text-3xl font-extrabold text-amber-500 mt-1">{totalCfu}</p>
-                  </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-500/20">
-                  <h3 class="font-bold text-xl mb-2">🚀 Spazio di Lavoro Attivo!</h3>
-                  <p class="text-indigo-100 text-sm max-w-2xl leading-relaxed">
-                    Benvenuto nella tua suite globale. Naviga tra le sezioni per inserire esami, organizzare compiti e gestire file.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* VOTI & SIMULATORE */}
-            {activeTab === 'grades' && (
-              <div class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
-                    <p class="text-xs font-bold text-indigo-600 uppercase">Voto Partenza Laurea</p>
-                    <p class="text-3xl font-extrabold text-indigo-900 mt-1">{graduationBase ? graduationBase.toFixed(1) : 0} / 110</p>
-                  </div>
-                  <div class="bg-white p-5 rounded-2xl border border-slate-200">
-                    <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Obiettivo Voto Finale</label>
-                    <input type="number" value={targetGraduation} onChange={e => setTargetGraduation(e.target.value)} class="w-full text-xl font-bold bg-slate-50 border rounded-xl p-2" />
-                  </div>
-                  <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
-                    <p class="text-xs font-bold text-emerald-600 uppercase">Media Necessaria nei prossimi CFU</p>
-                    <p class="text-3xl font-extrabold text-emerald-900 mt-1">{requiredGrade > 0 ? requiredGrade : 'N/D'}</p>
-                  </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Aggiungi Nuovo Esame</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if(!newGrade.subject || !newGrade.grade) return;
-                    setUserData({...userData, grades: [...userData.grades, { id: Date.now(), ...newGrade }]});
-                    setNewGrade({ subject: '', grade: '', cfu: '', date: '' });
-                  }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" placeholder="Materia *" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.subject} onChange={e => setNewGrade({...newGrade, subject: e.target.value})} required />
-                    <input type="number" placeholder="Voto (es. 28) *" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.grade} onChange={e => setNewGrade({...newGrade, grade: e.target.value})} required />
-                    <input type="number" placeholder="CFU (es. 9)" class="px-3 py-2 border rounded-xl text-sm" value={newGrade.cfu} onChange={e => setNewGrade({...newGrade, cfu: e.target.value})} />
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Registra Voto</button>
-                  </form>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Libretto Esami</h3>
-                  <div class="space-y-3">
-                    {userData.grades.map(g => (
-                      <div key={g.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+            <!-- Scrollable Content Container -->
+            <div id="main-scroll" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                
+                <!-- ============================================================= -->
+                <!-- VIEW 1: DASHBOARD (SOLO CARTELLE COLORATE, ZERO APPUNTI SOTTO) -->
+                <!-- ============================================================= -->
+                <section id="view-folders" class="max-w-6xl mx-auto space-y-6 fade-in">
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
-                          <p class="font-bold text-slate-800">{g.subject}</p>
-                          <p class="text-xs text-slate-400">{g.cfu || 6} CFU</p>
-                        </div>
-                        <span class="px-3.5 py-1.5 bg-indigo-600 text-white font-extrabold rounded-xl text-sm">{g.grade}</span>
-                      </div>
-                    ))}
-                    {userData.grades.length === 0 && <p class="text-slate-400 text-sm italic">Nessun voto registrato.</p>}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* COMPITI KANBAN */}
-            {activeTab === 'tasks' && (
-              <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Nuova Attività / Progetto</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if(!newTask.title) return;
-                    setUserData({...userData, tasks: [...userData.tasks, { id: Date.now(), ...newTask, status: 'todo', checklist: [] }]});
-                    setNewTask({ title: '', subject: '', dueDate: '', priority: 'media' });
-                  }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" placeholder="Titolo attività *" class="px-3 py-2 border rounded-xl text-sm" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} required />
-                    <input type="text" placeholder="Materia" class="px-3 py-2 border rounded-xl text-sm" value={newTask.subject} onChange={e => setNewTask({...newTask, subject: e.target.value})} />
-                    <input type="date" class="px-3 py-2 border rounded-xl text-sm" value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} />
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Aggiungi Task</button>
-                  </form>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {['todo', 'in_progress', 'done'].map(status => (
-                    <div key={status} class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                      <h4 class="font-bold text-sm text-slate-700 uppercase mb-3">{status === 'todo' ? '📌 Da Fare' : status === 'in_progress' ? '⚡ In Corso' : '✅ Completati'}</h4>
-                      <div class="space-y-3">
-                        {userData.tasks.filter(t => t.status === status).map(t => (
-                          <div key={t.id} class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-2">
-                            <p class="font-bold text-slate-800 text-sm">{t.title}</p>
-                            <p class="text-xs text-slate-400">{t.subject || 'Generale'}</p>
-                            <div class="flex gap-2 mt-2">
-                              {status !== 'todo' && <button onClick={() => {
-                                const updated = userData.tasks.map(item => item.id === t.id ? {...item, status: status === 'done' ? 'in_progress' : 'todo'} : item);
-                                setUserData({...userData, tasks: updated});
-                              }} class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold">← Sposta</button>}
-                              {status !== 'done' && <button onClick={() => {
-                                const updated = userData.tasks.map(item => item.id === t.id ? {...item, status: status === 'todo' ? 'in_progress' : 'done'} : item);
-                                setUserData({...userData, tasks: updated});
-                              }} class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded font-bold">Sposta →</button>}
+                            <div class="flex items-center gap-2 text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
+                                <i class="ph-fill ph-folders"></i>
+                                <span id="dashboard-context-label">Spazio di Studio</span>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TIMER POMODORO */}
-            {activeTab === 'pomodoro' && (
-              <div class="max-w-md mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center space-y-6">
-                <span class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-full text-xs uppercase">{pomoMode === 'work' ? '🎯 Sessione Studio' : '☕ Pausa'}</span>
-                <div class="text-6xl font-black text-slate-800 tracking-tight">
-                  {Math.floor(pomoTime / 60).toString().padStart(2, '0')}:{(pomoTime % 60).toString().padStart(2, '0')}
-                </div>
-                <div class="flex justify-center gap-3">
-                  <button onClick={() => setPomoActive(!pomoActive)} class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25">
-                    {pomoActive ? 'Pausa' : 'Avvia'}
-                  </button>
-                  <button onClick={() => { setPomoActive(false); setPomoTime(25*60); setPomoMode('work'); }} class="px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">
-                    Reset
-                  </button>
-                </div>
-                <div class="pt-4 border-t border-slate-100">
-                  <p class="text-xs font-bold text-slate-400 uppercase mb-3">Suoni Ambientali Synth</p>
-                  <div class="flex justify-center gap-2">
-                    <button onClick={() => playAmbientSound('rain')} class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-lg">🌧️ Pioggia</button>
-                    <button onClick={() => playAmbientSound('white')} class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-lg">🌊 Onde</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* HUB CARTELLE & CANVA */}
-            {activeTab === 'files' && (
-              <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Aggiungi Cartella</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if(!newFolder.name) return;
-                    setUserData({...userData, folders: [...userData.folders, { id: 'f_' + Date.now(), ...newFolder }]});
-                    setNewFolder({ name: '', color: 'bg-indigo-500' });
-                  }} class="flex gap-3">
-                    <input type="text" placeholder="Nome cartella *" class="flex-1 px-3 py-2 border rounded-xl text-sm" value={newFolder.name} onChange={e => setNewFolder({...newFolder, name: e.target.value})} required />
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm px-4 py-2 shadow-md">Crea Cartella</button>
-                  </form>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {userData.folders.map(f => (
-                    <div key={f.id} class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-                      <div class={`w-10 h-10 ${f.color} rounded-xl flex items-center justify-center text-white font-bold`}>
-                        <i data-lucide="folder" class="w-5 h-5"></i>
-                      </div>
-                      <div>
-                        <h4 class="font-bold text-slate-800">{f.name}</h4>
-                        <p class="text-xs text-slate-400">{userData.files.filter(fi => fi.folderId === f.id).length} file collegati</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* NOTE */}
-            {activeTab === 'notes' && (
-              <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Scrivi Nuova Nota</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if(!newNote.title) return;
-                    setUserData({...userData, notes: [...userData.notes, { id: 'n_' + Date.now(), ...newNote, date: new Date().toISOString().split('T')[0] }]});
-                    setNewNote({ title: '', subject: '', content: '', tags: '' });
-                  }} class="space-y-3">
-                    <input type="text" placeholder="Titolo nota *" class="w-full px-3 py-2 border rounded-xl text-sm" value={newNote.title} onChange={e => setNewNote({...newNote, title: e.target.value})} required />
-                    <textarea placeholder="Contenuto appunti..." class="w-full px-3 py-2 border rounded-xl text-sm h-24" value={newNote.content} onChange={e => setNewNote({...newNote, content: e.target.value})}></textarea>
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm px-4 py-2 shadow-md">Salva Nota</button>
-                  </form>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {userData.notes.map(n => (
-                    <div key={n.id} class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                      <h4 class="font-bold text-slate-800">{n.title}</h4>
-                      <p class="text-xs text-indigo-600 font-semibold mt-0.5">{n.subject || 'Generale'}</p>
-                      <p class="text-sm text-slate-600 mt-2 whitespace-pre-wrap">{n.content}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SPESE */}
-            {activeTab === 'expenses' && (
-              <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Registra Spesa / Entrata</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if(!newExpense.title || !newExpense.amount) return;
-                    setUserData({...userData, expenses: [...userData.expenses, { id: Date.now(), ...newExpense, amount: Number(newExpense.amount) }]});
-                    setNewExpense({ type: 'uscita', category: 'Libri', title: '', amount: '', date: '' });
-                  }} class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" placeholder="Descrizione *" class="px-3 py-2 border rounded-xl text-sm" value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} required />
-                    <input type="number" step="0.01" placeholder="Importo € *" class="px-3 py-2 border rounded-xl text-sm" value={newExpense.amount} onChange={e => setNewExpense({...newExpense, amount: e.target.value})} required />
-                    <select class="px-3 py-2 border rounded-xl text-sm bg-white" value={newExpense.type} onChange={e => setNewExpense({...newExpense, type: e.target.value})}>
-                      <option value="uscita">Uscita (-)</option>
-                      <option value="entrata">Entrata (+)</option>
-                    </select>
-                    <button type="submit" class="bg-indigo-600 text-white font-bold rounded-xl text-sm py-2 shadow-md">Registra Transazione</button>
-                  </form>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Storico Movimenti</h3>
-                  <div class="space-y-3">
-                    {userData.expenses.map(ex => (
-                      <div key={ex.id} class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                        <div>
-                          <p class="font-bold text-slate-800">{ex.title}</p>
-                          <p class="text-xs text-slate-400">{ex.category}</p>
+                            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Le tue Cartelle</h2>
+                            <p class="text-sm text-slate-500 mt-1">Clicca su una cartella colorata per aprire gli argomenti e gli appunti al suo interno.</p>
                         </div>
-                        <span class={`font-extrabold text-sm ${ex.type === 'entrata' ? 'text-emerald-600' : 'text-red-600'}`}>
-                          {ex.type === 'entrata' ? '+' : '-'}€{Number(ex.amount).toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+                        <button onclick="openFolderModal()" class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/20 text-xs font-bold flex items-center gap-2 transition-all">
+                            <i class="ph-bold ph-folder-plus text-base"></i>
+                            <span>+ Nuova Cartella</span>
+                        </button>
+                    </div>
 
-            {/* DOCENTI & ORARIO */}
-            {activeTab === 'professors' && (
-              <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 class="font-bold text-lg mb-4 text-slate-800">Rubrica Docenti</h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {userData.professors.map(p => (
-                      <div key={p.id} class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                        <h4 class="font-bold text-slate-800">{p.name}</h4>
-                        <p class="text-xs text-indigo-600 font-semibold">{p.subject}</p>
-                        <p class="text-xs text-slate-500">📧 {p.email}</p>
-                        <p class="text-xs text-slate-500">🏢 {p.office}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </main>
+                    <!-- ONLY COLORED FOLDERS GRID -->
+                    <div id="folders-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-1">
+                        <!-- Populated dynamically with colorful folder cards ONLY -->
+                    </div>
+                </section>
 
-          {/* Bottom Bar Mobile */}
-          <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-400 border-t border-slate-800 flex justify-around p-2 z-50">
-            {[
-              { id: 'dashboard', icon: 'layout-dashboard', label: 'Dash' },
-              { id: 'grades', icon: 'award', label: 'Voti' },
-              { id: 'tasks', icon: 'check-square', label: 'Tasks' },
-              { id: 'pomodoro', icon: 'clock', label: 'Focus' },
-              { id: 'files', icon: 'folder-open', label: 'File' },
-              { id: 'notes', icon: 'file-text', label: 'Note' },
-            ].map(item => (
-              <button key={item.id} onClick={() => setActiveTab(item.id)} class={`flex flex-col items-center py-1 px-2 text-[10px] font-bold ${activeTab === item.id ? 'text-indigo-400' : ''}`}>
-                <i data-lucide={item.icon} class="w-5 h-5 mb-0.5"></i>
-                {item.label}
-              </button>
-            ))}
-          </nav>
+                <!-- ============================================================= -->
+                <!-- VIEW 2: DETTAGLIO CARTELLA / RISULTATI RICERCA                -->
+                <!-- ============================================================= -->
+                <section id="view-folder-detail" class="max-w-6xl mx-auto space-y-6 hidden fade-in">
+                    
+                    <!-- Breadcrumb -->
+                    <div class="flex items-center justify-between">
+                        <button onclick="backToFoldersDashboard()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-2 shadow-2xs transition-all">
+                            <i class="ph-bold ph-arrow-left text-indigo-600"></i>
+                            <span>Torna alle Cartelle</span>
+                        </button>
+                        <span id="breadcrumb-current" class="text-xs font-bold text-slate-400">Cartella</span>
+                    </div>
+
+                    <!-- Colorful Folder Banner -->
+                    <div id="folder-banner" class="rounded-3xl p-6 sm:p-7 border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-slate-200/80 shadow-2xs">
+                        <div class="flex items-center gap-4">
+                            <div id="detail-folder-icon" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-2xs shrink-0">
+                                📐
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2.5 flex-wrap">
+                                    <h2 id="detail-folder-title" class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Matematica</h2>
+                                    <span id="detail-folder-count" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/80 text-slate-700 border border-slate-200/60">0 appunti</span>
+                                </div>
+                                <p id="detail-folder-subtitle" class="text-sm text-slate-600 mt-1">Appunti organizzati per sottocartelle e argomenti</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 self-start sm:self-center">
+                            <button id="detail-edit-folder-btn" onclick="editCurrentFolder()" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all">
+                                <i class="ph-bold ph-sliders-horizontal"></i>
+                                <span>Personalizza</span>
+                            </button>
+                            <button onclick="openNewNote()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all">
+                                <i class="ph-bold ph-plus"></i>
+                                <span>Nuovo Appunto</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Subfolders / Topic Tabs & Layout Switcher -->
+                    <div id="subfolder-toolbar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
+                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="subfolder-tabs">
+                        </div>
+
+                        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                            <button id="add-subfolder-btn" onclick="openSubfolderPrompt()" class="px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-600 hover:bg-indigo-50 flex items-center gap-1 transition-colors">
+                                <i class="ph-bold ph-folder-simple-plus"></i>
+                                <span>Sottocartella</span>
+                            </button>
+                            <div class="w-px h-5 bg-slate-200"></div>
+                            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                                <button onclick="setLayoutMode('grid')" id="btn-grid" class="p-1.5 rounded-lg bg-white text-slate-900 shadow-2xs" title="Vista Griglia">
+                                    <i class="ph-bold ph-squares-four text-sm"></i>
+                                </button>
+                                <button onclick="setLayoutMode('list')" id="btn-list" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700" title="Vista Lista">
+                                    <i class="ph-bold ph-list-dashes text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Grid / List inside Folder -->
+                    <div id="notes-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    </div>
+                </section>
+
+                <!-- ============================================================= -->
+                <!-- VIEW 3: CHAT DI CLASSE IN TEMPO REALE + ALLEGATI APPUNTI      -->
+                <!-- ============================================================= -->
+                <section id="view-chat" class="max-w-6xl mx-auto h-[calc(100vh-7.5rem)] hidden fade-in">
+                    
+                    <!-- If user is in Personal Workspace (no class selected) -->
+                    <div id="chat-no-class-banner" class="hidden h-full flex items-center justify-center">
+                        <div class="max-w-md bg-white rounded-3xl border border-slate-200/80 p-8 text-center space-y-4 shadow-sm">
+                            <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl">
+                                <i class="ph-duotone ph-chats-circle"></i>
+                            </div>
+                            <h3 class="font-display text-xl font-extrabold text-slate-900">Unisciti a una Classe per Chattare</h3>
+                            <p class="text-sm text-slate-500">La chat di classe ti permette di scrivere ai compagni e caricare gli appunti direttamente dalle tue cartelle colorate.</p>
+                            <button onclick="openClassLobby()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition-all">
+                                Crea una Classe o Inserisci Codice
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Active Class Chat Interface -->
+                    <div id="chat-active-container" class="h-full grid grid-cols-1 lg:grid-cols-4 gap-5">
+                        
+                        <!-- Main Chat Box (3 cols) -->
+                        <div class="lg:col-span-3 bg-white rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col overflow-hidden h-full">
+                            
+                            <!-- Chat Top Header -->
+                            <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between gap-3 bg-white shrink-0">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                                        <i class="ph-duotone ph-users-three"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h3 id="chat-class-title" class="font-display font-extrabold text-base text-slate-900 truncate">Chat di Classe</h3>
+                                        <p id="chat-members-subtitle" class="text-xs text-slate-400">Condividi messaggi e appunti in tempo reale</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button onclick="copyClassCode()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                                        <i class="ph-bold ph-user-plus"></i>
+                                        <span>Codice: <span id="chat-header-code" class="font-mono">CLS-0000</span></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Chat Messages Feed -->
+                            <div id="chat-messages-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
+                                <!-- Messages populated in real time -->
+                            </div>
+
+                            <!-- Chat Input Bar -->
+                            <form onsubmit="sendChatMessage(event)" class="p-3 sm:p-4 border-t border-slate-100 bg-white flex items-center gap-2 shrink-0">
+                                <button type="button" onclick="openAttachNoteModal()" title="Carica un appunto nella chat" 
+                                        class="px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center gap-1.5 transition-colors shrink-0">
+                                    <i class="ph-bold ph-paperclip text-base"></i>
+                                    <span class="hidden sm:inline">Allega Appunto</span>
+                                </button>
+
+                                <input type="text" id="chat-input" placeholder="Scrivi un messaggio ai compagni di classe..." 
+                                       class="flex-1 px-4 py-2.5 rounded-xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-sm outline-none transition-all">
+
+                                <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center gap-1.5 shadow-xs transition-all shrink-0">
+                                    <span class="hidden sm:inline">Invia</span>
+                                    <i class="ph-bold ph-paper-plane-right"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Classmates Sidebar (1 col, visible on desktop) -->
+                        <div class="hidden lg:flex bg-white rounded-3xl border border-slate-200/80 p-5 shadow-2xs flex-col justify-between overflow-hidden">
+                            <div class="space-y-4 overflow-y-auto">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-display font-bold text-sm text-slate-900">Compagni di Classe</h4>
+                                    <span id="class-members-count" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">1</span>
+                                </div>
+
+                                <div id="class-members-list" class="space-y-2.5">
+                                    <!-- Members populated dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-100 space-y-2">
+                                <p class="text-[11px] text-slate-400">Invita altri compagni condividendo il codice della classe:</p>
+                                <button onclick="copyClassCode()" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all">
+                                    <i class="ph-bold ph-copy"></i>
+                                    <span id="sidebar-panel-code">Copia Codice</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ============================================================= -->
+                <!-- VIEW 4: CALENDARIO SCOLASTICO                                 -->
+                <!-- ============================================================= -->
+                <section id="view-calendar" class="max-w-6xl mx-auto space-y-6 hidden fade-in">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                        <div>
+                            <h2 class="font-display text-2xl font-extrabold text-slate-900">Calendario Scolastico</h2>
+                            <p class="text-sm text-slate-500">Verifiche, interrogazioni e consegne sincronizzate con le tue materie.</p>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="goToTodayCalendar()" class="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors">
+                                Oggi
+                            </button>
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1">
+                                <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-white text-slate-600 transition-all">
+                                    <i class="ph-bold ph-caret-left"></i>
+                                </button>
+                                <span id="calendar-month-label" class="font-display font-bold text-sm min-w-[145px] text-center capitalize text-slate-800 px-2">Novembre 2026</span>
+                                <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-white text-slate-600 transition-all">
+                                    <i class="ph-bold ph-caret-right"></i>
+                                </button>
+                            </div>
+                            <button onclick="openEventModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all">
+                                <i class="ph-bold ph-plus"></i>
+                                <span>Nuovo Evento</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1" id="calendar-subject-filters"></div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs">
+                            <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-400 pb-3 border-b border-slate-100">
+                                <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+                            </div>
+                            <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 pt-3"></div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs flex flex-col">
+                            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                                <div>
+                                    <h3 id="selected-date-title" class="font-display font-bold text-base text-slate-900">Prossimi Impegni</h3>
+                                    <p id="selected-date-subtitle" class="text-xs text-slate-400">Ordinati per data</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="clearDateFilter()" id="reset-date-filter" class="hidden text-xs font-bold text-indigo-600 hover:underline">Tutti</button>
+                                    <button onclick="openEventModal()" class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 flex items-center justify-center">
+                                        <i class="ph-bold ph-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="calendar-events-sidebar" class="flex-1 overflow-y-auto space-y-3 pt-4 max-h-[500px]"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 1: RICH NOTE EDITOR                                             -->
+    <!-- ===================================================================== -->
+    <div id="note-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-white w-full max-w-4xl h-[92vh] sm:h-[86vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 fade-in">
+            
+            <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-50/80 flex-wrap">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="note-folder-select" onchange="onEditorFolderChange()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500"></select>
+                    <select id="note-subfolder-select" onchange="triggerAutoSave()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-600 outline-none focus:border-indigo-500"></select>
+                    <button id="note-pin-btn" onclick="toggleNotePinInEditor()" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-amber-500 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                        <i class="ph-bold ph-star"></i>
+                        <span>Fissa</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span id="save-status" class="text-xs text-emerald-600 font-semibold hidden sm:flex items-center gap-1">
+                        <i class="ph-fill ph-check-circle"></i> Salvato
+                    </span>
+                    <button id="share-note-chat-btn" onclick="shareCurrentNoteToChat()" class="hidden px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                        <i class="ph-bold ph-paper-plane-tilt"></i>
+                        <span class="hidden sm:inline">Invia in Chat</span>
+                    </button>
+                    <button id="delete-note-btn" onclick="deleteCurrentNote()" class="p-2 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors" title="Elimina appunto">
+                        <i class="ph-bold ph-trash text-base"></i>
+                    </button>
+                    <button onclick="saveAndCloseNote()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-colors">
+                        Salva e Chiudi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formatting Toolbar -->
+            <div class="px-5 py-2 border-b border-slate-100 flex items-center gap-1 overflow-x-auto bg-white shrink-0">
+                <button type="button" onclick="execCmd('bold')" class="p-2 rounded-lg hover:bg-slate-100 text-slate-700" title="Grassetto"><i class="ph-bold ph-text-b"></i></button>
+                <button type="button" onclick="execCmd('italic')" class="p-2 rounded-lg hover:bg-slate-100 text-slate-700" title="Corsivo"><i class="ph-bold ph-text-italic"></i></button>
+                <button type="button" onclick="execCmd('underline')" class="p-2 rounded-lg hover:bg-slate-100 text-slate-700" title="Sottolineato"><i class="ph-bold ph-text-underline"></i></button>
+                <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                <button type="button" onclick="execCmd('formatBlock', 'H2')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-700 font-display font-bold text-xs">H2 Titolo</button>
+                <button type="button" onclick="execCmd('insertUnorderedList')" class="p-2 rounded-lg hover:bg-slate-100 text-slate-700"><i class="ph-bold ph-list-bullets"></i></button>
+                <button type="button" onclick="execCmd('insertOrderedList')" class="p-2 rounded-lg hover:bg-slate-100 text-slate-700"><i class="ph-bold ph-list-numbers"></i></button>
+                <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                <button type="button" onclick="execCmd('hiliteColor', '#fef08a')" class="w-6 h-6 rounded-full bg-yellow-200 border border-yellow-400 hover:scale-110 transition-transform" title="Giallo"></button>
+                <button type="button" onclick="execCmd('hiliteColor', '#bbf7d0')" class="w-6 h-6 rounded-full bg-emerald-200 border border-emerald-400 hover:scale-110 transition-transform" title="Verde"></button>
+                <button type="button" onclick="execCmd('hiliteColor', '#fbcfe8')" class="w-6 h-6 rounded-full bg-pink-200 border border-pink-400 hover:scale-110 transition-transform" title="Rosa"></button>
+                <button type="button" onclick="execCmd('hiliteColor', '#bae6fd')" class="w-6 h-6 rounded-full bg-sky-200 border border-sky-400 hover:scale-110 transition-transform" title="Azzurro"></button>
+                <button type="button" onclick="execCmd('hiliteColor', 'transparent')" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 text-xs" title="Cancella evidenziazione"><i class="ph-bold ph-eraser"></i></button>
+                <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                <button type="button" onclick="execCmd('formatBlock', 'BLOCKQUOTE')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-1">
+                    <i class="ph-bold ph-lightbulb"></i><span>Box Regola</span>
+                </button>
+            </div>
+
+            <!-- Editor Body -->
+            <div class="flex-1 overflow-y-auto p-6 sm:p-10 space-y-4">
+                <input type="text" id="note-title-input" oninput="triggerAutoSave()" placeholder="Titolo dell'appunto..." 
+                       class="w-full font-display text-2xl sm:text-3xl font-extrabold text-slate-900 placeholder:text-slate-300 outline-none bg-transparent">
+                <div class="flex items-center gap-4 text-xs text-slate-400 pb-3 border-b border-slate-100">
+                    <span id="note-date-display">Oggi</span>
+                    <span>•</span>
+                    <span id="word-count-display">0 parole</span>
+                </div>
+                <div id="editor-content" contenteditable="true" oninput="handleEditorInput()" 
+                     data-placeholder="Scrivi qui i tuoi appunti..."
+                     class="min-h-[320px] text-slate-700 text-base leading-relaxed outline-none pb-12">
+                </div>
+            </div>
         </div>
-      );
-    }
+    </div>
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+    <!-- ===================================================================== -->
+    <!-- MODAL 2: CREATE / EDIT COLORED FOLDER                                 -->
+    <!-- ===================================================================== -->
+    <div id="folder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5">
+            <div class="flex items-center justify-between">
+                <h3 id="folder-modal-title" class="font-display text-xl font-extrabold text-slate-900">Nuova Cartella</h3>
+                <button onclick="closeFolderModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100"><i class="ph-bold ph-x"></i></button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Nome Materia</label>
+                    <input type="text" id="folder-name-input" placeholder="Es. Fisica, Filosofia, Arte, Chimica..." 
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Sottocartelle (separate da virgola)</label>
+                    <input type="text" id="folder-subfolders-input" placeholder="Es. Trimestre 1, Ripasso, Esercizi" 
+                           class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-xs font-medium text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Icona Materia</label>
+                    <div class="grid grid-cols-6 gap-2" id="emoji-picker"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Colore Cartella</label>
+                    <div class="grid grid-cols-5 gap-2.5" id="color-picker"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <button id="delete-folder-btn" onclick="deleteCurrentFolder()" class="hidden px-3.5 py-2 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold">Elimina Cartella</button>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button onclick="closeFolderModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-bold">Annulla</button>
+                    <button onclick="saveFolder()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs">Salva Cartella</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 3: ATTACH NOTE TO CHAT SELECTOR                                 -->
+    <!-- ===================================================================== -->
+    <div id="attach-note-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-display text-lg font-extrabold text-slate-900">Allega un Appunto in Chat</h3>
+                    <p class="text-xs text-slate-500">Scegli un appunto dalle tue cartelle da condividere con la classe</p>
+                </div>
+                <button onclick="closeAttachNoteModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100"><i class="ph-bold ph-x"></i></button>
+            </div>
+
+            <div id="attach-notes-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 4: VIEW SHARED NOTE FROM CHAT (READ & IMPORT)                   -->
+    <!-- ===================================================================== -->
+    <div id="shared-note-viewer-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-3xl max-h-[88vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 fade-in">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-50">
+                <div class="flex items-center gap-2.5">
+                    <span id="viewer-folder-badge" class="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-100 text-indigo-700">📐 Materia</span>
+                    <span id="viewer-author-label" class="text-xs text-slate-500 font-medium">Condiviso da Compagno</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="importSharedNoteToMyFolders()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors">
+                        <i class="ph-bold ph-download-simple"></i>
+                        <span>Salva nelle mie Cartelle</span>
+                    </button>
+                    <button onclick="closeSharedNoteViewer()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200/70"><i class="ph-bold ph-x"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 sm:p-8 space-y-4">
+                <h2 id="viewer-title" class="font-display text-2xl font-extrabold text-slate-900">Titolo Appunto</h2>
+                <div id="viewer-content" class="text-slate-700 text-base leading-relaxed"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 5: ADD SUBFOLDER & ADD EVENT                                    -->
+    <!-- ===================================================================== -->
+    <div id="subfolder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-display text-lg font-extrabold text-slate-900">Nuova Sottocartella</h3>
+                <button onclick="closeSubfolderModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100"><i class="ph-bold ph-x"></i></button>
+            </div>
+            <input type="text" id="new-subfolder-name" placeholder="Es. Trimestre 2, Schemi, Formule..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-semibold">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeSubfolderModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-bold">Annulla</button>
+                <button onclick="confirmAddSubfolder()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">Aggiungi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="event-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5 overflow-hidden">
+            <div class="flex items-center justify-between">
+                <h3 class="font-display text-xl font-extrabold text-slate-900">Nuovo Evento Scolastico</h3>
+                <button onclick="closeEventModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100"><i class="ph-bold ph-x"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Titolo Evento</label>
+                    <input type="text" id="event-title-input" placeholder="Es. Verifica di Matematica..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none text-sm font-semibold">
+                </div>
+                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 w-full">
+                    <div class="min-w-0 flex flex-col items-center">
+                        <label class="block w-full text-center text-xs font-bold uppercase text-slate-500 mb-1.5">Data</label>
+                        <input type="date" id="event-date-input" class="ios-centered-picker h-11 px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white focus:border-indigo-500 outline-none text-sm font-semibold text-slate-800">
+                    </div>
+                    <div class="min-w-0 flex flex-col items-center">
+                        <label class="block w-full text-center text-xs font-bold uppercase text-slate-500 mb-1.5">Ora</label>
+                        <input type="time" id="event-time-input" class="ios-centered-picker h-11 px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white focus:border-indigo-500 outline-none text-sm font-semibold text-slate-800">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Materia</label>
+                        <select id="event-folder-input" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-semibold bg-white"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Tipologia</label>
+                        <select id="event-type-input" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-semibold bg-white">
+                            <option value="Verifica">📝 Verifica</option>
+                            <option value="Interrogazione">🗣️ Interrogazione</option>
+                            <option value="Consegna">📁 Consegna</option>
+                            <option value="Evento">🎒 Evento</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Note</label>
+                    <input type="text" id="event-notes-input" placeholder="Argomenti..." class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm">
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeEventModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-bold">Annulla</button>
+                <button onclick="saveEvent()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
+        <i class="ph-fill ph-check-circle text-emerald-400 text-lg"></i>
+        <span id="toast-msg">Operazione completata</span>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- FIREBASE & APPLICATION LOGIC                                          -->
+    <!-- ===================================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            updateProfile,
+            signOut,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            onSnapshot, 
+            collection,
+            getDocs
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE INITIALIZATION ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'studyflow-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        let app = null, auth = null, db = null;
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        }
+
+        // --- COLOR THEMES & CONSTANTS ---
+        const COLOR_THEMES = {
+            indigo:  { name: 'Indaco',     bg: 'bg-indigo-50',  cardBg: 'bg-gradient-to-br from-indigo-50/90 to-blue-50/40',    text: 'text-indigo-700',  border: 'border-indigo-200/80',  bar: 'bg-indigo-500',  badge: 'bg-indigo-100 text-indigo-700' },
+            amber:   { name: 'Ambra',      bg: 'bg-amber-50',   cardBg: 'bg-gradient-to-br from-amber-50/90 to-orange-50/40',   text: 'text-amber-700',   border: 'border-amber-200/80',   bar: 'bg-amber-500',   badge: 'bg-amber-100 text-amber-800' },
+            emerald: { name: 'Smeraldo',   bg: 'bg-emerald-50', cardBg: 'bg-gradient-to-br from-emerald-50/90 to-teal-50/40',   text: 'text-emerald-700', border: 'border-emerald-200/80', bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
+            rose:    { name: 'Rosa',       bg: 'bg-rose-50',    cardBg: 'bg-gradient-to-br from-rose-50/90 to-pink-50/40',      text: 'text-rose-700',    border: 'border-rose-200/80',    bar: 'bg-rose-500',    badge: 'bg-rose-100 text-rose-700' },
+            purple:  { name: 'Viola',      bg: 'bg-purple-50',  cardBg: 'bg-gradient-to-br from-purple-50/90 to-fuchsia-50/40', text: 'text-purple-700',  border: 'border-purple-200/80',  bar: 'bg-purple-500',  badge: 'bg-purple-100 text-purple-700' },
+            cyan:    { name: 'Ciano',      bg: 'bg-cyan-50',    cardBg: 'bg-gradient-to-br from-cyan-50/90 to-sky-50/40',       text: 'text-cyan-700',    border: 'border-cyan-200/80',    bar: 'bg-cyan-500',    badge: 'bg-cyan-100 text-cyan-700' },
+            orange:  { name: 'Arancio',    bg: 'bg-orange-50',  cardBg: 'bg-gradient-to-br from-orange-50/90 to-red-50/30',     text: 'text-orange-700',  border: 'border-orange-200/80',  bar: 'bg-orange-500',  badge: 'bg-orange-100 text-orange-700' },
+            teal:    { name: 'Verde Acqua',bg: 'bg-teal-50',    cardBg: 'bg-gradient-to-br from-teal-50/90 to-emerald-50/40',   text: 'text-teal-700',    border: 'border-teal-200/80',    bar: 'bg-teal-500',    badge: 'bg-teal-100 text-teal-700' },
+            fuchsia: { name: 'Fucsia',     bg: 'bg-fuchsia-50', cardBg: 'bg-gradient-to-br from-fuchsia-50/90 to-pink-50/40',   text: 'text-fuchsia-700', border: 'border-fuchsia-200/80', bar: 'bg-fuchsia-500', badge: 'bg-fuchsia-100 text-fuchsia-700' },
+            sky:     { name: 'Azzurro',    bg: 'bg-sky-50',     cardBg: 'bg-gradient-to-br from-sky-50/90 to-blue-50/40',       text: 'text-sky-700',     border: 'border-sky-200/80',     bar: 'bg-sky-500',     badge: 'bg-sky-100 text-sky-700' }
+        };
+
+        const EMOJI_OPTIONS = ['📐', '🏛️', '🧬', '📚', '🇬🇧', '🎨', '💻', '🧪', '🌍', '⚖️', '🎵', '🏃'];
+        const EVENT_TYPE_ICONS = { 'Verifica': '📝', 'Interrogazione': '🗣️', 'Consegna': '📁', 'Evento': '🎒' };
+
+        function getDateStrOffset(daysOffset) {
+            const d = new Date();
+            d.setDate(d.getDate() + daysOffset);
+            return d.toISOString().split('T')[0];
+        }
+
+        const DEFAULT_FOLDERS = [
+            { id: 'f-math', name: 'Matematica', icon: '📐', color: 'indigo', subfolders: ['Trimestre 1', 'Formule', 'Esercizi'] },
+            { id: 'f-hist', name: 'Storia', icon: '🏛️', color: 'amber', subfolders: ['Trimestre 1', 'Ripasso', 'Date Chiave'] },
+            { id: 'f-sci',  name: 'Scienze', icon: '🧬', color: 'emerald', subfolders: ['Biologia', 'Chimica', 'Laboratorio'] },
+            { id: 'f-lit',  name: 'Letteratura', icon: '📚', color: 'rose', subfolders: ['Autori', 'Analisi Testo', 'Ripasso'] },
+            { id: 'f-eng',  name: 'Inglese', icon: '🇬🇧', color: 'purple', subfolders: ['Grammar', 'Literature', 'Writing'] },
+            { id: 'f-art',  name: 'Arte & Filosofia', icon: '🎨', color: 'cyan', subfolders: ['Storia dell\'Arte', 'Filosofia', 'Schemi'] }
+        ];
+
+        const DEFAULT_NOTES = [
+            {
+                id: 'n-1',
+                folderId: 'f-math',
+                subfolder: 'Formule',
+                title: 'Studio di Funzione e Regole di Derivazione',
+                pinned: true,
+                updatedAt: getDateStrOffset(0),
+                content: `<h2>Schema rapido per lo studio di funzione</h2><ul><li><b>1. Dominio:</b> controllare denominatori (≠ 0), radici pari (≥ 0) e logaritmi (> 0).</li><li><b>2. Limiti e Asintoti:</b> calcolare i limiti agli estremi del dominio.</li><li><b>3. Derivata Prima f'(x):</b> studiare il segno per massimi e minimi.</li></ul><blockquote>Ricorda: dove f''(x) = 0 si trovano i possibili punti di flesso!</blockquote>`
+            },
+            {
+                id: 'n-2',
+                folderId: 'f-hist',
+                subfolder: 'Ripasso',
+                title: 'La Rivoluzione Industriale e le sue conseguenze',
+                pinned: true,
+                updatedAt: getDateStrOffset(-1),
+                content: `<h2>Perché iniziò in Inghilterra nel Settecento?</h2><p>Grandissima disponibilità di <span style="background-color: rgb(254, 240, 138);">carbone e ferro</span> a basso costo e invenzione della macchina a vapore di James Watt (1769).</p>`
+            },
+            {
+                id: 'n-3',
+                folderId: 'f-sci',
+                subfolder: 'Biologia',
+                title: 'La Cellula Eucariote: Organuli e Funzioni',
+                pinned: false,
+                updatedAt: getDateStrOffset(-2),
+                content: `<h2>Organuli principali</h2><ul><li><b>Nucleo:</b> contiene il DNA.</li><li><b>Mitocondri:</b> <span style="background-color: rgb(187, 247, 208);">centrale energetica della cellula</span> (ATP).</li></ul>`
+            }
+        ];
+
+        const DEFAULT_EVENTS = [
+            { id: 'e-1', title: 'Verifica di Matematica (Derivate)', date: getDateStrOffset(2), time: '09:00', type: 'Verifica', folderId: 'f-math', notes: 'Portare calcolatrice' },
+            { id: 'e-2', title: 'Interrogazione di Storia', date: getDateStrOffset(5), time: '11:00', type: 'Interrogazione', folderId: 'f-hist', notes: 'Capitoli 8 e 9' }
+        ];
+
+        // --- APPLICATION STATE ---
+        let state = {
+            user: null,
+            userName: 'Studente',
+            authMode: 'login', // 'login' | 'register'
+            userClasses: [], // List of { id, name, code }
+            activeClass: null, // null = Personal Workspace, or { id, name, code, members }
+            folders: [],
+            notes: [],
+            events: [],
+            messages: [],
+            currentView: 'folders', // 'folders' | 'folder-detail' | 'chat' | 'calendar'
+            selectedFolderId: null,
+            selectedSubfolder: 'ALL',
+            searchQuery: '',
+            layoutMode: 'grid',
+            editingNoteId: null,
+            editingNotePinned: false,
+            editingFolderId: null,
+            selectedEmoji: '📐',
+            selectedColor: 'indigo',
+            calendarMonth: new Date(),
+            selectedCalendarDate: null,
+            calendarFolderFilter: 'ALL',
+            viewingSharedNote: null
+        };
+
+        let unsubFolders = null, unsubNotes = null, unsubEvents = null, unsubMessages = null, unsubClassDoc = null;
+        let autoSaveTimeout = null;
+
+        // --- AUTHENTICATION FLOW ---
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    state.user = user;
+                    state.userName = user.displayName || (user.email ? user.email.split('@')[0] : 'Studente ' + user.uid.slice(0, 4).toUpperCase());
+                    updateUserUI();
+                    await loadUserClasses();
+                    showScreen('lobby');
+                } else {
+                    state.user = null;
+                    cleanupListeners();
+                    showScreen('auth');
+                }
+            });
+        }
+
+        window.switchAuthTab = function(mode) {
+            state.authMode = mode;
+            const loginTab = document.getElementById('tab-login');
+            const regTab = document.getElementById('tab-register');
+            const nameGroup = document.getElementById('register-name-group');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            document.getElementById('auth-error').classList.add('hidden');
+
+            if (mode === 'login') {
+                loginTab.className = 'py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-900 shadow-2xs transition-all';
+                regTab.className = 'py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-all';
+                nameGroup.classList.add('hidden');
+                submitBtn.textContent = 'Accedi a StudyFlow';
+            } else {
+                regTab.className = 'py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-900 shadow-2xs transition-all';
+                loginTab.className = 'py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-all';
+                nameGroup.classList.remove('hidden');
+                submitBtn.textContent = 'Crea Account Studente';
+            }
+        };
+
+        window.handleAuthSubmit = async function(e) {
+            e.preventDefault();
+            if (!auth) return;
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value.trim();
+            const errBox = document.getElementById('auth-error');
+            const errMsg = document.getElementById('auth-error-msg');
+            errBox.classList.add('hidden');
+
+            try {
+                if (state.authMode === 'register') {
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    if (name) {
+                        await updateProfile(cred.user, { displayName: name });
+                        state.userName = name;
+                    }
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errBox.classList.remove('hidden');
+                if (err.code === 'auth/email-already-in-use') errMsg.textContent = 'Questa email è già registrata. Prova ad accedere!';
+                else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') errMsg.textContent = 'Email o password non corretti.';
+                else if (err.code === 'auth/weak-password') errMsg.textContent = 'La password deve avere almeno 6 caratteri.';
+                else errMsg.textContent = 'Errore durante l\'accesso: ' + err.message;
+            }
+        };
+
+        window.handleGuestLogin = async function() {
+            if (!auth) return;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                const errBox = document.getElementById('auth-error');
+                errBox.classList.remove('hidden');
+                document.getElementById('auth-error-msg').textContent = 'Errore accesso ospite: ' + err.message;
+            }
+        };
+
+        window.handleLogout = async function() {
+            if (!auth) return;
+            cleanupListeners();
+            await signOut(auth);
+            state.activeClass = null;
+            showToast('Disconnesso');
+        };
+
+        function showScreen(screenName) {
+            document.getElementById('auth-screen').classList.toggle('hidden', screenName !== 'auth');
+            document.getElementById('class-lobby-screen').classList.toggle('hidden', screenName !== 'lobby');
+            document.getElementById('main-app-screen').classList.toggle('hidden', screenName !== 'app');
+        }
+
+        function updateUserUI() {
+            const initials = state.userName.slice(0, 2).toUpperCase();
+            document.getElementById('lobby-user-avatar').textContent = initials;
+            document.getElementById('lobby-user-name').textContent = state.userName;
+            document.getElementById('sidebar-user-avatar').textContent = initials;
+            document.getElementById('sidebar-user-name').textContent = state.userName;
+        }
+
+        // --- CLASS LOBBY & INVITE CODE SYSTEM (FIRESTORE) ---
+        async function loadUserClasses() {
+            if (!state.user || !db) return;
+            try {
+                const snap = await getDocs(collection(db, 'artifacts', appId, 'users', state.user.uid, 'joined_classes'));
+                state.userClasses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderLobbyClasses();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderLobbyClasses() {
+            const box = document.getElementById('lobby-existing-classes-box');
+            const list = document.getElementById('lobby-classes-list');
+            if (state.userClasses.length === 0) {
+                box.classList.add('hidden');
+                return;
+            }
+            box.classList.remove('hidden');
+            list.innerHTML = '';
+            state.userClasses.forEach(cls => {
+                const btn = document.createElement('button');
+                btn.onclick = () => enterClassWorkspace(cls.id);
+                btn.className = 'p-3.5 rounded-2xl border border-indigo-200/80 bg-indigo-50/50 hover:bg-indigo-50 text-left flex items-center justify-between transition-all';
+                btn.innerHTML = `
+                    <div>
+                        <h4 class="font-display font-bold text-sm text-slate-900">${cls.name}</h4>
+                        <span class="text-xs font-mono font-bold text-indigo-600">Codice: ${cls.code}</span>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl bg-white text-indigo-600 text-xs font-bold shadow-2xs">Entra →</span>
+                `;
+                list.appendChild(btn);
+            });
+        }
+
+        window.openClassLobby = async function() {
+            await loadUserClasses();
+            showScreen('lobby');
+        };
+
+        window.handleCreateClass = async function() {
+            if (!state.user || !db) return;
+            const nameInput = document.getElementById('create-class-name');
+            const className = nameInput.value.trim();
+            if (!className) {
+                showToast('Inserisci il nome della classe!');
+                return;
+            }
+
+            const code = 'CLS-' + Math.floor(1000 + Math.random() * 9000);
+            const classId = code; // Use invite code as document ID for instant lookup
+
+            try {
+                const classRef = doc(db, 'artifacts', appId, 'public', 'data', 'classes', classId);
+                await setDoc(classRef, {
+                    name: className,
+                    code: code,
+                    createdBy: state.user.uid,
+                    createdAt: new Date().toISOString(),
+                    members: [{ uid: state.user.uid, name: state.userName }]
+                });
+
+                // Seed default colorful folders for the new class
+                for (const f of DEFAULT_FOLDERS) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', `class_${classId}_folders`, f.id), f);
+                }
+
+                // Welcome message in class chat
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `class_${classId}_messages`), {
+                    senderUid: 'system',
+                    senderName: 'StudyFlow',
+                    text: `Benvenuti nella classe "${className}"! Condividete il codice ${code} con i compagni per scrivere e scambiare appunti.`,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Save in user's joined classes
+                await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'joined_classes', classId), {
+                    name: className,
+                    code: code
+                });
+
+                nameInput.value = '';
+                showToast(`Classe "${className}" creata! Codice: ${code}`);
+                await enterClassWorkspace(classId);
+            } catch (err) {
+                showToast('Errore creazione classe: ' + err.message);
+            }
+        };
+
+        window.handleJoinClass = async function() {
+            if (!state.user || !db) return;
+            const rawCode = document.getElementById('join-class-code').value.trim().toUpperCase();
+            if (!rawCode) {
+                showToast('Inserisci il codice della classe!');
+                return;
+            }
+            const code = rawCode.startsWith('CLS-') ? rawCode : 'CLS-' + rawCode;
+
+            try {
+                const classRef = doc(db, 'artifacts', appId, 'public', 'data', 'classes', code);
+                const snap = await getDoc(classRef);
+
+                if (!snap.exists()) {
+                    showToast('Codice classe non trovato. Controlla e riprova!');
+                    return;
+                }
+
+                const classData = snap.data();
+                const members = classData.members || [];
+                if (!members.some(m => m.uid === state.user.uid)) {
+                    members.push({ uid: state.user.uid, name: state.userName });
+                    await updateDoc(classRef, { members });
+
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `class_${code}_messages`), {
+                        senderUid: 'system',
+                        senderName: 'StudyFlow',
+                        text: `👋 ${state.userName} è entrato nella classe!`,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+
+                await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'joined_classes', code), {
+                    name: classData.name,
+                    code: code
+                });
+
+                document.getElementById('join-class-code').value = '';
+                showToast(`Sei entrato nella classe ${classData.name}!`);
+                await enterClassWorkspace(code);
+            } catch (err) {
+                showToast('Errore accesso alla classe: ' + err.message);
+            }
+        };
+
+        async function enterClassWorkspace(classId) {
+            if (!state.user || !db) return;
+            const classRef = doc(db, 'artifacts', appId, 'public', 'data', 'classes', classId);
+            const snap = await getDoc(classRef);
+            if (!snap.exists()) return;
+
+            state.activeClass = { id: classId, ...snap.data() };
+            showScreen('app');
+            setupFirestoreSync();
+            setView('folders');
+        }
+
+        window.enterPersonalWorkspace = async function() {
+            if (!state.user || !db) return;
+            state.activeClass = null;
+
+            // Check if personal folders exist, otherwise seed defaults
+            const fSnap = await getDocs(collection(db, 'artifacts', appId, 'users', state.user.uid, 'folders'));
+            if (fSnap.empty) {
+                for (const f of DEFAULT_FOLDERS) {
+                    await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'folders', f.id), f);
+                }
+                for (const n of DEFAULT_NOTES) {
+                    await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'notes', n.id), n);
+                }
+                for (const e of DEFAULT_EVENTS) {
+                    await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'events', e.id), e);
+                }
+            }
+
+            showScreen('app');
+            setupFirestoreSync();
+            setView('folders');
+        };
+
+        // --- REALTIME FIRESTORE SYNC ---
+        function cleanupListeners() {
+            if (unsubFolders) { unsubFolders(); unsubFolders = null; }
+            if (unsubNotes) { unsubNotes(); unsubNotes = null; }
+            if (unsubEvents) { unsubEvents(); unsubEvents = null; }
+            if (unsubMessages) { unsubMessages(); unsubMessages = null; }
+            if (unsubClassDoc) { unsubClassDoc(); unsubClassDoc = null; }
+        }
+
+        function getWorkspaceCollections() {
+            if (state.activeClass) {
+                const cid = state.activeClass.id;
+                return {
+                    foldersCol: collection(db, 'artifacts', appId, 'public', 'data', `class_${cid}_folders`),
+                    notesCol: collection(db, 'artifacts', appId, 'public', 'data', `class_${cid}_notes`),
+                    eventsCol: collection(db, 'artifacts', appId, 'public', 'data', `class_${cid}_events`),
+                    messagesCol: collection(db, 'artifacts', appId, 'public', 'data', `class_${cid}_messages`)
+                };
+            } else {
+                const uid = state.user.uid;
+                return {
+                    foldersCol: collection(db, 'artifacts', appId, 'users', uid, 'folders'),
+                    notesCol: collection(db, 'artifacts', appId, 'users', uid, 'notes'),
+                    eventsCol: collection(db, 'artifacts', appId, 'users', uid, 'events'),
+                    messagesCol: null
+                };
+            }
+        }
+
+        function setupFirestoreSync() {
+            cleanupListeners();
+            if (!state.user || !db) return;
+
+            updateWorkspaceHeaderUI();
+            const cols = getWorkspaceCollections();
+
+            unsubFolders = onSnapshot(cols.foldersCol, (snap) => {
+                state.folders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            }, (err) => console.error('Folders sync error:', err));
+
+            unsubNotes = onSnapshot(cols.notesCol, (snap) => {
+                state.notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            }, (err) => console.error('Notes sync error:', err));
+
+            unsubEvents = onSnapshot(cols.eventsCol, (snap) => {
+                state.events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            }, (err) => console.error('Events sync error:', err));
+
+            if (state.activeClass && cols.messagesCol) {
+                const classRef = doc(db, 'artifacts', appId, 'public', 'data', 'classes', state.activeClass.id);
+                unsubClassDoc = onSnapshot(classRef, (snap) => {
+                    if (snap.exists()) {
+                        state.activeClass = { id: snap.id, ...snap.data() };
+                        renderClassMembers();
+                    }
+                }, (err) => console.error(err));
+
+                unsubMessages = onSnapshot(cols.messagesCol, (snap) => {
+                    state.messages = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                        .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+                    document.getElementById('badge-chat-count').textContent = state.messages.length;
+                    if (state.currentView === 'chat') renderChatMessages();
+                }, (err) => console.error('Chat sync error:', err));
+            } else {
+                state.messages = [];
+                document.getElementById('badge-chat-count').textContent = '0';
+            }
+        }
+
+        function updateWorkspaceHeaderUI() {
+            const typeEl = document.getElementById('sidebar-workspace-type');
+            const nameEl = document.getElementById('sidebar-workspace-name');
+            const inviteBox = document.getElementById('sidebar-invite-box');
+            const dashContext = document.getElementById('dashboard-context-label');
+
+            if (state.activeClass) {
+                typeEl.textContent = 'Classe Condivisa';
+                nameEl.textContent = state.activeClass.name;
+                dashContext.textContent = `Classe: ${state.activeClass.name} (${state.activeClass.code})`;
+                inviteBox.classList.remove('hidden');
+                document.getElementById('sidebar-class-code').textContent = state.activeClass.code;
+                document.getElementById('chat-class-title').textContent = state.activeClass.name;
+                document.getElementById('chat-header-code').textContent = state.activeClass.code;
+                document.getElementById('sidebar-panel-code').textContent = `Copia ${state.activeClass.code}`;
+            } else {
+                typeEl.textContent = 'Spazio Privato';
+                nameEl.textContent = 'Cartelle Personali';
+                dashContext.textContent = 'Spazio Personale';
+                inviteBox.classList.add('hidden');
+            }
+        }
+
+        window.copyClassCode = function() {
+            if (!state.activeClass) return;
+            const code = state.activeClass.code;
+            const temp = document.createElement('input');
+            temp.value = code;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast(`Codice ${code} copiato! Invialo ai compagni.`);
+        };
+
+        // --- NAVIGATION & RENDERING ---
+        window.setView = function(view, folderId = null) {
+            state.currentView = view;
+            state.selectedFolderId = folderId;
+            state.selectedSubfolder = 'ALL';
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold');
+                btn.classList.add('text-slate-600', 'font-medium');
+            });
+
+            const activeNavId = view === 'folders' ? 'nav-folders' : view === 'chat' ? 'nav-chat' : view === 'calendar' ? 'nav-calendar' : null;
+            if (activeNavId) {
+                const b = document.getElementById(activeNavId);
+                b.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold');
+                b.classList.remove('text-slate-600', 'font-medium');
+            }
+
+            if (window.innerWidth < 1024) {
+                const sb = document.getElementById('sidebar');
+                if (!sb.classList.contains('-translate-x-full')) toggleSidebar();
+            }
+
+            renderAll();
+        };
+
+        window.backToFoldersDashboard = function() {
+            state.searchQuery = '';
+            document.getElementById('global-search').value = '';
+            document.getElementById('clear-search-btn').classList.add('hidden');
+            setView('folders');
+        };
+
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobile-backdrop').classList.toggle('hidden');
+        };
+
+        window.handleSearch = function(val) {
+            state.searchQuery = val.trim().toLowerCase();
+            document.getElementById('clear-search-btn').classList.toggle('hidden', !state.searchQuery);
+            if (state.searchQuery && state.currentView === 'folders') {
+                state.currentView = 'folder-detail';
+                state.selectedFolderId = null;
+            }
+            renderAll();
+        };
+
+        window.clearSearch = function() {
+            backToFoldersDashboard();
+        };
+
+        function renderAll() {
+            renderSidebarFolders();
+            updateBadges();
+
+            document.getElementById('view-folders').classList.toggle('hidden', state.currentView !== 'folders');
+            document.getElementById('view-folder-detail').classList.toggle('hidden', state.currentView !== 'folder-detail');
+            document.getElementById('view-chat').classList.toggle('hidden', state.currentView !== 'chat');
+            document.getElementById('view-calendar').classList.toggle('hidden', state.currentView !== 'calendar');
+
+            if (state.currentView === 'folders') {
+                renderFoldersDashboardOnly();
+            } else if (state.currentView === 'folder-detail') {
+                renderFolderDetailView();
+            } else if (state.currentView === 'chat') {
+                renderChatView();
+            } else if (state.currentView === 'calendar') {
+                renderCalendarView();
+            }
+        }
+
+        function updateBadges() {
+            document.getElementById('badge-folders-count').textContent = state.folders.length;
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('badge-upcoming').textContent = state.events.filter(e => e.date >= today).length;
+        }
+
+        function renderSidebarFolders() {
+            const container = document.getElementById('sidebar-folders-list');
+            container.innerHTML = '';
+
+            state.folders.forEach(folder => {
+                const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+                const count = state.notes.filter(n => n.folderId === folder.id).length;
+                const isActive = state.currentView === 'folder-detail' && state.selectedFolderId === folder.id;
+
+                const btn = document.createElement('button');
+                btn.onclick = () => setView('folder-detail', folder.id);
+                btn.className = `w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
+                    isActive ? `${theme.bg} ${theme.text} font-bold shadow-2xs` : 'text-slate-600 hover:bg-slate-100/80 font-medium'
+                }`;
+
+                btn.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2.5 h-2.5 rounded-full ${theme.bar} shrink-0"></span>
+                        <span class="text-base shrink-0">${folder.icon}</span>
+                        <span class="truncate">${folder.name}</span>
+                    </div>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-white/90 ' + theme.text : 'bg-slate-100 text-slate-500'}">${count}</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        // --- VIEW 1: DASHBOARD WITH ONLY COLORED FOLDERS ---
+        function renderFoldersDashboardOnly() {
+            const grid = document.getElementById('folders-grid');
+            grid.innerHTML = '';
+
+            if (state.folders.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white rounded-3xl border border-dashed border-slate-200 p-12 text-center">
+                        <div class="text-4xl mb-3">📁</div>
+                        <h3 class="font-display font-bold text-slate-800 text-lg">Nessuna cartella ancora creata</h3>
+                        <p class="text-sm text-slate-500 mt-1 mb-4">Crea la tua prima cartella colorata per organizzare le materie scolastiche!</p>
+                        <button onclick="openFolderModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700">
+                            + Crea Prima Cartella
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            state.folders.forEach(folder => {
+                const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+                const folderNotes = state.notes.filter(n => n.folderId === folder.id);
+
+                const card = document.createElement('div');
+                card.onclick = () => setView('folder-detail', folder.id);
+                card.className = `folder-card cursor-pointer rounded-3xl border ${theme.border} ${theme.cardBg} p-6 shadow-2xs hover:shadow-xl hover:shadow-slate-200/70 flex flex-col justify-between gap-6 overflow-hidden`;
+
+                const subfoldersBadges = (folder.subfolders || []).slice(0, 3).map(sf => 
+                    `<span class="px-2.5 py-0.5 rounded-lg bg-white/85 text-slate-600 text-[11px] font-semibold border border-slate-200/60">${sf}</span>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 right-0 h-2 ${theme.bar}"></div>
+
+                    <div class="flex items-start justify-between gap-3 pt-1">
+                        <div class="w-14 h-14 rounded-2xl bg-white shadow-2xs border ${theme.border} flex items-center justify-center text-3xl shrink-0">
+                            ${folder.icon}
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-extrabold ${theme.badge}">
+                            ${folderNotes.length} ${folderNotes.length === 1 ? 'appunto' : 'appunti'}
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="font-display text-xl font-extrabold text-slate-900 tracking-tight">${folder.name}</h3>
+                        <div class="flex flex-wrap gap-1.5 mt-3">
+                            ${subfoldersBadges}
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold ${theme.text}">
+                        <span>Apri cartella materia</span>
+                        <i class="ph-bold ph-arrow-right text-sm"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- VIEW 2: FOLDER DETAIL & NOTES INSIDE ---
+        function renderFolderDetailView() {
+            const folder = state.selectedFolderId ? state.folders.find(f => f.id === state.selectedFolderId) : null;
+
+            const banner = document.getElementById('folder-banner');
+            const iconBox = document.getElementById('detail-folder-icon');
+            const titleEl = document.getElementById('detail-folder-title');
+            const subEl = document.getElementById('detail-folder-subtitle');
+            const countEl = document.getElementById('detail-folder-count');
+            const editBtn = document.getElementById('detail-edit-folder-btn');
+            const subToolbar = document.getElementById('subfolder-toolbar');
+            const breadEl = document.getElementById('breadcrumb-current');
+
+            if (folder) {
+                const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+                banner.className = `rounded-3xl p-6 sm:p-7 border ${theme.border} ${theme.cardBg} transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs`;
+                iconBox.className = `w-16 h-16 rounded-2xl bg-white border ${theme.border} flex items-center justify-center text-3xl shadow-2xs shrink-0`;
+                iconBox.textContent = folder.icon;
+                titleEl.textContent = folder.name;
+                breadEl.textContent = folder.name;
+                subEl.textContent = 'Appunti organizzati per sottocartelle e argomenti';
+                editBtn.classList.remove('hidden');
+                subToolbar.classList.remove('hidden');
+            } else {
+                banner.className = `rounded-3xl p-6 sm:p-7 border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 to-blue-50/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs`;
+                iconBox.className = `w-16 h-16 rounded-2xl bg-white border border-indigo-200 flex items-center justify-center text-3xl shadow-2xs shrink-0`;
+                iconBox.textContent = '🔍';
+                titleEl.textContent = `Ricerca: "${state.searchQuery}"`;
+                breadEl.textContent = 'Ricerca';
+                subEl.textContent = 'Risultati trovati in tutte le cartelle';
+                editBtn.classList.add('hidden');
+                subToolbar.classList.add('hidden');
+            }
+
+            const tabsContainer = document.getElementById('subfolder-tabs');
+            tabsContainer.innerHTML = '';
+
+            const allTab = document.createElement('button');
+            allTab.onclick = () => { state.selectedSubfolder = 'ALL'; renderFolderDetailView(); };
+            allTab.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                state.selectedSubfolder === 'ALL' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
+            }`;
+            allTab.textContent = 'Tutti gli appunti';
+            tabsContainer.appendChild(allTab);
+
+            if (folder && folder.subfolders) {
+                folder.subfolders.forEach(sf => {
+                    const btn = document.createElement('button');
+                    btn.onclick = () => { state.selectedSubfolder = sf; renderFolderDetailView(); };
+                    btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                        state.selectedSubfolder === sf ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
+                    }`;
+                    btn.innerHTML = `<i class="ph-fill ph-folder-simple"></i> <span>${sf}</span>`;
+                    tabsContainer.appendChild(btn);
+                });
+            }
+
+            let filtered = state.notes.filter(n => {
+                if (folder && n.folderId !== folder.id) return false;
+                if (folder && state.selectedSubfolder !== 'ALL' && n.subfolder !== state.selectedSubfolder) return false;
+                if (state.searchQuery) {
+                    const txt = stripHtml(n.content).toLowerCase();
+                    if (!n.title.toLowerCase().includes(state.searchQuery) && !txt.includes(state.searchQuery)) return false;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => ((b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)) || (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+            countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'appunto' : 'appunti'}`;
+
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+            container.className = state.layoutMode === 'grid' 
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' 
+                : 'flex flex-col gap-3';
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white rounded-3xl border border-dashed border-slate-200 p-12 text-center">
+                        <div class="text-4xl mb-3">📝</div>
+                        <h4 class="font-display font-bold text-slate-800 text-base">Nessun appunto in questa sezione</h4>
+                        <p class="text-sm text-slate-400 mt-1 mb-4">Crea un nuovo appunto ordinato all'interno di questa cartella!</p>
+                        <button onclick="openNewNote()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors">
+                            + Scrivi Nuovo Appunto
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(note => {
+                container.appendChild(createNoteCard(note, state.layoutMode === 'list'));
+            });
+        }
+
+        function createNoteCard(note, isList = false) {
+            const folder = state.folders.find(f => f.id === note.folderId) || { name: 'Materia', icon: '📄', color: 'indigo' };
+            const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+            const excerpt = stripHtml(note.content) || 'Appunto vuoto...';
+
+            const card = document.createElement('div');
+            card.onclick = () => openEditNote(note.id);
+
+            if (isList) {
+                card.className = 'cursor-pointer bg-white hover:shadow-md border border-slate-200/80 rounded-2xl p-4 transition-all flex items-center justify-between gap-4 group';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <span class="w-10 h-10 rounded-xl ${theme.bg} flex items-center justify-center text-lg shrink-0">${folder.icon}</span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                ${note.pinned ? '<i class="ph-fill ph-star text-amber-400 text-sm"></i>' : ''}
+                                <h4 class="font-display font-bold text-sm text-slate-900 truncate group-hover:text-indigo-600 transition-colors">${note.title}</h4>
+                            </div>
+                            <p class="text-xs text-slate-500 truncate mt-0.5">${excerpt}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        ${note.subfolder ? `<span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-600">${note.subfolder}</span>` : ''}
+                        <span class="text-xs text-slate-400 hidden md:inline">${formatDateIt(note.updatedAt)}</span>
+                    </div>
+                `;
+            } else {
+                card.className = 'cursor-pointer bg-white hover:shadow-lg hover:shadow-slate-200/60 border border-slate-200/80 rounded-2xl p-5 transition-all hover:-translate-y-0.5 flex flex-col justify-between gap-4 group';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${theme.bg} ${theme.text}">
+                                <span>${folder.icon}</span>
+                                <span>${folder.name}</span>
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                ${note.subfolder ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-semibold">${note.subfolder}</span>` : ''}
+                                ${note.pinned ? '<i class="ph-fill ph-star text-amber-400 text-base"></i>' : ''}
+                            </div>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">${note.title}</h4>
+                        <p class="text-xs text-slate-500 line-clamp-3 mt-1.5 leading-relaxed">${excerpt}</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                        <span>${note.authorName ? 'Di ' + note.authorName : formatDateIt(note.updatedAt)}</span>
+                        <span class="text-indigo-600 font-bold">Apri →</span>
+                    </div>
+                `;
+            }
+            return card;
+        }
+
+        window.setLayoutMode = function(mode) {
+            state.layoutMode = mode;
+            document.getElementById('btn-grid').className = mode === 'grid' ? 'p-1.5 rounded-lg bg-white text-slate-900 shadow-2xs' : 'p-1.5 rounded-lg text-slate-400 hover:text-slate-700';
+            document.getElementById('btn-list').className = mode === 'list' ? 'p-1.5 rounded-lg bg-white text-slate-900 shadow-2xs' : 'p-1.5 rounded-lg text-slate-400 hover:text-slate-700';
+            renderFolderDetailView();
+        };
+
+        // --- VIEW 3: CLASS CHAT & NOTE SHARING ---
+        function renderChatView() {
+            const noClassBanner = document.getElementById('chat-no-class-banner');
+            const activeContainer = document.getElementById('chat-active-container');
+
+            if (!state.activeClass) {
+                noClassBanner.classList.remove('hidden');
+                activeContainer.classList.add('hidden');
+                return;
+            }
+
+            noClassBanner.classList.add('hidden');
+            activeContainer.classList.remove('hidden');
+            renderClassMembers();
+            renderChatMessages();
+        }
+
+        function renderClassMembers() {
+            if (!state.activeClass) return;
+            const members = state.activeClass.members || [];
+            document.getElementById('class-members-count').textContent = members.length;
+            document.getElementById('chat-members-subtitle').textContent = `${members.length} ${members.length === 1 ? 'compagno iscritto' : 'compagni iscritti'} • Codice ${state.activeClass.code}`;
+
+            const list = document.getElementById('class-members-list');
+            list.innerHTML = '';
+            members.forEach(m => {
+                const isMe = state.user && m.uid === state.user.uid;
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2.5 p-2 rounded-xl bg-slate-50/80 border border-slate-100';
+                row.innerHTML = `
+                    <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-bold text-xs flex items-center justify-center shrink-0">
+                        ${(m.name || 'ST').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-slate-800 truncate">${m.name} ${isMe ? '(Tu)' : ''}</p>
+                        <p class="text-[10px] text-emerald-600 font-semibold">Nella classe</p>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function renderChatMessages() {
+            const feed = document.getElementById('chat-messages-feed');
+            feed.innerHTML = '';
+
+            state.messages.forEach(msg => {
+                if (msg.senderUid === 'system') {
+                    const sys = document.createElement('div');
+                    sys.className = 'text-center my-2';
+                    sys.innerHTML = `<span class="inline-block px-3.5 py-1 rounded-full bg-slate-200/70 text-slate-600 text-[11px] font-semibold">${msg.text}</span>`;
+                    feed.appendChild(sys);
+                    return;
+                }
+
+                const isMine = state.user && msg.senderUid === state.user.uid;
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-full`;
+
+                const timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '';
+
+                let attachmentHtml = '';
+                if (msg.attachedNote) {
+                    const att = msg.attachedNote;
+                    const theme = COLOR_THEMES[att.folderColor] || COLOR_THEMES.indigo;
+                    attachmentHtml = `
+                        <div onclick="openSharedNoteViewer('${msg.id}')" class="mt-2 cursor-pointer rounded-2xl border ${theme.border} bg-white p-3.5 shadow-2xs hover:shadow-md transition-all text-left max-w-xs sm:max-w-sm">
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold ${theme.bg} ${theme.text}">
+                                    ${att.folderIcon || '📄'} ${att.folderName || 'Appunto'}
+                                </span>
+                                <span class="text-[10px] font-bold text-indigo-600">Apri appunto →</span>
+                            </div>
+                            <h5 class="font-display font-bold text-sm text-slate-900 line-clamp-1">${att.title}</h5>
+                            <p class="text-xs text-slate-500 line-clamp-2 mt-1">${stripHtml(att.content) || 'Clicca per leggere'}</p>
+                        </div>
+                    `;
+                }
+
+                wrapper.innerHTML = `
+                    <div class="flex items-center gap-2 mb-1 px-1">
+                        <span class="text-[11px] font-bold text-slate-500">${isMine ? 'Tu' : msg.senderName}</span>
+                        <span class="text-[10px] text-slate-400">${timeStr}</span>
+                    </div>
+                    <div class="px-4 py-2.5 rounded-2xl text-sm max-w-[85%] sm:max-w-md shadow-2xs ${
+                        isMine 
+                        ? 'bg-indigo-600 text-white rounded-tr-xs' 
+                        : 'bg-white border border-slate-200/80 text-slate-800 rounded-tl-xs'
+                    }">
+                        ${msg.text ? `<p class="leading-relaxed break-words">${msg.text}</p>` : ''}
+                        ${attachmentHtml}
+                    </div>
+                `;
+                feed.appendChild(wrapper);
+            });
+
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        window.sendChatMessage = async function(e) {
+            e.preventDefault();
+            if (!state.activeClass || !state.user || !db) return;
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            const cols = getWorkspaceCollections();
+            await addDoc(cols.messagesCol, {
+                senderUid: state.user.uid,
+                senderName: state.userName,
+                text,
+                createdAt: new Date().toISOString()
+            });
+        };
+
+        window.openAttachNoteModal = function() {
+            const list = document.getElementById('attach-notes-list');
+            list.innerHTML = '';
+
+            if (state.notes.length === 0) {
+                list.innerHTML = `<p class="text-center text-xs text-slate-400 py-8">Non hai ancora creato appunti da allegare.</p>`;
+            } else {
+                state.notes.forEach(note => {
+                    const folder = state.folders.find(f => f.id === note.folderId) || { name: 'Materia', icon: '📄', color: 'indigo' };
+                    const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.onclick = () => sendAttachedNoteToChat(note);
+                    item.className = 'w-full p-3 rounded-2xl border border-slate-200/80 hover:border-indigo-400 hover:bg-indigo-50/30 flex items-center justify-between gap-3 text-left transition-all';
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-10 h-10 rounded-xl ${theme.bg} flex items-center justify-center text-lg shrink-0">${folder.icon}</span>
+                            <div class="min-w-0">
+                                <h4 class="font-display font-bold text-sm text-slate-900 truncate">${note.title}</h4>
+                                <p class="text-xs text-slate-500">${folder.name} ${note.subfolder ? '• ' + note.subfolder : ''}</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl bg-indigo-600 text-white text-xs font-bold shrink-0">Allega</span>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            document.getElementById('attach-note-modal').classList.remove('hidden');
+        };
+
+        window.closeAttachNoteModal = function() {
+            document.getElementById('attach-note-modal').classList.add('hidden');
+        };
+
+        async function sendAttachedNoteToChat(note) {
+            if (!state.activeClass || !state.user || !db) return;
+            const folder = state.folders.find(f => f.id === note.folderId) || { name: 'Materia', icon: '📄', color: 'indigo' };
+            const cols = getWorkspaceCollections();
+
+            await addDoc(cols.messagesCol, {
+                senderUid: state.user.uid,
+                senderName: state.userName,
+                text: `📚 Ho caricato un appunto di ${folder.name}:`,
+                attachedNote: {
+                    title: note.title,
+                    content: note.content,
+                    folderName: folder.name,
+                    folderIcon: folder.icon,
+                    folderColor: folder.color,
+                    subfolder: note.subfolder || 'Generale',
+                    authorName: state.userName
+                },
+                createdAt: new Date().toISOString()
+            });
+
+            closeAttachNoteModal();
+            showToast('Appunto condiviso nella chat di classe!');
+        }
+
+        window.shareCurrentNoteToChat = async function() {
+            if (!state.activeClass) {
+                showToast('Entra in una classe per condividere gli appunti in chat!');
+                return;
+            }
+            await persistNote(false);
+            const note = state.notes.find(n => n.id === state.editingNoteId);
+            if (note) {
+                await sendAttachedNoteToChat(note);
+                document.getElementById('note-modal').classList.add('hidden');
+                setView('chat');
+            }
+        };
+
+        window.openSharedNoteViewer = function(msgId) {
+            const msg = state.messages.find(m => m.id === msgId);
+            if (!msg || !msg.attachedNote) return;
+            const att = msg.attachedNote;
+            state.viewingSharedNote = att;
+
+            document.getElementById('viewer-folder-badge').textContent = `${att.folderIcon || '📄'} ${att.folderName}`;
+            document.getElementById('viewer-author-label').textContent = `Caricato da ${att.authorName || msg.senderName}`;
+            document.getElementById('viewer-title').textContent = att.title;
+            document.getElementById('viewer-content').innerHTML = att.content;
+            document.getElementById('shared-note-viewer-modal').classList.remove('hidden');
+        };
+
+        window.closeSharedNoteViewer = function() {
+            document.getElementById('shared-note-viewer-modal').classList.add('hidden');
+            state.viewingSharedNote = null;
+        };
+
+        window.importSharedNoteToMyFolders = async function() {
+            if (!state.viewingSharedNote || !state.user || !db) return;
+            const att = state.viewingSharedNote;
+            const matchingFolder = state.folders.find(f => f.name.toLowerCase() === (att.folderName || '').toLowerCase()) || state.folders[0];
+            if (!matchingFolder) return;
+
+            const cols = getWorkspaceCollections();
+            await addDoc(cols.notesCol, {
+                folderId: matchingFolder.id,
+                subfolder: att.subfolder || (matchingFolder.subfolders ? matchingFolder.subfolders[0] : 'Generale'),
+                title: att.title,
+                content: att.content,
+                pinned: false,
+                authorName: att.authorName,
+                updatedAt: new Date().toISOString().split('T')[0]
+            });
+
+            closeSharedNoteViewer();
+            showToast(`Appunto salvato nella cartella "${matchingFolder.name}"!`);
+        };
+
+        // --- NOTE EDITOR CRUD (FIRESTORE) ---
+        function populateEditorFolderDropdown(selectedFolderId, selectedSubfolder = '') {
+            const fSel = document.getElementById('note-folder-select');
+            fSel.innerHTML = '';
+            state.folders.forEach(f => fSel.add(new Option(`${f.icon} ${f.name}`, f.id)));
+            if (selectedFolderId) fSel.value = selectedFolderId;
+            updateEditorSubfolderDropdown(fSel.value, selectedSubfolder);
+        }
+
+        window.onEditorFolderChange = function() {
+            updateEditorSubfolderDropdown(document.getElementById('note-folder-select').value, '');
+            triggerAutoSave();
+        };
+
+        function updateEditorSubfolderDropdown(folderId, selectedSub) {
+            const subSel = document.getElementById('note-subfolder-select');
+            subSel.innerHTML = '';
+            const folder = state.folders.find(f => f.id === folderId);
+            const subs = (folder && folder.subfolders && folder.subfolders.length) ? folder.subfolders : ['Generale'];
+            subs.forEach(s => subSel.add(new Option(`📁 ${s}`, s)));
+            if (selectedSub && subs.includes(selectedSub)) subSel.value = selectedSub;
+        }
+
+        window.openNewNote = function() {
+            if (state.folders.length === 0) {
+                showToast('Crea prima una cartella materia!');
+                openFolderModal();
+                return;
+            }
+            const defaultFolder = (state.currentView === 'folder-detail' && state.selectedFolderId) ? state.selectedFolderId : state.folders[0].id;
+            const defaultSub = (state.selectedSubfolder !== 'ALL') ? state.selectedSubfolder : '';
+
+            populateEditorFolderDropdown(defaultFolder, defaultSub);
+            state.editingNoteId = null;
+            state.editingNotePinned = false;
+
+            document.getElementById('note-title-input').value = '';
+            document.getElementById('editor-content').innerHTML = '';
+            document.getElementById('note-date-display').textContent = 'Nuovo appunto';
+            document.getElementById('delete-note-btn').classList.add('hidden');
+            document.getElementById('share-note-chat-btn').classList.toggle('hidden', !state.activeClass);
+
+            updatePinButtonUI();
+            updateWordCount();
+            document.getElementById('note-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('note-title-input').focus(), 80);
+        };
+
+        window.openEditNote = function(noteId) {
+            const note = state.notes.find(n => n.id === noteId);
+            if (!note) return;
+
+            populateEditorFolderDropdown(note.folderId, note.subfolder);
+            state.editingNoteId = note.id;
+            state.editingNotePinned = !!note.pinned;
+
+            document.getElementById('note-title-input').value = note.title;
+            document.getElementById('editor-content').innerHTML = note.content;
+            document.getElementById('note-date-display').textContent = `Aggiornato il ${formatDateIt(note.updatedAt)}`;
+            document.getElementById('delete-note-btn').classList.remove('hidden');
+            document.getElementById('share-note-chat-btn').classList.toggle('hidden', !state.activeClass);
+
+            updatePinButtonUI();
+            updateWordCount();
+            document.getElementById('note-modal').classList.remove('hidden');
+        };
+
+        window.toggleNotePinInEditor = function() {
+            state.editingNotePinned = !state.editingNotePinned;
+            updatePinButtonUI();
+            triggerAutoSave();
+        };
+
+        function updatePinButtonUI() {
+            const btn = document.getElementById('note-pin-btn');
+            if (state.editingNotePinned) {
+                btn.className = 'px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 text-xs font-bold flex items-center gap-1.5 transition-colors';
+                btn.innerHTML = '<i class="ph-fill ph-star text-amber-500"></i> <span>Fissato</span>';
+            } else {
+                btn.className = 'px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-amber-500 text-xs font-bold flex items-center gap-1.5 transition-colors';
+                btn.innerHTML = '<i class="ph-bold ph-star"></i> <span>Fissa</span>';
+            }
+        }
+
+        window.execCmd = function(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editor-content').focus();
+            triggerAutoSave();
+        };
+
+        window.handleEditorInput = function() {
+            updateWordCount();
+            triggerAutoSave();
+        };
+
+        function updateWordCount() {
+            const text = stripHtml(document.getElementById('editor-content').innerHTML).trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            document.getElementById('word-count-display').textContent = `${words} ${words === 1 ? 'parola' : 'parole'}`;
+        }
+
+        window.triggerAutoSave = function() {
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvataggio...';
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(async () => {
+                await persistNote(false);
+                statusEl.innerHTML = '<i class="ph-fill ph-check-circle"></i> Salvato';
+            }, 650);
+        };
+
+        async function persistNote(closeAfter = false) {
+            if (!state.user || !db) return;
+            const title = document.getElementById('note-title-input').value.trim() || 'Appunto senza titolo';
+            const content = document.getElementById('editor-content').innerHTML;
+            const folderId = document.getElementById('note-folder-select').value;
+            const subfolder = document.getElementById('note-subfolder-select').value;
+            const today = new Date().toISOString().split('T')[0];
+
+            const cols = getWorkspaceCollections();
+            const payload = {
+                title,
+                content,
+                folderId,
+                subfolder,
+                pinned: state.editingNotePinned,
+                authorName: state.userName,
+                updatedAt: today
+            };
+
+            if (state.editingNoteId) {
+                await setDoc(doc(cols.notesCol, state.editingNoteId), payload, { merge: true });
+            } else {
+                const docRef = await addDoc(cols.notesCol, payload);
+                state.editingNoteId = docRef.id;
+                document.getElementById('delete-note-btn').classList.remove('hidden');
+            }
+
+            if (closeAfter) {
+                document.getElementById('note-modal').classList.add('hidden');
+                showToast('Appunto salvato!');
+            }
+        }
+
+        window.saveAndCloseNote = async function() {
+            clearTimeout(autoSaveTimeout);
+            await persistNote(true);
+        };
+
+        window.deleteCurrentNote = async function() {
+            if (!state.editingNoteId || !state.user || !db) return;
+            const cols = getWorkspaceCollections();
+            await deleteDoc(doc(cols.notesCol, state.editingNoteId));
+            document.getElementById('note-modal').classList.add('hidden');
+            showToast('Appunto eliminato');
+        };
+
+        // --- FOLDER MODAL CRUD (FIRESTORE) ---
+        window.openFolderModal = function(folderToEdit = null) {
+            state.editingFolderId = folderToEdit ? folderToEdit.id : null;
+            state.selectedEmoji = folderToEdit ? folderToEdit.icon : '📐';
+            state.selectedColor = folderToEdit ? folderToEdit.color : 'indigo';
+
+            document.getElementById('folder-modal-title').textContent = folderToEdit ? 'Personalizza Cartella' : 'Nuova Cartella Colorata';
+            document.getElementById('folder-name-input').value = folderToEdit ? folderToEdit.name : '';
+            document.getElementById('folder-subfolders-input').value = folderToEdit ? (folderToEdit.subfolders || []).join(', ') : 'Trimestre 1, Ripasso, Esercizi';
+
+            const delBtn = document.getElementById('delete-folder-btn');
+            if (folderToEdit && state.folders.length > 1) delBtn.classList.remove('hidden');
+            else delBtn.classList.add('hidden');
+
+            renderFolderPickers();
+            document.getElementById('folder-modal').classList.remove('hidden');
+        };
+
+        window.editCurrentFolder = function() {
+            const folder = state.folders.find(f => f.id === state.selectedFolderId);
+            if (folder) openFolderModal(folder);
+        };
+
+        function renderFolderPickers() {
+            const emojiGrid = document.getElementById('emoji-picker');
+            emojiGrid.innerHTML = '';
+            EMOJI_OPTIONS.forEach(em => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = em;
+                btn.onclick = () => { state.selectedEmoji = em; renderFolderPickers(); };
+                btn.className = `h-10 rounded-xl text-xl flex items-center justify-center transition-all ${
+                    state.selectedEmoji === em ? 'bg-indigo-100 ring-2 ring-indigo-500 scale-105' : 'bg-slate-100 hover:bg-slate-200'
+                }`;
+                emojiGrid.appendChild(btn);
+            });
+
+            const colorGrid = document.getElementById('color-picker');
+            colorGrid.innerHTML = '';
+            Object.entries(COLOR_THEMES).forEach(([key, val]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.title = val.name;
+                btn.onclick = () => { state.selectedColor = key; renderFolderPickers(); };
+                btn.className = `h-9 rounded-xl ${val.bar} transition-all flex items-center justify-center text-white text-xs font-bold shadow-2xs ${
+                    state.selectedColor === key ? 'ring-3 ring-offset-2 ring-slate-800 scale-105' : 'opacity-85 hover:opacity-100'
+                }`;
+                if (state.selectedColor === key) btn.innerHTML = '<i class="ph-bold ph-check text-sm"></i>';
+                colorGrid.appendChild(btn);
+            });
+        }
+
+        window.closeFolderModal = function() {
+            document.getElementById('folder-modal').classList.add('hidden');
+        };
+
+        window.saveFolder = async function() {
+            if (!state.user || !db) return;
+            const name = document.getElementById('folder-name-input').value.trim();
+            if (!name) {
+                showToast('Inserisci il nome della materia');
+                return;
+            }
+            const rawSubs = document.getElementById('folder-subfolders-input').value;
+            const subfolders = rawSubs.split(',').map(s => s.trim()).filter(Boolean);
+            if (subfolders.length === 0) subfolders.push('Generale');
+
+            const cols = getWorkspaceCollections();
+            const payload = { name, icon: state.selectedEmoji, color: state.selectedColor, subfolders };
+
+            if (state.editingFolderId) {
+                await setDoc(doc(cols.foldersCol, state.editingFolderId), payload, { merge: true });
+                showToast('Cartella aggiornata!');
+            } else {
+                await addDoc(cols.foldersCol, payload);
+                showToast(`Cartella "${name}" creata!`);
+            }
+            closeFolderModal();
+        };
+
+        window.deleteCurrentFolder = async function() {
+            if (!state.editingFolderId || state.folders.length <= 1 || !state.user || !db) return;
+            const cols = getWorkspaceCollections();
+            await deleteDoc(doc(cols.foldersCol, state.editingFolderId));
+            closeFolderModal();
+            setView('folders');
+            showToast('Cartella eliminata');
+        };
+
+        // --- SUBFOLDER PROMPT ---
+        window.openSubfolderPrompt = function() {
+            document.getElementById('new-subfolder-name').value = '';
+            document.getElementById('subfolder-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('new-subfolder-name').focus(), 80);
+        };
+
+        window.closeSubfolderModal = function() {
+            document.getElementById('subfolder-modal').classList.add('hidden');
+        };
+
+        window.confirmAddSubfolder = async function() {
+            const name = document.getElementById('new-subfolder-name').value.trim();
+            if (!name || !state.selectedFolderId || !state.user || !db) return;
+            const folder = state.folders.find(f => f.id === state.selectedFolderId);
+            if (folder) {
+                const subs = [...(folder.subfolders || [])];
+                if (!subs.includes(name)) {
+                    subs.push(name);
+                    const cols = getWorkspaceCollections();
+                    await updateDoc(doc(cols.foldersCol, folder.id), { subfolders: subs });
+                    state.selectedSubfolder = name;
+                    showToast(`Sottocartella "${name}" aggiunta!`);
+                }
+            }
+            closeSubfolderModal();
+        };
+
+        // --- CALENDAR VIEW & CRUD ---
+        function renderCalendarView() {
+            const filterBar = document.getElementById('calendar-subject-filters');
+            filterBar.innerHTML = '';
+
+            const allBtn = document.createElement('button');
+            allBtn.onclick = () => { state.calendarFolderFilter = 'ALL'; renderCalendarView(); };
+            allBtn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                state.calendarFolderFilter === 'ALL' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`;
+            allBtn.textContent = 'Tutte le materie';
+            filterBar.appendChild(allBtn);
+
+            state.folders.forEach(f => {
+                const theme = COLOR_THEMES[f.color] || COLOR_THEMES.indigo;
+                const isSelected = state.calendarFolderFilter === f.id;
+                const btn = document.createElement('button');
+                btn.onclick = () => { state.calendarFolderFilter = f.id; renderCalendarView(); };
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 border ${
+                    isSelected ? `${theme.bg} ${theme.text} ${theme.border}` : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`;
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full ${theme.bar}"></span> <span>${f.icon} ${f.name}</span>`;
+                filterBar.appendChild(btn);
+            });
+
+            const year = state.calendarMonth.getFullYear();
+            const month = state.calendarMonth.getMonth();
+            document.getElementById('calendar-month-label').textContent = state.calendarMonth.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1);
+            let startDay = firstDay.getDay() - 1;
+            if (startDay < 0) startDay = 6;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            for (let i = 0; i < startDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'h-20 sm:h-24 rounded-xl bg-slate-50/60';
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                let dayEvents = state.events.filter(e => e.date === dateStr);
+                if (state.calendarFolderFilter !== 'ALL') dayEvents = dayEvents.filter(e => e.folderId === state.calendarFolderFilter);
+
+                const isToday = dateStr === todayStr;
+                const isSelected = state.selectedCalendarDate === dateStr;
+
+                const cell = document.createElement('div');
+                cell.onclick = () => { state.selectedCalendarDate = (state.selectedCalendarDate === dateStr) ? null : dateStr; renderCalendarView(); };
+                cell.className = `h-20 sm:h-24 rounded-xl p-1.5 sm:p-2 border transition-all cursor-pointer flex flex-col justify-between overflow-hidden ${
+                    isSelected ? 'border-indigo-500 bg-indigo-50/40 ring-2 ring-indigo-500/20' : isToday ? 'border-indigo-300 bg-indigo-50/20' : 'border-slate-100 hover:border-slate-300 bg-white'
+                }`;
+
+                let pillsHtml = '';
+                dayEvents.slice(0, 2).forEach(ev => {
+                    const folder = state.folders.find(f => f.id === ev.folderId) || { color: 'indigo' };
+                    const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+                    pillsHtml += `<div class="text-[10px] font-bold px-1.5 py-0.5 rounded-md truncate ${theme.bg} ${theme.text}">${EVENT_TYPE_ICONS[ev.type] || ''} ${ev.title}</div>`;
+                });
+
+                cell.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold ${isToday ? 'w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center' : 'text-slate-700'}">${day}</span>
+                        ${dayEvents.length > 0 ? `<span class="w-1.5 h-1.5 rounded-full bg-rose-500 sm:hidden"></span>` : ''}
+                    </div>
+                    <div class="space-y-1 hidden sm:block">${pillsHtml}</div>
+                `;
+                grid.appendChild(cell);
+            }
+
+            renderCalendarEventsSidebar();
+        }
+
+        window.changeMonth = function(delta) {
+            state.calendarMonth.setMonth(state.calendarMonth.getMonth() + delta);
+            renderCalendarView();
+        };
+
+        window.goToTodayCalendar = function() {
+            state.calendarMonth = new Date();
+            state.selectedCalendarDate = new Date().toISOString().split('T')[0];
+            renderCalendarView();
+        };
+
+        window.clearDateFilter = function() {
+            state.selectedCalendarDate = null;
+            renderCalendarView();
+        };
+
+        function renderCalendarEventsSidebar() {
+            const container = document.getElementById('calendar-events-sidebar');
+            const titleEl = document.getElementById('selected-date-title');
+            const subEl = document.getElementById('selected-date-subtitle');
+            const resetBtn = document.getElementById('reset-date-filter');
+
+            let list = [...state.events].sort((a, b) => a.date.localeCompare(b.date));
+            if (state.calendarFolderFilter !== 'ALL') list = list.filter(e => e.folderId === state.calendarFolderFilter);
+
+            if (state.selectedCalendarDate) {
+                titleEl.textContent = `Giorno ${formatDateIt(state.selectedCalendarDate)}`;
+                subEl.textContent = 'Impegni per questa data';
+                resetBtn.classList.remove('hidden');
+                list = list.filter(e => e.date === state.selectedCalendarDate);
+            } else {
+                titleEl.textContent = 'Prossimi Impegni';
+                subEl.textContent = 'Tutti gli eventi';
+                resetBtn.classList.add('hidden');
+            }
+
+            container.innerHTML = '';
+            if (list.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs">Nessun evento in questa data.</div>`;
+                return;
+            }
+
+            list.forEach(ev => {
+                const folder = state.folders.find(f => f.id === ev.folderId) || { name: 'Generale', icon: '📌', color: 'indigo' };
+                const theme = COLOR_THEMES[folder.color] || COLOR_THEMES.indigo;
+
+                const card = document.createElement('div');
+                card.className = `p-3.5 rounded-2xl border ${theme.border} ${theme.cardBg} flex items-start justify-between gap-3`;
+                card.innerHTML = `
+                    <div class="space-y-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-white ${theme.text}">${EVENT_TYPE_ICONS[ev.type] || ''} ${ev.type}</span>
+                            <span class="text-xs font-bold text-slate-600">${formatDateIt(ev.date)} ${ev.time ? '• ' + ev.time : ''}</span>
+                        </div>
+                        <h4 class="font-display font-bold text-sm text-slate-900">${ev.title}</h4>
+                        <p class="text-xs font-semibold ${theme.text}">${folder.icon} ${folder.name}</p>
+                        ${ev.notes ? `<p class="text-xs text-slate-500 pt-1">${ev.notes}</p>` : ''}
+                    </div>
+                    <button onclick="deleteEvent('${ev.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors shrink-0">
+                        <i class="ph-bold ph-trash text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.openEventModal = function() {
+            const sel = document.getElementById('event-folder-input');
+            sel.innerHTML = '';
+            state.folders.forEach(f => sel.add(new Option(`${f.icon} ${f.name}`, f.id)));
+
+            document.getElementById('event-title-input').value = '';
+            document.getElementById('event-date-input').value = state.selectedCalendarDate || getDateStrOffset(1);
+            document.getElementById('event-time-input').value = '';
+            document.getElementById('event-notes-input').value = '';
+            document.getElementById('event-modal').classList.remove('hidden');
+        };
+
+        window.closeEventModal = function() {
+            document.getElementById('event-modal').classList.add('hidden');
+        };
+
+        window.saveEvent = async function() {
+            if (!state.user || !db) return;
+            const title = document.getElementById('event-title-input').value.trim();
+            const date = document.getElementById('event-date-input').value;
+            const time = document.getElementById('event-time-input').value;
+            const folderId = document.getElementById('event-folder-input').value;
+            const type = document.getElementById('event-type-input').value;
+            const notes = document.getElementById('event-notes-input').value.trim();
+
+            if (!title || !date) {
+                showToast('Inserisci titolo e data!');
+                return;
+            }
+
+            const cols = getWorkspaceCollections();
+            await addDoc(cols.eventsCol, { title, date, time, folderId, type, notes });
+            closeEventModal();
+            showToast('Evento aggiunto!');
+        };
+
+        window.deleteEvent = async function(id) {
+            if (!state.user || !db) return;
+            const cols = getWorkspaceCollections();
+            await deleteDoc(doc(cols.eventsCol, id));
+            showToast('Evento eliminato');
+        };
+
+        // --- HELPERS ---
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html || '';
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        function formatDateIt(iso) {
+            if (!iso) return '';
+            const [y, m, d] = iso.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2800);
+        }
+    </script>
 </body>
 </html>
