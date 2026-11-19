@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StudyFlow — Appunti Colorati, File &amp; Chat di Classe</title>
+    <title>StudyFlow — Appunti Colorati, Orario &amp; Chat di Classe</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter & Plus Jakarta Sans -->
@@ -23,7 +23,6 @@
         .font-display {
             font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
-        /* Scrollbar sottile */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -38,7 +37,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        /* Fix definitivo per iOS Safari Data e Ora centrati senza sbordare */
+        /* Fix definitivo iOS Safari per input Data e Ora centrati senza sbordare */
         .ios-datetime-grid {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -71,7 +70,6 @@
             text-align: center;
             margin: 0 auto;
         }
-        /* Animazioni fluide */
         .fade-in {
             animation: fadeIn 0.22s ease-out forwards;
         }
@@ -85,7 +83,6 @@
         .folder-card:hover {
             transform: translateY(-3px);
         }
-        /* Editor formattazione */
         #note-editor-area:empty:before {
             content: attr(data-placeholder);
             color: #94a3b8;
@@ -121,16 +118,14 @@
     <!-- ===================================================================== -->
     <section id="auth-screen" class="min-h-screen w-full bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center p-4">
         <div class="bg-white/95 backdrop-blur-md w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-white/40 fade-in">
-            <!-- Brand -->
             <div class="text-center space-y-2">
                 <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-indigo-500/30">
                     <i class="ph-duotone ph-books"></i>
                 </div>
                 <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">StudyFlow</h1>
-                <p class="text-xs sm:text-sm text-slate-500 font-medium">Cartelle colorate, file di ogni tipo, chat di classe e calendario</p>
+                <p class="text-xs sm:text-sm text-slate-500 font-medium">Cartelle colorate, orario scolastico, file universali e chat di classe</p>
             </div>
 
-            <!-- Tabs Accedi / Registrati -->
             <div class="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-100 rounded-2xl">
                 <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-xs transition-all cursor-pointer">
                     Accedi
@@ -140,7 +135,6 @@
                 </button>
             </div>
 
-            <!-- Form -->
             <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
                 <div id="auth-name-wrap" class="hidden space-y-1.5">
                     <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Il tuo Nome</label>
@@ -165,7 +159,6 @@
                 <div class="flex-grow border-t border-slate-200"></div>
             </div>
 
-            <!-- Accesso Ospite Istantaneo -->
             <button type="button" onclick="handleGuestLogin()" class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
                 <i class="ph-bold ph-rocket-launch text-amber-400 text-base"></i>
                 <span>Entra subito come Ospite</span>
@@ -176,14 +169,13 @@
     <!-- ===================================================================== -->
     <!-- 2. APPLICAZIONE PRINCIPALE                                            -->
     <!-- ===================================================================== -->
-    <div id="app-shell" class="hidden min-h-screen flex-1 flex flex-col lg:flex-row">
+    <div id="app-shell" class="hidden min-h-screen flex-1 flex flex-col lg:flex-row pb-16 lg:pb-0">
 
         <!-- Overlay Mobile Sidebar -->
         <div id="mobile-sidebar-overlay" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 hidden lg:hidden"></div>
 
         <!-- SIDEBAR LATERALE -->
         <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200/80 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
-            <!-- Header Sidebar -->
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center text-xl shadow-sm">
@@ -220,7 +212,6 @@
                     <i class="ph-bold ph-caret-up-down text-slate-400 shrink-0"></i>
                 </button>
 
-                <!-- Badge Codice Classe se attivo -->
                 <div id="sidebar-class-code-box" class="hidden p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <span class="text-[10px] font-bold uppercase text-emerald-700 block">Codice Invito Classe</span>
@@ -238,19 +229,23 @@
                     <i class="ph-duotone ph-folders text-xl"></i>
                     <span>Le mie Cartelle</span>
                 </button>
+                <button type="button" id="nav-timetable" onclick="setMainView('timetable')" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+                    <i class="ph-duotone ph-clock-afternoon text-xl"></i>
+                    <span>Orario Scolastico</span>
+                </button>
                 <button type="button" id="nav-chat" onclick="setMainView('chat')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
                     <span class="flex items-center gap-3">
                         <i class="ph-duotone ph-chats-circle text-xl"></i>
                         <span>Chat di Classe</span>
                     </span>
-                    <span id="nav-chat-badge" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-extrabold">Live</span>
+                    <span id="nav-chat-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Live</span>
                 </button>
                 <button type="button" id="nav-calendar" onclick="setMainView('calendar')" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
                     <i class="ph-duotone ph-calendar-check text-xl"></i>
-                    <span>Calendario Scolastico</span>
+                    <span>Calendario</span>
                 </button>
 
-                <!-- Scorciatoia Cartelle nella Sidebar -->
+                <!-- Scorciatoia Cartelle -->
                 <div class="pt-4 mt-3 border-t border-slate-100 space-y-2">
                     <div class="flex items-center justify-between px-2">
                         <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Materie Rapide</span>
@@ -289,7 +284,6 @@
                     </div>
                 </div>
 
-                <!-- Pulsanti Azione Rapida -->
                 <div class="flex items-center gap-2 shrink-0">
                     <button type="button" onclick="openOnboardingTour(0)" title="Presentazione App" class="p-2.5 sm:px-3 sm:py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
                         <i class="ph-duotone ph-sparkle text-base"></i>
@@ -310,7 +304,7 @@
                 </div>
             </header>
 
-            <!-- Input File Nascosto Universale (Canva, Word, Excel, AutoCAD, PDF, Immagini, ecc.) -->
+            <!-- Input File Nascosto Universale -->
             <input type="file" id="universal-file-input" multiple accept="*/*" onchange="handleUniversalFilesSelected(event)" class="hidden">
 
             <!-- CONTENUTO SCORREVOLE -->
@@ -327,11 +321,14 @@
                         </div>
                         <button type="button" onclick="openClassModal()" class="self-start sm:self-center px-3.5 py-2 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer">
                             <i class="ph-duotone ph-users-three text-indigo-600 text-base"></i>
-                            <span id="dashboard-class-pill">Spazio Personale (Cambia / Classe)</span>
+                            <span id="dashboard-class-pill">Spazio Personale (Crea / Entra in Classe)</span>
                         </button>
                     </div>
 
-                    <!-- Griglia SOLO Cartelle Colorate (nessun appunto sciolto sotto!) -->
+                    <!-- Banner Lezione Attuale / Prossima dall'Orario -->
+                    <div id="dashboard-live-lesson-banner" class="hidden"></div>
+
+                    <!-- Griglia SOLO Cartelle Colorate -->
                     <div id="folders-grid"></div>
                 </section>
 
@@ -339,7 +336,6 @@
                 <!-- VISTA B: DETTAGLIO SINGOLA CARTELLA & SOTTOCARTELLE       -->
                 <!-- ========================================================= -->
                 <section id="view-folder-detail" class="hidden space-y-6 fade-in">
-                    <!-- Intestazione Cartella -->
                     <div id="folder-detail-banner" class="rounded-3xl p-5 sm:p-7 border bg-white shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5 min-w-0">
                             <button type="button" onclick="setMainView('folders')" class="p-2.5 rounded-2xl bg-white/90 hover:bg-white border border-slate-200/80 text-slate-700 shrink-0 cursor-pointer" title="Torna alle cartelle">
@@ -368,18 +364,39 @@
                         </div>
                     </div>
 
-                    <!-- Barra Sottocartelle -->
                     <div class="flex items-center gap-2 overflow-x-auto pb-1" id="subfolders-bar"></div>
-
-                    <!-- Griglia Appunti e File Importati dentro questa cartella -->
                     <div id="folder-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </section>
 
                 <!-- ========================================================= -->
-                <!-- VISTA C: CHAT DI CLASSE                                   -->
+                <!-- VISTA C: ORARIO SCOLASTICO SETTIMANALE (LUN-SAB)          -->
+                <!-- ========================================================= -->
+                <section id="view-timetable" class="hidden space-y-6 fade-in">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Orario Scolastico</h2>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Inserisci le tue materie dal Lunedì al Sabato e apri subito la cartella durante la lezione</p>
+                        </div>
+                        <button type="button" onclick="openTimetableModal()" class="self-start sm:self-center px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm cursor-pointer">
+                            <i class="ph-bold ph-plus-circle text-base"></i>
+                            <span>Aggiungi Lezione</span>
+                        </button>
+                    </div>
+
+                    <!-- Banner Ora in Corso / Prossima Lezione -->
+                    <div id="timetable-live-banner"></div>
+
+                    <!-- Selettore Giorno Rapido su Mobile -->
+                    <div id="timetable-mobile-days" class="flex lg:hidden items-center gap-1.5 overflow-x-auto pb-1"></div>
+
+                    <!-- Griglia Orario (Giorno singolo su mobile / Settimana Lun-Sab su desktop) -->
+                    <div id="timetable-board"></div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- VISTA D: CHAT DI CLASSE SINCRONIZZATA                     -->
                 <!-- ========================================================= -->
                 <section id="view-chat" class="hidden fade-in">
-                    <!-- Stato quando l'utente è nello Spazio Personale e non ha ancora aperto una classe -->
                     <div id="chat-no-class-box" class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-xl mx-auto space-y-5 shadow-2xs">
                         <div class="w-16 h-16 mx-auto rounded-3xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl">
                             <i class="ph-duotone ph-chats-circle"></i>
@@ -387,7 +404,7 @@
                         <div class="space-y-2">
                             <h3 class="font-display text-2xl font-extrabold text-slate-900">Entra in una Classe per Chattare</h3>
                             <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                                Crea una nuova classe e condividi il codice con i tuoi compagni, oppure entra con un codice invito per scambiare messaggi, appunti e file.
+                                Crea una nuova classe e condividi il codice con i tuoi compagni (senza bisogno di numero di telefono), oppure entra con un codice invito per scambiare messaggi, appunti e file.
                             </p>
                         </div>
                         <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -400,17 +417,16 @@
                         </div>
                     </div>
 
-                    <!-- Finestra Chat Attiva -->
-                    <div id="chat-active-box" class="hidden bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col h-[74vh] min-h-[480px]">
-                        <!-- Header Chat -->
+                    <div id="chat-active-box" class="hidden bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col h-[72vh] min-h-[460px]">
                         <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3 flex-wrap">
                             <div class="flex items-center gap-3">
-                                <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold">
+                                <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold relative">
                                     <i class="ph-duotone ph-users-three"></i>
+                                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white"></span>
                                 </div>
                                 <div>
                                     <h3 id="chat-class-title" class="font-display font-extrabold text-base text-slate-900">Classe</h3>
-                                    <p id="chat-class-members" class="text-xs text-slate-500 font-medium">Compagni connessi</p>
+                                    <p id="chat-class-members" class="text-xs text-slate-500 font-medium">Stanza sincronizzata in tempo reale</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -421,10 +437,8 @@
                             </div>
                         </div>
 
-                        <!-- Messaggi -->
                         <div id="chat-messages-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/40"></div>
 
-                        <!-- Barra Invio Messaggio + Allega Appunto / File -->
                         <form onsubmit="sendChatMessage(event)" class="p-3 sm:p-4 border-t border-slate-100 bg-white flex items-center gap-2">
                             <button type="button" onclick="openAttachModal()" title="Allega un appunto o un file" class="px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
                                 <i class="ph-bold ph-paperclip text-base"></i>
@@ -440,7 +454,7 @@
                 </section>
 
                 <!-- ========================================================= -->
-                <!-- VISTA D: CALENDARIO SCOLASTICO                            -->
+                <!-- VISTA E: CALENDARIO SCOLASTICO                            -->
                 <!-- ========================================================= -->
                 <section id="view-calendar" class="hidden space-y-6 fade-in">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -455,7 +469,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Griglia Mensile -->
                         <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
                             <div class="flex items-center justify-between">
                                 <h3 id="calendar-month-label" class="font-display font-extrabold text-lg text-slate-900 capitalize">Novembre 2026</h3>
@@ -472,7 +485,6 @@
                             <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
                         </div>
 
-                        <!-- Dettaglio Eventi del Giorno Selezionato -->
                         <div class="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
                             <div class="space-y-4">
                                 <div class="flex items-center justify-between">
@@ -492,6 +504,27 @@
 
             </main>
         </div>
+
+        <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE -->
+        <nav class="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 grid grid-cols-4 py-1.5 px-2">
+            <button type="button" id="mnav-folders" onclick="setMainView('folders')" class="flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer">
+                <i class="ph-duotone ph-folders text-xl"></i>
+                <span>Cartelle</span>
+            </button>
+            <button type="button" id="mnav-timetable" onclick="setMainView('timetable')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer">
+                <i class="ph-duotone ph-clock-afternoon text-xl"></i>
+                <span>Orario</span>
+            </button>
+            <button type="button" id="mnav-chat" onclick="setMainView('chat')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 relative cursor-pointer">
+                <i class="ph-duotone ph-chats-circle text-xl"></i>
+                <span>Chat</span>
+                <span id="mnav-chat-dot" class="hidden absolute top-1 right-6 w-2 h-2 rounded-full bg-rose-500"></span>
+            </button>
+            <button type="button" id="mnav-calendar" onclick="setMainView('calendar')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer">
+                <i class="ph-duotone ph-calendar-check text-xl"></i>
+                <span>Calendario</span>
+            </button>
+        </nav>
     </div>
 
     <!-- ===================================================================== -->
@@ -508,7 +541,6 @@
 
             <div id="onboarding-slide-content" class="px-6 sm:px-9 py-5 text-center space-y-5 min-h-[320px] flex flex-col items-center justify-center"></div>
 
-            <!-- Frecce in basso Avanti e Indietro + Indicatori -->
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
                 <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="h-11 px-4 rounded-2xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-35 disabled:pointer-events-none transition-all cursor-pointer">
                     <i class="ph-bold ph-arrow-left text-base"></i>
@@ -541,19 +573,16 @@
                     <input type="text" id="folder-name-input" required placeholder="Es. Matematica, Progettazione CAD, Storia..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
                 </div>
 
-                <!-- Scelta Colore (10 colori vivaci) -->
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-500 uppercase">Colore Cartella</label>
                     <div id="folder-colors-picker" class="grid grid-cols-5 gap-2.5"></div>
                 </div>
 
-                <!-- Scelta Icona / Emoji -->
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-500 uppercase">Icona</label>
                     <div id="folder-icons-picker" class="grid grid-cols-6 gap-2"></div>
                 </div>
 
-                <!-- Sottocartelle iniziali -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Sottocartelle (separate da virgola)</label>
                     <input type="text" id="folder-subfolders-input" placeholder="Es. Trimestre 1, Formule, Esercizi" class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs font-semibold outline-none">
@@ -573,11 +602,73 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 3: EDITOR APPUNTI FORMATTATO                                   -->
+    <!-- MODALE 3: AGGIUNGI / MODIFICA ORA DI LEZIONE NELL'ORARIO              -->
+    <!-- ===================================================================== -->
+    <div id="timetable-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5">
+            <div class="flex items-center justify-between">
+                <h3 id="timetable-modal-title" class="font-display text-lg font-extrabold text-slate-900">Aggiungi Ora di Lezione</h3>
+                <button type="button" onclick="closeTimetableModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
+            </div>
+
+            <form onsubmit="saveTimetableSlot(event)" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Giorno della Settimana</label>
+                    <select id="tt-day-input" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-bold text-slate-800 outline-none">
+                        <option value="1">Lunedì</option>
+                        <option value="2">Martedì</option>
+                        <option value="3">Mercoledì</option>
+                        <option value="4">Giovedì</option>
+                        <option value="5">Venerdì</option>
+                        <option value="6">Sabato</option>
+                    </select>
+                </div>
+
+                <!-- ORA INIZIO E FINE CENTRATI SU IOS/MOBILE -->
+                <div class="ios-datetime-grid">
+                    <div class="ios-datetime-col space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Ora Inizio</label>
+                        <input type="time" id="tt-start-input" required value="08:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                    </div>
+                    <div class="ios-datetime-col space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Ora Fine</label>
+                        <input type="time" id="tt-end-input" required value="09:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Cartella Materia Collegata</label>
+                    <select id="tt-folder-input" onchange="handleTimetableFolderChange()" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none"></select>
+                </div>
+
+                <div id="tt-custom-subject-wrap" class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia (se non hai ancora la cartella)</label>
+                    <input type="text" id="tt-subject-input" placeholder="Es. Matematica, Inglese, Educazione Fisica..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-semibold outline-none">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Aula / Laboratorio / Prof (opzionale)</label>
+                    <input type="text" id="tt-room-input" placeholder="Es. Aula 14, Lab. Informatica, Prof. Bianchi..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs font-medium outline-none">
+                </div>
+
+                <div class="flex items-center justify-between pt-2 gap-2">
+                    <button type="button" id="tt-delete-btn" onclick="deleteCurrentTimetableSlot()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
+                        Elimina
+                    </button>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" onclick="closeTimetableModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva Ora</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODALE 4: EDITOR APPUNTI FORMATTATO                                   -->
     <!-- ===================================================================== -->
     <div id="note-editor-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="bg-white w-full max-w-3xl max-h-[92vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
-            <!-- Top Bar Editor -->
             <div class="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2 flex-wrap">
                     <select id="note-folder-select" onchange="updateNoteSubfolderOptions()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
@@ -599,7 +690,6 @@
                 </div>
             </div>
 
-            <!-- Toolbar Formattazione -->
             <div class="px-5 py-2 border-b border-slate-100 bg-white flex items-center gap-1.5 overflow-x-auto">
                 <button type="button" onclick="execFormat('bold')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold text-slate-700 cursor-pointer">B</button>
                 <button type="button" onclick="execFormat('italic')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs italic font-serif text-slate-700 cursor-pointer">I</button>
@@ -612,7 +702,6 @@
                 <button type="button" onclick="insertFormulaBox()" class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-bold cursor-pointer">+ Box Formula</button>
             </div>
 
-            <!-- Titolo + Corpo Appunto -->
             <div class="p-5 sm:p-7 flex-1 overflow-y-auto space-y-4">
                 <input type="text" id="note-title-input" placeholder="Titolo dell'appunto..." class="w-full font-display text-xl sm:text-2xl font-extrabold text-slate-900 placeholder-slate-300 outline-none">
                 <div id="note-editor-area" contenteditable="true" data-placeholder="Scrivi qui i tuoi appunti, schemi o riassunti..." class="min-h-[240px] text-sm sm:text-base text-slate-700 leading-relaxed outline-none"></div>
@@ -621,7 +710,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 4: VISUALIZZATORE & DOWNLOAD FILE IMPORTATI (CAD/WORD/CANVA..) -->
+    <!-- MODALE 5: VISUALIZZATORE & DOWNLOAD FILE IMPORTATI (CAD/WORD/CANVA..) -->
     <!-- ===================================================================== -->
     <div id="file-viewer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
@@ -658,7 +747,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 5: GESTIONE CLASSI (CREA CLASSE O ENTRA CON CODICE)            -->
+    <!-- MODALE 6: GESTIONE CLASSI (CREA CLASSE O ENTRA CON CODICE)            -->
     <!-- ===================================================================== -->
     <div id="class-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5 max-h-[90vh] overflow-y-auto">
@@ -667,13 +756,11 @@
                 <button type="button" onclick="closeClassModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
 
-            <!-- Elenco Spazi Disponibili -->
             <div class="space-y-2">
                 <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Seleziona Spazio</span>
                 <div id="class-switcher-list" class="space-y-2"></div>
             </div>
 
-            <!-- Crea Nuova Classe -->
             <form onsubmit="createNewClass(event)" class="pt-3 border-t border-slate-100 space-y-2.5">
                 <label class="text-xs font-bold text-slate-700 block">Crea una Nuova Classe (genera codice invito)</label>
                 <div class="flex gap-2">
@@ -682,7 +769,6 @@
                 </div>
             </form>
 
-            <!-- Entra con Codice -->
             <form onsubmit="joinClassByCode(event)" class="pt-3 border-t border-slate-100 space-y-2.5">
                 <label class="text-xs font-bold text-slate-700 block">Entra con Codice Classe (es. <span class="font-mono text-indigo-600">CLS-2026</span>)</label>
                 <div class="flex gap-2">
@@ -694,7 +780,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 6: ALLEGA APPUNTO O FILE IN CHAT                               -->
+    <!-- MODALE 7: ALLEGA APPUNTO O FILE IN CHAT                               -->
     <!-- ===================================================================== -->
     <div id="attach-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[85vh] flex flex-col">
@@ -710,7 +796,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 7: VISUALIZZA APPUNTO CONDIVISO IN CHAT                        -->
+    <!-- MODALE 8: VISUALIZZA APPUNTO CONDIVISO IN CHAT                        -->
     <!-- ===================================================================== -->
     <div id="shared-note-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[85vh] flex flex-col">
@@ -729,7 +815,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 8: NUOVO EVENTO SCOLASTICO (DATA E ORA CENTRATI SU iOS/MOBILE) -->
+    <!-- MODALE 9: NUOVO EVENTO SCOLASTICO (DATA E ORA CENTRATI SU iOS/MOBILE) -->
     <!-- ===================================================================== -->
     <div id="event-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5">
@@ -786,19 +872,20 @@
     </div>
 
     <!-- TOAST NOTIFICHE -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold pointer-events-none">
+    <div id="toast" class="fixed bottom-20 lg:bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold pointer-events-none">
         <i class="ph-fill ph-check-circle text-emerald-400 text-lg"></i>
         <span id="toast-msg">Operazione completata</span>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MOTORE JAVASCRIPT COMPLETO E AUTONOMO                                 -->
+    <!-- MOTORE JAVASCRIPT COMPLETO E SINCRONIZZATO                            -->
     <!-- ===================================================================== -->
     <script>
         (function () {
             'use strict';
 
-            const STORAGE_KEY = 'studyflow_clean_v6';
+            const STORAGE_KEY = 'studyflow_v7_data';
+            const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('studyflow_realtime_sync') : null;
 
             const COLOR_THEMES = {
                 indigo:  { label: 'Indaco',     bg: 'bg-gradient-to-br from-indigo-50 to-blue-50/70',     border: 'border-indigo-200/80', bar: 'bg-indigo-500',  iconBg: 'bg-indigo-100 text-indigo-700',  badge: 'bg-indigo-100 text-indigo-800',  dot: 'bg-indigo-500' },
@@ -814,39 +901,40 @@
             };
 
             const FOLDER_EMOJIS = ['📐', '📚', '🧪', '🌍', '💻', '🎨', '🏛️', '🧬', '🇬🇧', '📊', '✏️', '🎵'];
+            const DAYS_MAP = { 1: 'Lunedì', 2: 'Martedì', 3: 'Mercoledì', 4: 'Giovedì', 5: 'Venerdì', 6: 'Sabato' };
 
             const ONBOARDING_SLIDES = [
                 {
-                    badge: 'Pagina 1 di 4 • Benvenuto',
-                    title: 'Il tuo spazio parte da Zero',
-                    description: 'Appena crei il tuo account hai una scrivania completamente pulita: nessuna cartella preimpostata, così puoi costruire il tuo archivio scolastico esattamente come vuoi tu.',
+                    badge: 'Pagina 1 di 4 • Cartelle Colorate',
+                    title: 'Parti da Zero e Organizza le Materie',
+                    description: 'Appena crei il tuo account hai 0 cartelle preimpostate. Crea una cartella colorata per ogni materia con icona personalizzata e dividila in sottocartelle.',
                     gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-                    icon: 'ph-sparkle',
+                    icon: 'ph-folders',
                     pills: ['✨ 0 Cartelle Iniziali', '🎨 10 Colori Vivaci', '📂 Sottocartelle']
                 },
                 {
-                    badge: 'Pagina 2 di 4 • Organizzazione',
-                    title: 'Cartelle Colorate per Ogni Materia',
-                    description: 'Crea una cartella colorata per ogni materia con icona personalizzata e dividila in sottocartelle (es. Trimestre 1, Formule, Tavole CAD, Verifiche).',
-                    gradient: 'from-amber-500 via-orange-500 to-rose-500',
-                    icon: 'ph-folders',
-                    pills: ['📐 Matematica', '🏛️ Storia', '💻 Informatica']
-                },
-                {
-                    badge: 'Pagina 3 di 4 • File Universali',
+                    badge: 'Pagina 2 di 4 • File Universali',
                     title: 'Importa Canva, Word, Excel, AutoCAD e altro',
-                    description: 'Non devi riscrivere tutto dentro l’app: carica direttamente nelle tue cartelle progetti Canva, documenti Word, fogli Excel, disegni AutoCAD (.dwg/.dxf), PDF e immagini.',
+                    description: 'Carica direttamente dentro le tue cartelle progetti Canva, documenti Word, fogli Excel, disegni AutoCAD (.dwg/.dxf), PDF e immagini con anteprima e download.',
                     gradient: 'from-emerald-500 via-teal-500 to-cyan-500',
                     icon: 'ph-file-arrow-up',
                     pills: ['📐 AutoCAD', '📘 Word & Excel', '🎨 Canva & PDF']
                 },
                 {
-                    badge: 'Pagina 4 di 4 • Classe & Calendario',
-                    title: 'Chat con i Compagni & Calendario',
-                    description: 'Crea una classe con codice invito per scambiare messaggi, appunti e file con i compagni, e segna verifiche e interrogazioni nel calendario scolastico.',
+                    badge: 'Pagina 3 di 4 • Orario & Calendario',
+                    title: 'Orario Scolastico & Verifiche',
+                    description: 'Inserisci il tuo orario settimanale dal Lunedì al Sabato: l’app riconosce la lezione in corso e ti apre subito la cartella giusta, oltre al calendario verifiche.',
+                    gradient: 'from-amber-500 via-orange-500 to-rose-500',
+                    icon: 'ph-clock-afternoon',
+                    pills: ['⏰ Ora in Corso', '📅 Lun–Sab', '📝 Verifiche']
+                },
+                {
+                    badge: 'Pagina 4 di 4 • Classe & Chat',
+                    title: 'Classe con Codice Invito & Chat Condivisa',
+                    description: 'Crea una classe con codice invito (senza bisogno di numero di telefono) per chattare con i compagni e condividere al volo appunti e file.',
                     gradient: 'from-sky-500 via-blue-600 to-indigo-600',
                     icon: 'ph-chats-circle',
-                    pills: ['🔑 Codice Classe', '💬 Chat & File', '📅 Verifiche']
+                    pills: ['🔑 Codice Classe', '💬 Chat Live', '📎 Condividi File']
                 }
             ];
 
@@ -855,12 +943,13 @@
                 authMode: 'login',
                 hasSeenOnboarding: false,
                 onboardingIndex: 0,
-                activeClassId: null, // null = Spazio Personale (parte da 0)
+                activeClassId: null,
                 classes: {},
                 personalData: {
                     folders: [],
                     notes: [],
-                    events: []
+                    events: [],
+                    timetable: []
                 },
                 currentView: 'folders',
                 selectedFolderId: null,
@@ -869,15 +958,17 @@
                 editingFolderId: null,
                 selectedFolderColor: 'indigo',
                 selectedFolderEmoji: '📐',
+                editingTimetableId: null,
+                selectedTimetableDay: (new Date().getDay() >= 1 && new Date().getDay() <= 6) ? new Date().getDay() : 1,
                 editingNoteId: null,
                 editingNotePinned: false,
                 viewingFileItem: null,
                 viewingSharedNote: null,
+                unreadChatCount: 0,
                 calendarMonth: new Date(),
                 selectedCalendarDate: new Date().toISOString().split('T')[0]
             };
 
-            // --- ARCHIVIAZIONE LOCALE SICURA CON FALLBACK IN MEMORIA ---
             let memoryBackup = null;
 
             function initDemoClass() {
@@ -913,12 +1004,16 @@
                                 notes: 'Studio di funzione completo'
                             }
                         ],
+                        timetable: [
+                            { id: 'demo-tt1', day: 1, start: '08:00', end: '09:00', folderId: 'demo-f1', subject: 'Matematica', room: 'Aula 12' },
+                            { id: 'demo-tt2', day: 1, start: '09:00', end: '11:00', folderId: 'demo-f2', subject: 'Disegno & CAD', room: 'Lab. AutoCAD' }
+                        ],
                         messages: [
                             {
                                 id: 'demo-m1',
                                 senderId: 'sys-giulia',
                                 senderName: 'Giulia',
-                                text: 'Ciao ragazzi! Qui possiamo caricare gli appunti, i file AutoCAD e i PDF di Canva per la verifica.',
+                                text: 'Ciao ragazzi! Qui possiamo chattare e caricare gli appunti, i file AutoCAD e i PDF di Canva.',
                                 createdAt: new Date().toISOString()
                             }
                         ]
@@ -934,7 +1029,14 @@
                         if (parsed.user) state.user = parsed.user;
                         if (typeof parsed.hasSeenOnboarding === 'boolean') state.hasSeenOnboarding = parsed.hasSeenOnboarding;
                         if (parsed.activeClassId !== undefined) state.activeClassId = parsed.activeClassId;
-                        if (parsed.personalData) state.personalData = parsed.personalData;
+                        if (parsed.personalData) {
+                            state.personalData = {
+                                folders: parsed.personalData.folders || [],
+                                notes: parsed.personalData.notes || [],
+                                events: parsed.personalData.events || [],
+                                timetable: parsed.personalData.timetable || []
+                            };
+                        }
                         if (parsed.classes) state.classes = parsed.classes;
                     }
                 } catch (e) {
@@ -943,7 +1045,7 @@
                 initDemoClass();
             }
 
-            function saveStorage() {
+            function saveStorage(broadcast) {
                 const payload = JSON.stringify({
                     user: state.user,
                     hasSeenOnboarding: state.hasSeenOnboarding,
@@ -954,16 +1056,52 @@
                 memoryBackup = payload;
                 try {
                     localStorage.setItem(STORAGE_KEY, payload);
-                } catch (e) {
-                    // Ignora se quota piena su file molto grandi, resta comunque in memoria
+                } catch (e) {}
+                if (broadcast && channel) {
+                    channel.postMessage({ type: 'SYNC_UPDATE', classId: state.activeClassId });
                 }
             }
 
+            // Sincronizzazione in tempo reale tra schede / compagni
+            function handleIncomingRealtimeSync(incomingClassId) {
+                const prevMsgCount = (state.activeClassId && state.classes[state.activeClassId])
+                    ? (state.classes[state.activeClassId].messages || []).length
+                    : 0;
+                loadStorage();
+                const newMsgCount = (state.activeClassId && state.classes[state.activeClassId])
+                    ? (state.classes[state.activeClassId].messages || []).length
+                    : 0;
+
+                if (state.activeClassId && incomingClassId === state.activeClassId && newMsgCount > prevMsgCount) {
+                    if (state.currentView !== 'chat') {
+                        state.unreadChatCount += (newMsgCount - prevMsgCount);
+                        showToast('Nuovo messaggio nella chat di classe!');
+                    }
+                }
+                if (state.user) renderAll();
+            }
+
+            if (channel) {
+                channel.onmessage = function (ev) {
+                    if (ev.data && ev.data.type === 'SYNC_UPDATE') {
+                        handleIncomingRealtimeSync(ev.data.classId);
+                    }
+                };
+            }
+            window.addEventListener('storage', function (ev) {
+                if (ev.key === STORAGE_KEY) {
+                    handleIncomingRealtimeSync(state.activeClassId);
+                }
+            });
+
             function getActiveWorkspace() {
                 if (state.activeClassId && state.classes[state.activeClassId]) {
-                    return state.classes[state.activeClassId];
+                    const cls = state.classes[state.activeClassId];
+                    if (!cls.timetable) cls.timetable = [];
+                    return cls;
                 }
                 state.activeClassId = null;
+                if (!state.personalData.timetable) state.personalData.timetable = [];
                 return state.personalData;
             }
 
@@ -1014,11 +1152,10 @@
                 const cleanName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
 
                 state.user = { id: 'usr-' + Date.now(), name: cleanName, email: email };
-                // Nuovo account: parte da ZERO cartelle, ZERO appunti, ZERO eventi
-                state.personalData = { folders: [], notes: [], events: [] };
+                state.personalData = { folders: [], notes: [], events: [], timetable: [] };
                 state.activeClassId = null;
                 state.hasSeenOnboarding = false;
-                saveStorage();
+                saveStorage(false);
 
                 enterAppShell();
                 openOnboardingTour(0);
@@ -1026,11 +1163,10 @@
 
             window.handleGuestLogin = function () {
                 state.user = { id: 'guest-' + Date.now(), name: 'Studente Ospite', email: 'ospite@studyflow.it' };
-                // Ospite: parte da ZERO cartelle
-                state.personalData = { folders: [], notes: [], events: [] };
+                state.personalData = { folders: [], notes: [], events: [], timetable: [] };
                 state.activeClassId = null;
                 state.hasSeenOnboarding = false;
-                saveStorage();
+                saveStorage(false);
 
                 enterAppShell();
                 openOnboardingTour(0);
@@ -1038,7 +1174,7 @@
 
             window.handleLogout = function () {
                 state.user = null;
-                saveStorage();
+                saveStorage(false);
                 document.getElementById('app-shell').classList.add('hidden');
                 document.getElementById('auth-screen').classList.remove('hidden');
             };
@@ -1059,7 +1195,7 @@
 
             window.closeOnboardingTour = function () {
                 state.hasSeenOnboarding = true;
-                saveStorage();
+                saveStorage(false);
                 document.getElementById('onboarding-modal').classList.add('hidden');
             };
 
@@ -1125,9 +1261,10 @@
 
             window.setMainView = function (view) {
                 state.currentView = view;
+                if (view === 'chat') state.unreadChatCount = 0;
                 toggleMobileSidebar(false);
 
-                ['view-folders', 'view-folder-detail', 'view-chat', 'view-calendar'].forEach(id => {
+                ['view-folders', 'view-folder-detail', 'view-timetable', 'view-chat', 'view-calendar'].forEach(id => {
                     document.getElementById(id).classList.add('hidden');
                 });
 
@@ -1135,11 +1272,21 @@
                 const idleNav = 'w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer';
 
                 document.getElementById('nav-folders').className = (view === 'folders' || view === 'folder-detail') ? activeNav : idleNav;
+                document.getElementById('nav-timetable').className = view === 'timetable' ? activeNav : idleNav;
                 document.getElementById('nav-chat').className = view === 'chat' ? activeNav : idleNav;
                 document.getElementById('nav-calendar').className = view === 'calendar' ? activeNav : idleNav;
 
+                // Bottom nav mobile
+                const mActive = 'flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer';
+                const mIdle = 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer';
+                document.getElementById('mnav-folders').className = (view === 'folders' || view === 'folder-detail') ? mActive : mIdle;
+                document.getElementById('mnav-timetable').className = view === 'timetable' ? mActive : mIdle;
+                document.getElementById('mnav-chat').className = view === 'chat' ? mActive + ' relative' : mIdle + ' relative';
+                document.getElementById('mnav-calendar').className = view === 'calendar' ? mActive : mIdle;
+
                 if (view === 'folders') document.getElementById('view-folders').classList.remove('hidden');
                 if (view === 'folder-detail') document.getElementById('view-folder-detail').classList.remove('hidden');
+                if (view === 'timetable') document.getElementById('view-timetable').classList.remove('hidden');
                 if (view === 'chat') document.getElementById('view-chat').classList.remove('hidden');
                 if (view === 'calendar') document.getElementById('view-calendar').classList.remove('hidden');
 
@@ -1162,12 +1309,24 @@
                 if (!state.user) return;
                 const ws = getActiveWorkspace();
 
-                // Sidebar info
                 document.getElementById('sidebar-user-badge').textContent = state.user.name;
                 const isClass = !!state.activeClassId;
                 document.getElementById('active-ws-name').textContent = isClass ? ws.name : 'Spazio Personale';
                 document.getElementById('active-ws-sub').textContent = `${isClass ? 'Classe Condivisa' : 'Privato'} • ${ws.folders.length} cartelle`;
                 document.getElementById('dashboard-class-pill').textContent = isClass ? `Classe: ${ws.name} (${ws.id})` : 'Spazio Personale (Crea / Entra in Classe)';
+
+                // Badge notifiche chat
+                const chatBadge = document.getElementById('nav-chat-badge');
+                const mChatDot = document.getElementById('mnav-chat-dot');
+                if (state.unreadChatCount > 0) {
+                    chatBadge.textContent = `+${state.unreadChatCount}`;
+                    chatBadge.className = 'px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold';
+                    mChatDot.classList.remove('hidden');
+                } else {
+                    chatBadge.textContent = 'Live';
+                    chatBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold';
+                    mChatDot.classList.add('hidden');
+                }
 
                 const codeBox = document.getElementById('sidebar-class-code-box');
                 if (isClass) {
@@ -1177,7 +1336,6 @@
                     codeBox.classList.add('hidden');
                 }
 
-                // Lista rapida cartelle in sidebar
                 const sbList = document.getElementById('sidebar-folders-list');
                 if (ws.folders.length === 0) {
                     sbList.innerHTML = `<p class="px-2 py-1.5 text-[11px] text-slate-400 italic">Nessuna cartella creata</p>`;
@@ -1196,20 +1354,100 @@
 
                 if (state.currentView === 'folders') renderFoldersDashboard();
                 if (state.currentView === 'folder-detail') renderFolderDetailView();
+                if (state.currentView === 'timetable') renderTimetableView();
                 if (state.currentView === 'chat') renderChatView();
                 if (state.currentView === 'calendar') renderCalendarView();
             }
 
-            // --- VISTA A: DASHBOARD SOLO CARTELLE COLORATE (PARTE DA 0) ---
+            // --- RILEVAMENTO ORA IN CORSO / PROSSIMA LEZIONE ---
+            function getCurrentOrNextLesson() {
+                const ws = getActiveWorkspace();
+                const slots = ws.timetable || [];
+                if (slots.length === 0) return null;
+
+                const now = new Date();
+                const todayDay = now.getDay(); // 0=Dom, 1=Lun...6=Sab
+                if (todayDay < 1 || todayDay > 6) return null;
+
+                const nowMins = now.getHours() * 60 + now.getMinutes();
+                const todaySlots = slots
+                    .filter(s => Number(s.day) === todayDay)
+                    .sort((a, b) => a.start.localeCompare(b.start));
+
+                for (const s of todaySlots) {
+                    const [sh, sm] = s.start.split(':').map(Number);
+                    const [eh, em] = s.end.split(':').map(Number);
+                    const startM = sh * 60 + sm;
+                    const endM = eh * 60 + em;
+                    if (nowMins >= startM && nowMins < endM) {
+                        return { status: 'LIVE', slot: s };
+                    }
+                    if (nowMins < startM) {
+                        return { status: 'NEXT', slot: s };
+                    }
+                }
+                return null;
+            }
+
+            function renderLessonBannerHtml(compact) {
+                const info = getCurrentOrNextLesson();
+                const ws = getActiveWorkspace();
+                if (!info) return '';
+
+                const { status, slot } = info;
+                const folder = ws.folders.find(f => f.id === slot.folderId);
+                const theme = folder ? (COLOR_THEMES[folder.color] || COLOR_THEMES.indigo) : COLOR_THEMES.indigo;
+                const label = status === 'LIVE' ? '🔴 ORA IN CORSO' : '⏭️ PROSSIMA LEZIONE';
+                const subjectName = folder ? `${folder.icon} ${folder.name}` : `📘 ${slot.subject}`;
+
+                return `
+                    <div class="rounded-3xl border ${theme.border} ${theme.bg} p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 rounded-2xl ${theme.iconBg} flex items-center justify-center text-2xl shrink-0">
+                                ${folder ? folder.icon : '⏰'}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white text-slate-800 border border-slate-200/80">${label}</span>
+                                    <span class="text-xs font-extrabold text-slate-600">${slot.start} – ${slot.end}</span>
+                                    ${slot.room ? `<span class="text-xs font-semibold text-slate-500">• ${escapeHtml(slot.room)}</span>` : ''}
+                                </div>
+                                <h4 class="font-display font-extrabold text-base sm:text-lg text-slate-900 truncate mt-0.5">${escapeHtml(subjectName)}</h4>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            ${folder ? `
+                                <button type="button" onclick="openFolderDetail('${folder.id}')" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                                    <span>Apri Cartella</span>
+                                    <i class="ph-bold ph-arrow-right"></i>
+                                </button>
+                            ` : `
+                                <button type="button" onclick="setMainView('timetable')" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold cursor-pointer">
+                                    Vedi Orario
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- VISTA A: DASHBOARD SOLO CARTELLE COLORATE ---
             function renderFoldersDashboard() {
                 const ws = getActiveWorkspace();
                 const grid = document.getElementById('folders-grid');
+                const bannerEl = document.getElementById('dashboard-live-lesson-banner');
+                const bannerHtml = renderLessonBannerHtml(true);
+                if (bannerHtml) {
+                    bannerEl.innerHTML = bannerHtml;
+                    bannerEl.classList.remove('hidden');
+                } else {
+                    bannerEl.classList.add('hidden');
+                }
 
                 const filteredFolders = ws.folders.filter(f =>
                     !state.searchQuery || f.name.toLowerCase().includes(state.searchQuery)
                 );
 
-                // Stato iniziale da 0 cartelle
                 if (ws.folders.length === 0) {
                     grid.className = 'pt-2';
                     grid.innerHTML = `
@@ -1220,7 +1458,7 @@
                             <div class="space-y-2">
                                 <h3 class="font-display text-2xl font-extrabold text-slate-900">Il tuo spazio parte da zero!</h3>
                                 <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                                    Non hai ancora nessuna cartella. Crea la tua prima cartella colorata per materia e poi importa file Canva, Word, Excel, AutoCAD, PDF o scrivi i tuoi appunti.
+                                    Non hai ancora nessuna cartella. Crea la tua prima cartella colorata per materia, imposta l'orario settimanale e importa file Canva, Word, Excel, AutoCAD, PDF o appunti.
                                 </p>
                             </div>
                             <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
@@ -1228,9 +1466,9 @@
                                     <i class="ph-bold ph-folder-plus text-lg"></i>
                                     <span>+ Crea la tua prima Cartella</span>
                                 </button>
-                                <button type="button" onclick="openOnboardingTour(0)" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
-                                    <i class="ph-duotone ph-sparkle text-amber-500 text-lg"></i>
-                                    <span>Rivedi Presentazione (4 slide)</span>
+                                <button type="button" onclick="setMainView('timetable')" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                    <i class="ph-duotone ph-clock-afternoon text-indigo-600 text-lg"></i>
+                                    <span>Compila Orario Scolastico</span>
                                 </button>
                             </div>
                         </div>
@@ -1323,7 +1561,6 @@
                 const filesCount = folderItems.filter(n => n.isFile).length;
                 document.getElementById('detail-folder-stats').textContent = `${folderItems.length - filesCount} appunti • ${filesCount} file importati`;
 
-                // Sottocartelle
                 const subs = folder.subfolders || ['Generale'];
                 const subBar = document.getElementById('subfolders-bar');
                 subBar.innerHTML = [
@@ -1336,7 +1573,6 @@
                     `<button type="button" onclick="quickAddSubfolder()" class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 cursor-pointer">+ Sottocartella</button>`
                 ].join('');
 
-                // Filtra elementi
                 let visible = folderItems;
                 if (state.selectedSubfolder !== 'ALL') {
                     visible = visible.filter(n => (n.subfolder || 'Generale') === state.selectedSubfolder);
@@ -1348,7 +1584,6 @@
                     );
                 }
 
-                // Ordina fissati prima
                 visible.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
                 const itemsGrid = document.getElementById('folder-items-grid');
@@ -1428,10 +1663,198 @@
             };
 
             window.quickAddSubfolder = function () {
+                if (state.selectedFolderId) openFolderModal(state.selectedFolderId);
+            };
+
+            // --- VISTA C: ORARIO SCOLASTICO (LUNEDÌ - SABATO) ---
+            function renderTimetableView() {
                 const ws = getActiveWorkspace();
-                const folder = ws.folders.find(f => f.id === state.selectedFolderId);
-                if (!folder) return;
-                openFolderModal(folder.id);
+                const slots = ws.timetable || [];
+
+                document.getElementById('timetable-live-banner').innerHTML = renderLessonBannerHtml(false);
+
+                // Tabs giorni su mobile
+                const mDaysEl = document.getElementById('timetable-mobile-days');
+                mDaysEl.innerHTML = [1, 2, 3, 4, 5, 6].map(d => {
+                    const active = Number(state.selectedTimetableDay) === d;
+                    const count = slots.filter(s => Number(s.day) === d).length;
+                    return `
+                        <button type="button" onclick="selectTimetableMobileDay(${d})" class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${active ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white border border-slate-200 text-slate-600'}">
+                            ${DAYS_MAP[d].slice(0, 3)} ${count > 0 ? `(${count})` : ''}
+                        </button>
+                    `;
+                }).join('');
+
+                const board = document.getElementById('timetable-board');
+
+                if (slots.length === 0) {
+                    board.innerHTML = `
+                        <div class="bg-white rounded-3xl border-2 border-dashed border-slate-300 p-10 text-center max-w-xl mx-auto space-y-4">
+                            <div class="w-16 h-16 mx-auto rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl">
+                                <i class="ph-duotone ph-clock-afternoon"></i>
+                            </div>
+                            <div class="space-y-1.5">
+                                <h3 class="font-display font-extrabold text-xl text-slate-900">Nessuna lezione nell'orario</h3>
+                                <p class="text-xs sm:text-sm text-slate-500">Aggiungi le tue materie giorno per giorno dal Lunedì al Sabato e collegale alle tue cartelle colorate.</p>
+                            </div>
+                            <button type="button" onclick="openTimetableModal()" class="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer">
+                                <i class="ph-bold ph-plus"></i>
+                                <span>Inserisci Prima Ora di Lezione</span>
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Vista Mobile (giorno selezionato) + Vista Desktop (6 colonne Lun-Sab)
+                const renderDayColumn = (dayNum, isMobileCard) => {
+                    const daySlots = slots
+                        .filter(s => Number(s.day) === dayNum)
+                        .sort((a, b) => a.start.localeCompare(b.start));
+
+                    const cards = daySlots.map(s => {
+                        const folder = ws.folders.find(f => f.id === s.folderId);
+                        const theme = folder ? (COLOR_THEMES[folder.color] || COLOR_THEMES.indigo) : COLOR_THEMES.indigo;
+                        const title = folder ? `${folder.icon} ${folder.name}` : `📘 ${s.subject}`;
+
+                        return `
+                            <div class="rounded-2xl border ${theme.border} ${theme.bg} p-3.5 space-y-2 relative group transition-all hover:shadow-xs">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="px-2 py-0.5 rounded-lg bg-white/90 text-[11px] font-extrabold text-slate-800">${s.start} – ${s.end}</span>
+                                    <button type="button" onclick="openTimetableModal('${s.id}')" class="p-1 rounded-lg bg-white/80 hover:bg-white text-slate-500 hover:text-slate-900 cursor-pointer" title="Modifica ora">
+                                        <i class="ph-bold ph-pencil-simple text-xs"></i>
+                                    </button>
+                                </div>
+                                <p class="font-display font-extrabold text-sm text-slate-900 leading-snug">${escapeHtml(title)}</p>
+                                ${s.room ? `<p class="text-[11px] font-semibold text-slate-500 flex items-center gap-1"><i class="ph-bold ph-map-pin"></i> ${escapeHtml(s.room)}</p>` : ''}
+                                ${folder ? `
+                                    <button type="button" onclick="openFolderDetail('${folder.id}')" class="w-full mt-1 py-1.5 px-2.5 rounded-xl bg-white/85 hover:bg-white text-[11px] font-bold text-slate-800 flex items-center justify-between cursor-pointer">
+                                        <span>Apri cartella</span>
+                                        <i class="ph-bold ph-arrow-right"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+
+                    return `
+                        <div class="bg-white rounded-3xl border border-slate-200/90 p-4 space-y-3 flex flex-col ${isMobileCard ? '' : 'min-h-[340px]'}">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                <h4 class="font-display font-extrabold text-sm text-slate-900">${DAYS_MAP[dayNum]}</h4>
+                                <button type="button" onclick="openTimetableModal(null, ${dayNum})" class="p-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold cursor-pointer" title="Aggiungi ora a ${DAYS_MAP[dayNum]}">
+                                    <i class="ph-bold ph-plus"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-2.5 flex-1">
+                                ${cards || `<p class="text-[11px] text-slate-400 text-center py-6 italic">Nessuna lezione</p>`}
+                            </div>
+                        </div>
+                    `;
+                };
+
+                board.innerHTML = `
+                    <!-- Mobile: singolo giorno -->
+                    <div class="lg:hidden">
+                        ${renderDayColumn(Number(state.selectedTimetableDay), true)}
+                    </div>
+                    <!-- Desktop: settimana completa Lun-Sab -->
+                    <div class="hidden lg:grid lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                        ${[1, 2, 3, 4, 5, 6].map(d => renderDayColumn(d, false)).join('')}
+                    </div>
+                `;
+            }
+
+            window.selectTimetableMobileDay = function (d) {
+                state.selectedTimetableDay = d;
+                renderTimetableView();
+            };
+
+            window.openTimetableModal = function (slotId, presetDay) {
+                const ws = getActiveWorkspace();
+                state.editingTimetableId = slotId || null;
+                const existing = slotId ? (ws.timetable || []).find(s => s.id === slotId) : null;
+
+                document.getElementById('timetable-modal-title').textContent = existing ? 'Modifica Ora di Lezione' : 'Aggiungi Ora di Lezione';
+                document.getElementById('tt-day-input').value = existing ? existing.day : (presetDay || state.selectedTimetableDay || 1);
+                document.getElementById('tt-start-input').value = existing ? existing.start : '08:00';
+                document.getElementById('tt-end-input').value = existing ? existing.end : '09:00';
+                document.getElementById('tt-room-input').value = existing ? (existing.room || '') : '';
+                document.getElementById('tt-subject-input').value = existing ? (existing.subject || '') : '';
+
+                const fSel = document.getElementById('tt-folder-input');
+                fSel.innerHTML = [
+                    `<option value="">— Materia libera (senza cartella) —</option>`,
+                    ...ws.folders.map(f => `<option value="${f.id}">${f.icon} ${escapeHtml(f.name)}</option>`)
+                ].join('');
+                fSel.value = existing && existing.folderId ? existing.folderId : '';
+
+                handleTimetableFolderChange();
+                document.getElementById('tt-delete-btn').classList.toggle('hidden', !existing);
+                document.getElementById('timetable-modal').classList.remove('hidden');
+            };
+
+            window.handleTimetableFolderChange = function () {
+                const fid = document.getElementById('tt-folder-input').value;
+                document.getElementById('tt-custom-subject-wrap').classList.toggle('hidden', !!fid);
+            };
+
+            window.closeTimetableModal = function () {
+                document.getElementById('timetable-modal').classList.add('hidden');
+            };
+
+            window.saveTimetableSlot = function (e) {
+                e.preventDefault();
+                const ws = getActiveWorkspace();
+                if (!ws.timetable) ws.timetable = [];
+
+                const day = Number(document.getElementById('tt-day-input').value);
+                const start = document.getElementById('tt-start-input').value;
+                const end = document.getElementById('tt-end-input').value;
+                const folderId = document.getElementById('tt-folder-input').value || null;
+                const customSub = document.getElementById('tt-subject-input').value.trim();
+                const room = document.getElementById('tt-room-input').value.trim();
+
+                const linkedFolder = folderId ? ws.folders.find(f => f.id === folderId) : null;
+                const subjectName = linkedFolder ? linkedFolder.name : (customSub || 'Lezione');
+
+                if (state.editingTimetableId) {
+                    const slot = ws.timetable.find(s => s.id === state.editingTimetableId);
+                    if (slot) {
+                        slot.day = day;
+                        slot.start = start;
+                        slot.end = end;
+                        slot.folderId = folderId;
+                        slot.subject = subjectName;
+                        slot.room = room;
+                    }
+                    showToast('Orario aggiornato!');
+                } else {
+                    ws.timetable.push({
+                        id: 'tt-' + Date.now(),
+                        day: day,
+                        start: start,
+                        end: end,
+                        folderId: folderId,
+                        subject: subjectName,
+                        room: room
+                    });
+                    showToast(`Lezione di ${subjectName} aggiunta!`);
+                }
+
+                state.selectedTimetableDay = day;
+                saveStorage(true);
+                closeTimetableModal();
+                renderAll();
+            };
+
+            window.deleteCurrentTimetableSlot = function () {
+                const ws = getActiveWorkspace();
+                if (!state.editingTimetableId) return;
+                ws.timetable = (ws.timetable || []).filter(s => s.id !== state.editingTimetableId);
+                saveStorage(true);
+                closeTimetableModal();
+                renderAll();
+                showToast('Ora rimossa dall’orario');
             };
 
             // --- GESTIONE CARTELLE COLORATE ---
@@ -1519,7 +1942,7 @@
                     showToast(`Cartella "${name}" creata!`);
                 }
 
-                saveStorage();
+                saveStorage(true);
                 closeFolderModal();
                 renderAll();
             };
@@ -1529,13 +1952,13 @@
                 if (!state.editingFolderId) return;
                 ws.folders = ws.folders.filter(f => f.id !== state.editingFolderId);
                 ws.notes = ws.notes.filter(n => n.folderId !== state.editingFolderId);
-                saveStorage();
+                saveStorage(true);
                 closeFolderModal();
                 setMainView('folders');
                 showToast('Cartella eliminata');
             };
 
-            // --- IMPORTAZIONE UNIVERSALE FILE (CANVA, WORD, EXCEL, AUTOCAD, PDF, IMMAGINI, ECC.) ---
+            // --- IMPORTAZIONE UNIVERSALE FILE ---
             function getFileFormatInfo(fileName) {
                 const lower = (fileName || '').toLowerCase();
                 const ext = (lower.split('.').pop() || '').toLowerCase();
@@ -1619,7 +2042,7 @@
                         });
                         loaded++;
                         if (loaded === files.length) {
-                            saveStorage();
+                            saveStorage(true);
                             if (state.currentView !== 'folder-detail') {
                                 openFolderDetail(targetFolder.id);
                             } else {
@@ -1717,7 +2140,7 @@
                 const item = ws.notes.find(n => n.id === state.viewingFileItem.id);
                 if (item) {
                     item.fileNote = val;
-                    saveStorage();
+                    saveStorage(true);
                     renderAll();
                 }
             };
@@ -1726,7 +2149,7 @@
                 const ws = getActiveWorkspace();
                 if (!state.viewingFileItem) return;
                 ws.notes = ws.notes.filter(n => n.id !== state.viewingFileItem.id);
-                saveStorage();
+                saveStorage(true);
                 closeFileViewerModal();
                 renderAll();
                 showToast('File eliminato');
@@ -1827,7 +2250,7 @@
                     showToast('Nuovo appunto creato!');
                 }
 
-                saveStorage();
+                saveStorage(true);
                 closeNoteEditor();
                 if (state.currentView !== 'folder-detail') {
                     openFolderDetail(folderId);
@@ -1840,7 +2263,7 @@
                 const ws = getActiveWorkspace();
                 if (!state.editingNoteId) return;
                 ws.notes = ws.notes.filter(n => n.id !== state.editingNoteId);
-                saveStorage();
+                saveStorage(true);
                 closeNoteEditor();
                 renderAll();
                 showToast('Appunto eliminato');
@@ -1889,7 +2312,8 @@
             window.switchWorkspace = function (classId) {
                 state.activeClassId = classId;
                 state.selectedFolderId = null;
-                saveStorage();
+                state.unreadChatCount = 0;
+                saveStorage(false);
                 closeClassModal();
                 setMainView('folders');
                 showToast(classId ? `Entrato nella classe ${state.classes[classId].name}` : 'Passato allo Spazio Personale');
@@ -1907,6 +2331,7 @@
                     folders: [],
                     notes: [],
                     events: [],
+                    timetable: [],
                     messages: [
                         {
                             id: 'msg-' + Date.now(),
@@ -1918,6 +2343,7 @@
                     ]
                 };
                 document.getElementById('new-class-name-input').value = '';
+                saveStorage(true);
                 switchWorkspace(code);
             };
 
@@ -1933,10 +2359,12 @@
                         folders: [],
                         notes: [],
                         events: [],
+                        timetable: [],
                         messages: []
                     };
                 }
                 document.getElementById('join-class-code-input').value = '';
+                saveStorage(true);
                 switchWorkspace(code);
             };
 
@@ -1972,7 +2400,7 @@
 
                 const cls = state.classes[state.activeClassId];
                 document.getElementById('chat-class-title').textContent = cls.name;
-                document.getElementById('chat-class-members').textContent = `Codice invito: ${cls.id} • Condividi appunti e file`;
+                document.getElementById('chat-class-members').textContent = `Codice invito: ${cls.id} • Messaggi e file sincronizzati`;
                 document.getElementById('chat-class-code-pill').textContent = cls.id;
 
                 const feed = document.getElementById('chat-messages-feed');
@@ -2041,13 +2469,12 @@
                     createdAt: new Date().toISOString()
                 });
                 inp.value = '';
-                saveStorage();
+                saveStorage(true);
                 renderChatView();
             };
 
             window.openAttachModal = function () {
                 if (!state.activeClassId) return;
-                // Permette di allegare sia elementi dello spazio personale sia della classe
                 const allItems = [
                     ...state.personalData.notes.map(n => ({ item: n, ws: state.personalData })),
                     ...state.classes[state.activeClassId].notes.map(n => ({ item: n, ws: state.classes[state.activeClassId] }))
@@ -2113,7 +2540,7 @@
                     },
                     createdAt: new Date().toISOString()
                 });
-                saveStorage();
+                saveStorage(true);
                 renderChatView();
                 showToast('Allegato inviato nella chat di classe!');
             }
@@ -2166,7 +2593,7 @@
                     pinned: false,
                     updatedAt: new Date().toISOString().split('T')[0]
                 });
-                saveStorage();
+                saveStorage(true);
                 closeSharedNoteModal();
                 showToast(`Appunto salvato nella cartella "${folder.name}"!`);
             };
@@ -2306,7 +2733,7 @@
                     notes: notes
                 });
                 state.selectedCalendarDate = date;
-                saveStorage();
+                saveStorage(true);
                 closeEventModal();
                 renderCalendarView();
                 showToast('Evento salvato nel calendario!');
@@ -2315,7 +2742,7 @@
             window.deleteCalendarEvent = function (evId) {
                 const ws = getActiveWorkspace();
                 ws.events = ws.events.filter(e => e.id !== evId);
-                saveStorage();
+                saveStorage(true);
                 renderCalendarView();
                 showToast('Evento rimosso');
             };
