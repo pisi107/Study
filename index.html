@@ -720,15 +720,23 @@
                     <!-- Feed Messaggi Live -->
                     <div id="classchat-messages-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50/40 max-h-[52vh]"></div>
 
-                    <!-- Form Invio Messaggio -->
+                    <!-- Anteprima Allegato Selezionato Prima dell'Invio -->
+                    <div id="classchat-pending-attachment" class="hidden px-4 py-2.5 bg-indigo-50/90 border-t border-indigo-100 flex items-center justify-between gap-2"></div>
+
+                    <!-- Form Invio Messaggio & Allegati Appunti -->
                     <form onsubmit="sendClassChatMessage(event)" class="p-3 sm:p-4 border-t border-slate-100 bg-white flex flex-wrap sm:flex-nowrap items-center gap-2">
+                        <input type="file" id="classchat-file-input" onchange="handleClassChatFileUpload(event)" class="hidden">
+                        <button type="button" onclick="openClassAttachModal()" class="px-3 py-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 text-xs font-extrabold flex items-center gap-1.5 shrink-0 cursor-pointer transition-colors" title="Allega un appunto dalle tue cartelle o un file">
+                            <i class="ph-bold ph-paperclip text-base"></i>
+                            <span class="hidden md:inline">Allega Appunto</span>
+                        </button>
                         <select id="classchat-send-channel" class="px-3 py-3 rounded-2xl bg-slate-100 border border-slate-200/70 text-xs font-extrabold text-slate-700 outline-none cursor-pointer">
                             <option value="Generale"># Generale</option>
                             <option value="Compiti"># Compiti</option>
                             <option value="Verifiche"># Verifiche</option>
                             <option value="Appunti"># Appunti</option>
                         </select>
-                        <input type="text" id="classchat-message-input" placeholder="Scrivi un messaggio alla classe..." class="flex-1 min-w-[180px] px-4 py-3 rounded-2xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-xs sm:text-sm font-medium outline-none">
+                        <input type="text" id="classchat-message-input" placeholder="Scrivi un messaggio o commenta l'appunto..." class="flex-1 min-w-[160px] px-4 py-3 rounded-2xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-xs sm:text-sm font-medium outline-none">
                         <button type="submit" class="px-4 sm:px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shrink-0 cursor-pointer">
                             <span>Invia</span>
                             <i class="ph-bold ph-paper-plane-right"></i>
@@ -1235,10 +1243,52 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICHE -->
-    <div id="toast" class="fixed bottom-20 lg:bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold pointer-events-none">
-        <i class="ph-fill ph-check-circle text-emerald-400 text-lg"></i>
-        <span id="toast-msg">Operazione completata</span>
+    <!-- MODALE ALLEGA APPUNTI O FILE NELLA CHAT DI CLASSE -->
+    <div id="classchat-attach-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] fade-in">
+            <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="font-display text-base sm:text-lg font-extrabold text-slate-900">Allega Appunto o File alla Chat</h3>
+                    <p class="text-xs text-slate-500">Seleziona dalle tue cartelle materie oppure carica dal dispositivo</p>
+                </div>
+                <button type="button" onclick="closeClassAttachModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-200/70 cursor-pointer"><i class="ph-bold ph-x"></i></button>
+            </div>
+
+            <div class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
+                <button type="button" onclick="triggerClassChatDeviceFile()" class="w-full p-3.5 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 hover:bg-emerald-50 text-emerald-800 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-extrabold transition-colors cursor-pointer">
+                    <i class="ph-bold ph-upload-simple text-lg"></i>
+                    <span>Carica un file dal computer / telefono</span>
+                </button>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">I tuoi appunti e file salvati</span>
+                        <select id="classchat-attach-folder-filter" onchange="renderClassAttachList()" class="px-2.5 py-1 rounded-xl bg-slate-100 text-xs font-bold text-slate-700 outline-none cursor-pointer"></select>
+                    </div>
+                    <div id="classchat-attach-items-list" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE ANTEPRIMA APPUNTO CONDIVISO IN CHAT -->
+    <div id="shared-note-preview-modal" class="fixed inset-0 bg-slate-900/65 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[88vh] fade-in">
+            <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <span id="shared-note-badge" class="px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-700 text-[10px] font-extrabold uppercase">Appunto Condiviso</span>
+                    <h3 id="shared-note-title" class="font-display font-extrabold text-base sm:text-lg text-slate-900 truncate mt-1">Titolo Appunto</h3>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" id="shared-note-save-btn" onclick="saveSharedAttachmentToMyFolders()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                        <i class="ph-bold ph-folder-plus"></i>
+                        <span>Salva nelle mie cartelle</span>
+                    </button>
+                    <button type="button" onclick="closeSharedNotePreview()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200/70 cursor-pointer"><i class="ph-bold ph-x"></i></button>
+                </div>
+            </div>
+            <div id="shared-note-body" class="p-5 sm:p-7 overflow-y-auto flex-1 text-sm text-slate-800 leading-relaxed space-y-3"></div>
+        </div>
     </div>
 
     <!-- ===================================================================== -->
@@ -1440,6 +1490,8 @@
                 selectedSubfolder: 'ALL',
                 selectedBoardRoom: 'ALL',
                 selectedClassChannel: 'ALL',
+                pendingClassAttachment: null,
+                viewingSharedAttachment: null,
                 searchQuery: '',
                 editingFolderId: null,
                 selectedFolderColor: 'indigo',
@@ -2149,6 +2201,26 @@
                     const isMine = (m.sender || '').trim().toLowerCase() === currentUser.toLowerCase() && !m.isSystemDemo;
                     const initials = (m.sender || 'ST').slice(0, 2).toUpperCase();
                     const channelTag = m.channel || 'Generale';
+                    const att = m.attachment;
+
+                    const attachmentHtml = att ? `
+                        <div onclick="openChatAttachment('${m.id}')" class="mt-2 p-2.5 rounded-xl border ${isMine ? 'bg-white/15 border-white/25 hover:bg-white/25 text-white' : 'bg-indigo-50/80 border-indigo-200/80 hover:bg-indigo-100/70 text-slate-900'} flex items-center justify-between gap-2.5 cursor-pointer transition-colors">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-9 h-9 rounded-xl ${isMine ? 'bg-white/20 text-white' : 'bg-white text-indigo-600 shadow-2xs'} flex items-center justify-center text-lg shrink-0">
+                                    <i class="ph-duotone ${att.isFile ? 'ph-file-arrow-down' : 'ph-notebook'}"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider ${isMine ? 'text-indigo-200' : 'text-indigo-600'} block">
+                                        ${att.isFile ? 'File Allegato' : 'Appunto'} • ${escapeHtml(att.subject || 'Materia')}
+                                    </span>
+                                    <p class="text-xs font-extrabold truncate">${escapeHtml(att.title)}</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold shrink-0 ${isMine ? 'bg-white text-indigo-700' : 'bg-indigo-600 text-white'}">
+                                Apri
+                            </span>
+                        </div>
+                    ` : '';
 
                     return `
                         <div class="flex items-start gap-2.5 ${isMine ? 'flex-row-reverse' : ''}">
@@ -2171,7 +2243,8 @@
                                         </button>
                                     </div>
                                 </div>
-                                <p class="text-xs sm:text-sm leading-relaxed break-words">${escapeHtml(m.text)}</p>
+                                ${m.text ? `<p class="text-xs sm:text-sm leading-relaxed break-words">${escapeHtml(m.text)}</p>` : ''}
+                                ${attachmentHtml}
                             </div>
                         </div>
                     `;
@@ -2186,6 +2259,272 @@
                     sendSel.value = channelId;
                 }
                 renderClassChatView();
+            };
+
+            function renderPendingClassAttachment() {
+                const bar = document.getElementById('classchat-pending-attachment');
+                if (!bar) return;
+                const att = state.pendingClassAttachment;
+                if (!att) {
+                    bar.classList.add('hidden');
+                    bar.innerHTML = '';
+                    return;
+                }
+                bar.classList.remove('hidden');
+                bar.innerHTML = `
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="px-2 py-0.5 rounded-lg bg-indigo-600 text-white text-[10px] font-extrabold shrink-0">
+                            ${att.isFile ? 'FILE' : 'APPUNTO'}
+                        </span>
+                        <span class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(att.title)}</span>
+                        <span class="text-[11px] font-semibold text-indigo-700 shrink-0">(${escapeHtml(att.subject || 'Materia')})</span>
+                    </div>
+                    <button type="button" onclick="clearPendingClassAttachment()" class="p-1 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-white cursor-pointer" title="Rimuovi allegato">
+                        <i class="ph-bold ph-x text-xs"></i>
+                    </button>
+                `;
+            }
+
+            window.clearPendingClassAttachment = function () {
+                state.pendingClassAttachment = null;
+                renderPendingClassAttachment();
+            };
+
+            window.openClassAttachModal = function () {
+                const filterSel = document.getElementById('classchat-attach-folder-filter');
+                filterSel.innerHTML = [
+                    `<option value="ALL">Tutte le materie</option>`,
+                    ...(state.data.folders || []).map(f => `<option value="${f.id}">${f.icon} ${escapeHtml(f.name)}</option>`)
+                ].join('');
+                renderClassAttachList();
+                document.getElementById('classchat-attach-modal').classList.remove('hidden');
+            };
+
+            window.closeClassAttachModal = function () {
+                document.getElementById('classchat-attach-modal').classList.add('hidden');
+            };
+
+            window.renderClassAttachList = function () {
+                const folderFilter = document.getElementById('classchat-attach-folder-filter').value;
+                const notes = (state.data.notes || []).filter(n => folderFilter === 'ALL' || n.folderId === folderFilter);
+                const listEl = document.getElementById('classchat-attach-items-list');
+
+                if (notes.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 space-y-1">
+                            <p class="text-xs font-bold text-slate-600">Nessun appunto o file trovato</p>
+                            <p class="text-[11px] text-slate-400">Crea prima un appunto nelle tue cartelle o carica un file dal dispositivo qui sopra.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = notes.map(n => {
+                    const folder = (state.data.folders || []).find(f => f.id === n.folderId);
+                    const subj = folder ? `${folder.icon} ${folder.name}` : 'Generale';
+                    return `
+                        <div onclick="selectNoteAttachmentForChat('${n.id}')" class="p-3 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 flex items-center justify-between gap-3 cursor-pointer transition-all">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-9 h-9 rounded-xl ${n.isFile ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'} flex items-center justify-center text-lg shrink-0">
+                                    <i class="ph-duotone ${n.isFile ? 'ph-file-text' : 'ph-notebook'}"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(n.title || 'Senza titolo')}</p>
+                                    <span class="text-[10px] font-bold text-slate-500 block">${escapeHtml(subj)} • ${escapeHtml(n.subfolder || 'Generale')}</span>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-xl bg-indigo-600 text-white text-[11px] font-bold shrink-0">Allega</span>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            window.selectNoteAttachmentForChat = async function (noteId) {
+                const note = (state.data.notes || []).find(n => n.id === noteId);
+                if (!note) return;
+                const folder = (state.data.folders || []).find(f => f.id === note.folderId);
+                const subjectName = folder ? folder.name : 'Generale';
+
+                let fileDataUrl = null;
+                if (note.isFile) {
+                    fileDataUrl = await retrieveFileBinary(note);
+                }
+
+                state.pendingClassAttachment = {
+                    sourceId: note.id,
+                    isFile: !!note.isFile,
+                    title: note.title || 'Appunto',
+                    subject: subjectName,
+                    subfolder: note.subfolder || 'Generale',
+                    content: note.isFile ? '' : (note.content || ''),
+                    fileName: note.fileName || note.title,
+                    fileMime: note.fileMime || '',
+                    fileSizeLabel: note.fileSizeLabel || '',
+                    fileDataUrl: fileDataUrl || ''
+                };
+
+                const sendSel = document.getElementById('classchat-send-channel');
+                if (sendSel) sendSel.value = 'Appunti';
+
+                closeClassAttachModal();
+                renderPendingClassAttachment();
+                document.getElementById('classchat-message-input').focus();
+            };
+
+            window.triggerClassChatDeviceFile = function () {
+                document.getElementById('classchat-file-input').click();
+            };
+
+            window.handleClassChatFileUpload = async function (event) {
+                const file = (event.target.files || [])[0];
+                if (!file) return;
+
+                const dataUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(file);
+                });
+                event.target.value = '';
+                if (!dataUrl) return;
+
+                const kb = Math.max(1, Math.round(file.size / 1024));
+                const sizeLabel = kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB';
+
+                state.pendingClassAttachment = {
+                    sourceId: 'chatfile-' + Date.now(),
+                    isFile: true,
+                    title: file.name,
+                    subject: 'File Condiviso',
+                    subfolder: 'Generale',
+                    content: '',
+                    fileName: file.name,
+                    fileMime: file.type,
+                    fileSizeLabel: sizeLabel,
+                    fileDataUrl: dataUrl
+                };
+
+                const sendSel = document.getElementById('classchat-send-channel');
+                if (sendSel) sendSel.value = 'Appunti';
+
+                closeClassAttachModal();
+                renderPendingClassAttachment();
+                document.getElementById('classchat-message-input').focus();
+            };
+
+            window.openChatAttachment = async function (msgId) {
+                const msg = (state.data.classMessages || []).find(m => m.id === msgId);
+                if (!msg || !msg.attachment) return;
+                const att = msg.attachment;
+                state.viewingSharedAttachment = att;
+
+                if (att.isFile) {
+                    const blobId = att.storageBlobId || att.sourceId || ('shared-' + msg.id);
+                    if (att.fileDataUrl) {
+                        await storeFileBinary(blobId, att.fileDataUrl);
+                    }
+                    openFileViewerFromObject({
+                        id: blobId,
+                        storageBlobId: blobId,
+                        title: att.title,
+                        fileName: att.fileName || att.title,
+                        fileMime: att.fileMime || '',
+                        fileSizeLabel: att.fileSizeLabel || 'Allegato Chat',
+                        subfolder: att.subject || 'Chat Classe',
+                        fileDataUrl: att.fileDataUrl || '',
+                        customNote: ''
+                    });
+                    return;
+                }
+
+                document.getElementById('shared-note-badge').textContent = `${att.subject || 'Materia'} • Condiviso da ${msg.sender || 'Compagno'}`;
+                document.getElementById('shared-note-title').textContent = att.title || 'Appunto';
+                document.getElementById('shared-note-body').innerHTML = att.content || '<p class="text-slate-400 italic">Appunto vuoto.</p>';
+                document.getElementById('shared-note-preview-modal').classList.remove('hidden');
+            };
+
+            window.closeSharedNotePreview = function () {
+                document.getElementById('shared-note-preview-modal').classList.add('hidden');
+            };
+
+            window.saveSharedAttachmentToMyFolders = function () {
+                const att = state.viewingSharedAttachment;
+                if (!att) return;
+
+                let targetFolder = (state.data.folders || []).find(f => f.name.toLowerCase() === (att.subject || '').toLowerCase());
+                if (!targetFolder && state.data.folders.length > 0) {
+                    targetFolder = state.data.folders[0];
+                }
+                if (!targetFolder) {
+                    targetFolder = {
+                        id: 'fld-' + Date.now(),
+                        name: att.subject || 'Appunti Classe',
+                        color: 'indigo',
+                        icon: '📚',
+                        subfolders: ['Generale']
+                    };
+                    state.data.folders.push(targetFolder);
+                }
+
+                state.data.notes.unshift({
+                    id: 'note-' + Date.now(),
+                    folderId: targetFolder.id,
+                    subfolder: 'Generale',
+                    title: att.title || 'Appunto condiviso',
+                    content: att.content || '',
+                    pinned: false,
+                    isFile: false,
+                    updatedAt: new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })
+                });
+
+                saveStorage();
+                closeSharedNotePreview();
+                renderAll();
+                showToast(`Appunto salvato nella cartella "${targetFolder.name}"!`);
+            };
+
+            window.sendClassChatMessage = async function (e) {
+                e.preventDefault();
+                const inp = document.getElementById('classchat-message-input');
+                const text = inp.value.trim();
+                const att = state.pendingClassAttachment;
+                if (!text && !att) return;
+
+                ensureDefaultClassMessages();
+                const channel = document.getElementById('classchat-send-channel').value || 'Generale';
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                let savedAttachment = null;
+                if (att) {
+                    const blobId = 'catt-' + Date.now();
+                    if (att.isFile && att.fileDataUrl) {
+                        await storeFileBinary(blobId, att.fileDataUrl);
+                    }
+                    savedAttachment = {
+                        ...att,
+                        storageBlobId: blobId,
+                        fileDataUrl: (att.fileDataUrl && att.fileDataUrl.length <= 350000) ? att.fileDataUrl : ''
+                    };
+                }
+
+                state.data.classMessages.push({
+                    id: 'cmsg-' + Date.now(),
+                    roomCode: state.data.classRoomCode || '4A-LICEO',
+                    channel: channel,
+                    sender: state.studentName || 'Studente',
+                    text: text,
+                    attachment: savedAttachment,
+                    time: timeStr,
+                    pinned: false
+                });
+
+                inp.value = '';
+                state.pendingClassAttachment = null;
+                renderPendingClassAttachment();
+                saveStorage();
+                renderClassChatView();
+                if (savedAttachment) showToast('Appunto allegato e inviato alla classe!');
             };
 
             window.sendClassChatMessage = function (e) {
@@ -2740,6 +3079,11 @@
 
             window.openFileViewer = async function (fileId) {
                 const item = state.data.notes.find(n => n.id === fileId);
+                if (!item) return;
+                openFileViewerFromObject(item);
+            };
+
+            async function openFileViewerFromObject(item) {
                 if (!item) return;
 
                 if (state.viewingFileObjectUrl) {
