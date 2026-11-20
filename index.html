@@ -742,23 +742,32 @@
     <!-- ===================================================================== -->
     <!-- MODALE 1: PRESENTAZIONE INIZIALE A 4 SLIDE CON FRECCE AVANTI/INDIETRO -->
     <!-- ===================================================================== -->
-    <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden fade-in flex flex-col">
-            <div class="px-6 pt-5 pb-3 flex items-center justify-between border-b border-slate-100">
-                <span id="onboarding-step-label" class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-extrabold">1 di 4</span>
-                <button type="button" onclick="closeOnboardingTour()" class="text-xs font-bold text-slate-400 hover:text-slate-700 cursor-pointer">Salta presentazione</button>
+    <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden fade-in flex flex-col max-h-[92vh]">
+            <div class="px-6 sm:px-8 pt-5 pb-3.5 flex items-center justify-between border-b border-slate-100 bg-slate-50/70">
+                <div class="flex items-center gap-2.5">
+                    <span id="onboarding-step-label" class="px-3.5 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-extrabold">1 di 4</span>
+                    <span class="text-xs font-bold text-slate-400 hidden sm:inline">Panoramica di StudyFlow</span>
+                </div>
+                <button type="button" onclick="closeOnboardingTour()" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer">Chiudi</button>
             </div>
-            <div id="onboarding-slide-content" class="p-6 sm:p-8 text-center space-y-5"></div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
-                <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 disabled:opacity-40 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
-                    <i class="ph-bold ph-arrow-left text-base"></i>
-                    <span>Indietro</span>
-                </button>
-                <div id="onboarding-dots" class="flex items-center gap-2"></div>
-                <button type="button" onclick="changeOnboardingSlide(1)" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer">
-                    <span id="onboarding-next-label">Avanti</span>
-                    <i id="onboarding-next-icon" class="ph-bold ph-arrow-right text-base"></i>
-                </button>
+            <div id="onboarding-slide-content" class="p-6 sm:p-10 text-center space-y-6 overflow-y-auto flex-1"></div>
+            <div class="px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <label class="inline-flex items-center gap-2.5 cursor-pointer select-none order-2 sm:order-1">
+                    <input type="checkbox" id="onboarding-dont-show-checkbox" onchange="toggleOnboardingDontShow(this.checked)" class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                    <span class="text-xs font-bold text-slate-600">Non mostrare più</span>
+                </label>
+                <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto order-1 sm:order-2">
+                    <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 disabled:opacity-40 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                        <i class="ph-bold ph-arrow-left text-base"></i>
+                        <span>Indietro</span>
+                    </button>
+                    <div id="onboarding-dots" class="flex items-center gap-2"></div>
+                    <button type="button" onclick="changeOnboardingSlide(1)" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer">
+                        <span id="onboarding-next-label">Avanti</span>
+                        <i id="onboarding-next-icon" class="ph-bold ph-arrow-right text-base"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1300,34 +1309,50 @@
                 {
                     badge: '1 • Organizzazione Perfetta',
                     title: 'Cartelle Colorate per Ogni Materia',
-                    description: 'Parti da una scrivania pulita e crea cartelle con 10 colori diversi, icone e sottocartelle per dividere al meglio teoria, esercizi e verifiche.',
+                    description: 'Parti da una scrivania pulita e crea cartelle con 10 colori diversi, icone e sottocartelle per dividere al meglio teoria, esercizi, schemi e verifiche.',
                     icon: 'ph-folders',
                     gradient: 'from-indigo-500 to-purple-600',
-                    pills: ['10 Colori', 'Sottocartelle', 'Dashboard Pulita']
+                    highlights: [
+                        { icon: 'ph-palette', title: '10 Temi Colore', desc: 'Identifica a colpo d’occhio ogni materia della settimana.' },
+                        { icon: 'ph-folder-open', title: 'Sottocartelle Su Misura', desc: 'Separa appunti di teoria, esercizi svolti e materiale d’esame.' },
+                        { icon: 'ph-sparkle', title: 'Spazio Ordinato', desc: 'Zero disordine: trovi subito ciò che cerchi prima di entrare in classe.' }
+                    ]
                 },
                 {
                     badge: '2 • Apri Tutto Dentro l’App',
-                    title: 'Importa e Consulta Ogni File',
-                    description: 'Carica progetti Canva, documenti Word (.docx), fogli Excel (.xlsx), disegni AutoCAD (.dwg/.dxf), PDF e foto: si aprono direttamente nel visualizzatore integrato.',
+                    title: 'Importa e Consulta Ogni Formato di File',
+                    description: 'Carica progetti Canva, documenti Word (.docx), fogli Excel (.xlsx), disegni AutoCAD (.dwg/.dxf), PDF e foto della lavagna: si aprono direttamente nel visualizzatore integrato.',
                     icon: 'ph-file-arrow-up',
                     gradient: 'from-emerald-500 to-teal-600',
-                    pills: ['Word & Excel', 'PDF & Canva', 'AutoCAD & Immagini']
+                    highlights: [
+                        { icon: 'ph-file-doc', title: 'Word, Excel & PDF', desc: 'Leggi documenti formattati e tabelle multi-foglio senza uscire dall’app.' },
+                        { icon: 'ph-magnifying-glass-plus', title: 'Foto con Zoom & Rotazione', desc: 'Ingrandisci gli appunti scritti a mano o le foto della lavagna.' },
+                        { icon: 'ph-compass-tool', title: 'Canva & AutoCAD', desc: 'Archivia tavole tecniche e presentazioni con note personali allegate.' }
+                    ]
                 },
                 {
-                    badge: '3 • Orario Intelligente',
-                    title: 'Orario Settimanale Collegato',
-                    description: 'Inserisci le ore di lezione dal Lunedì al Sabato: StudyFlow riconosce quale materia hai in corso e ti apre subito la cartella corrispondente.',
+                    badge: '3 • Orario, Diario & Voti',
+                    title: 'Tutta la Tua Settimana Scolastica Sotto Controllo',
+                    description: 'Gestisci l’orario dal Lunedì al Sabato, annota i compiti sul diario a doppia pagina e monitora la tua media con grafico e simulatore del prossimo voto.',
                     icon: 'ph-clock-afternoon',
                     gradient: 'from-amber-500 to-orange-600',
-                    pills: ['Lunedì – Sabato', 'Materia Ora in Corso', 'Aule & Laboratori']
+                    highlights: [
+                        { icon: 'ph-broadcast', title: 'Lezione Ora in Corso', desc: 'Riconosce automaticamente l’ora del giorno e apre la cartella giusta.' },
+                        { icon: 'ph-notebook', title: 'Diario Compiti a Righe', desc: 'Segna gli esercizi giorno per giorno e barrando quelli completati.' },
+                        { icon: 'ph-chart-line-up', title: 'Voti & Simulatore Media', desc: 'Scopri subito che voto prendere per raggiungere la media obiettivo.' }
+                    ]
                 },
                 {
                     badge: '4 • Classe & Calendario',
-                    title: 'Chat di Classe e Scadenze',
-                    description: 'Crea una classe con codice invito per scambiare appunti e file con i compagni in tempo reale, e segna verifiche e interrogazioni sul calendario.',
+                    title: 'Chat di Classe in Tempo Reale e Scadenze',
+                    description: 'Crea una classe con codice invito per scambiare appunti e file con i compagni in tempo reale, e segna verifiche e interrogazioni sul calendario scolastico.',
                     icon: 'ph-chats-circle',
                     gradient: 'from-pink-500 to-rose-600',
-                    pills: ['Codice Classe', 'Condivisione File', 'Calendario Verifiche']
+                    highlights: [
+                        { icon: 'ph-key', title: 'Codice Invito Classe', desc: 'Condividi un codice unico per collegare tutti i compagni di classe.' },
+                        { icon: 'ph-paperclip', title: 'Scambio Appunti & File', desc: 'Invia schemi, PDF e documenti in chat e salvali nelle tue cartelle.' },
+                        { icon: 'ph-calendar-check', title: 'Calendario Verifiche', desc: 'Tieni traccia di interrogazioni, compiti in classe e consegne.' }
+                    ]
                 }
             ];
 
@@ -1335,6 +1360,7 @@
                 user: null,
                 authMode: 'login',
                 hasSeenOnboarding: false,
+                hideOnboardingForever: false,
                 onboardingIndex: 0,
                 activeClassId: null,
                 classes: {},
@@ -1450,6 +1476,7 @@
                         const parsed = JSON.parse(raw);
                         if (parsed.user) state.user = parsed.user;
                         if (typeof parsed.hasSeenOnboarding === 'boolean') state.hasSeenOnboarding = parsed.hasSeenOnboarding;
+                        if (typeof parsed.hideOnboardingForever === 'boolean') state.hideOnboardingForever = parsed.hideOnboardingForever;
                         if (parsed.activeClassId !== undefined) state.activeClassId = parsed.activeClassId;
                         if (parsed.personalData) {
                             state.personalData = {
@@ -1489,6 +1516,7 @@
                 const payload = JSON.stringify({
                     user: state.user,
                     hasSeenOnboarding: state.hasSeenOnboarding,
+                    hideOnboardingForever: state.hideOnboardingForever,
                     activeClassId: state.activeClassId,
                     personalData: stripHeavyDataUrls(state.personalData),
                     classes: safeClasses
@@ -1604,7 +1632,9 @@
                 saveStorage(false);
 
                 enterAppShell();
-                openOnboardingTour(0);
+                if (!state.hideOnboardingForever) {
+                    openOnboardingTour(0);
+                }
             };
 
             window.handleGuestLogin = function () {
@@ -1615,42 +1645,111 @@
                 saveStorage(false);
 
                 enterAppShell();
-                openOnboardingTour(0);
-            };
-
-            window.handleGuestLogin = function () {
-                state.user = { id: 'guest-' + Date.now(), name: 'Studente Ospite', email: 'ospite@studyflow.it' };
-                state.personalData = { folders: [], notes: [], events: [], timetable: [], grades: [] };
-                state.activeClassId = null;
-                state.hasSeenOnboarding = false;
-                saveStorage(false);
-
-                enterAppShell();
-                openOnboardingTour(0);
-            };
-
-            window.handleLogout = function () {
-                state.user = null;
-                saveStorage(false);
-                document.getElementById('app-shell').classList.add('hidden');
-                document.getElementById('auth-screen').classList.remove('hidden');
+                if (!state.hideOnboardingForever) {
+                    openOnboardingTour(0);
+                }
             };
 
             function enterAppShell() {
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-shell').classList.remove('hidden');
-                setMainView('folders');
-                renderAll();
+                document.getElementById('sidebar-user-badge').textContent = state.user ? state.user.name : 'Studente';
+                setMainView(state.currentView || 'folders');
             }
+
+            window.handleLogout = function () {
+                state.user = null;
+                state.activeClassId = null;
+                state.selectedFolderId = null;
+                saveStorage(false);
+                document.getElementById('app-shell').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+                showToast('Disconnesso');
+            };
+
+            window.toggleMobileSidebar = function (show) {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('mobile-sidebar-overlay');
+                if (show) {
+                    sb.classList.remove('-translate-x-full');
+                    ov.classList.remove('hidden');
+                } else {
+                    sb.classList.add('-translate-x-full');
+                    ov.classList.add('hidden');
+                }
+            };
+
+            window.handleGlobalSearch = function (query) {
+                state.searchQuery = (query || '').trim().toLowerCase();
+                if (state.currentView === 'folders') renderFoldersDashboard();
+                if (state.currentView === 'folder-detail') renderFolderDetailView();
+            };
+
+            window.openFolderDetail = function (folderId) {
+                state.selectedFolderId = folderId;
+                state.selectedSubfolder = 'ALL';
+                setMainView('folder-detail');
+            };
+
+            window.setMainView = function (view) {
+                state.currentView = view;
+                toggleMobileSidebar(false);
+
+                ['view-folders', 'view-folder-detail', 'view-homework', 'view-timetable', 'view-grades', 'view-chat', 'view-calendar'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+
+                const activeNav = 'w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold bg-indigo-50 text-indigo-700 transition-all cursor-pointer';
+                const idleNav = 'w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer';
+
+                document.getElementById('nav-folders').className = (view === 'folders' || view === 'folder-detail') ? activeNav : idleNav;
+                document.getElementById('nav-homework').className = view === 'homework' ? activeNav : idleNav;
+                document.getElementById('nav-timetable').className = view === 'timetable' ? activeNav : idleNav;
+                document.getElementById('nav-grades').className = view === 'grades' ? activeNav : idleNav;
+                document.getElementById('nav-chat').className = view === 'chat' ? activeNav : idleNav;
+                document.getElementById('nav-calendar').className = view === 'calendar' ? activeNav : idleNav;
+
+                const mActive = 'flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 relative cursor-pointer';
+                const mIdle = 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 relative cursor-pointer';
+
+                document.getElementById('mnav-folders').className = (view === 'folders' || view === 'folder-detail') ? mActive : mIdle;
+                document.getElementById('mnav-homework').className = view === 'homework' ? mActive : mIdle;
+                document.getElementById('mnav-timetable').className = view === 'timetable' ? mActive : mIdle;
+                document.getElementById('mnav-grades').className = view === 'grades' ? mActive : mIdle;
+                document.getElementById('mnav-chat').className = view === 'chat' ? mActive : mIdle;
+                document.getElementById('mnav-calendar').className = view === 'calendar' ? mActive : mIdle;
+
+                if (view === 'chat') {
+                    state.unreadChatCount = 0;
+                    document.getElementById('mnav-chat-dot').classList.add('hidden');
+                }
+
+                const targetEl = document.getElementById('view-' + view);
+                if (targetEl) targetEl.classList.remove('hidden');
+
+                renderAll();
+            };
 
             // --- PRESENTAZIONE INIZIALE (4 SLIDE CON FRECCE AVANTI/INDIETRO) ---
             window.openOnboardingTour = function (index) {
                 state.onboardingIndex = typeof index === 'number' ? index : 0;
+                const cb = document.getElementById('onboarding-dont-show-checkbox');
+                if (cb) cb.checked = !!state.hideOnboardingForever;
                 renderOnboardingSlide();
                 document.getElementById('onboarding-modal').classList.remove('hidden');
             };
 
+            window.toggleOnboardingDontShow = function (checked) {
+                state.hideOnboardingForever = !!checked;
+                if (checked) state.hasSeenOnboarding = true;
+                saveStorage(false);
+            };
+
             window.closeOnboardingTour = function () {
+                const cb = document.getElementById('onboarding-dont-show-checkbox');
+                if (cb && cb.checked) {
+                    state.hideOnboardingForever = true;
+                }
                 state.hasSeenOnboarding = true;
                 saveStorage(false);
                 document.getElementById('onboarding-modal').classList.add('hidden');
@@ -1668,8 +1767,10 @@
             };
 
             window.goToOnboardingSlide = function (idx) {
-                state.onboardingIndex = idx;
-                renderOnboardingSlide();
+                if (idx >= 0 && idx < ONBOARDING_SLIDES.length) {
+                    state.onboardingIndex = idx;
+                    renderOnboardingSlide();
+                }
             };
 
             function renderOnboardingSlide() {
@@ -1681,16 +1782,24 @@
                 document.getElementById('onboarding-step-label').textContent = `${state.onboardingIndex + 1} di ${total}`;
 
                 document.getElementById('onboarding-slide-content').innerHTML = `
-                    <div class="w-20 h-20 rounded-3xl bg-gradient-to-br ${slide.gradient} flex items-center justify-center text-white shadow-xl mx-auto">
-                        <i class="ph-duotone ${slide.icon} text-4xl"></i>
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br ${slide.gradient} flex items-center justify-center text-white shadow-xl mx-auto">
+                        <i class="ph-duotone ${slide.icon} text-4xl sm:text-5xl"></i>
                     </div>
-                    <div class="space-y-2 max-w-md mx-auto">
+                    <div class="space-y-2.5 max-w-2xl mx-auto">
                         <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600">${slide.badge}</span>
                         <h3 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">${slide.title}</h3>
-                        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pt-1">${slide.description}</p>
+                        <p class="text-xs sm:text-base text-slate-500 leading-relaxed pt-1">${slide.description}</p>
                     </div>
-                    <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
-                        ${slide.pills.map(p => `<span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">${p}</span>`).join('')}
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-left">
+                        ${(slide.highlights || []).map(h => `
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                                <div class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 text-indigo-600 flex items-center justify-center text-lg shadow-2xs">
+                                    <i class="ph-duotone ${h.icon}"></i>
+                                </div>
+                                <h4 class="font-display font-extrabold text-xs sm:text-sm text-slate-900">${h.title}</h4>
+                                <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">${h.desc}</p>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
 
@@ -1703,90 +1812,14 @@
                 `).join('');
             }
 
-            // --- NAVIGAZIONE PRINCIPALE ---
-            window.toggleMobileSidebar = function (open) {
-                const sb = document.getElementById('sidebar');
-                const ov = document.getElementById('mobile-sidebar-overlay');
-                if (open) {
-                    sb.classList.remove('-translate-x-full');
-                    ov.classList.remove('hidden');
-                } else {
-                    sb.classList.add('-translate-x-full');
-                    ov.classList.add('hidden');
-                }
-            };
-
-            window.setMainView = function (view) {
-                state.currentView = view;
-                ['view-folders', 'view-folder-detail', 'view-homework', 'view-timetable', 'view-grades', 'view-chat', 'view-calendar'].forEach(id => {
-                    document.getElementById(id).classList.add('hidden');
-                });
-
-                const activeNav = 'w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold bg-indigo-50 text-indigo-700 transition-all cursor-pointer';
-                const idleNav = 'w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer';
-
-                document.getElementById('nav-folders').className = (view === 'folders' || view === 'folder-detail') ? activeNav : idleNav;
-                document.getElementById('nav-homework').className = view === 'homework' ? activeNav : idleNav;
-                document.getElementById('nav-timetable').className = view === 'timetable' ? activeNav : idleNav;
-                document.getElementById('nav-grades').className = view === 'grades' ? activeNav : idleNav;
-                document.getElementById('nav-chat').className = view === 'chat' ? activeNav : idleNav;
-                document.getElementById('nav-calendar').className = view === 'calendar' ? activeNav : idleNav;
-
-                // Bottom nav mobile
-                const mActive = 'flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer';
-                const mIdle = 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer';
-                document.getElementById('mnav-folders').className = (view === 'folders' || view === 'folder-detail') ? mActive : mIdle;
-                document.getElementById('mnav-homework').className = view === 'homework' ? mActive + ' relative' : mIdle + ' relative';
-                document.getElementById('mnav-timetable').className = view === 'timetable' ? mActive : mIdle;
-                document.getElementById('mnav-grades').className = view === 'grades' ? mActive : mIdle;
-                document.getElementById('mnav-chat').className = view === 'chat' ? mActive + ' relative' : mIdle + ' relative';
-                document.getElementById('mnav-calendar').className = view === 'calendar' ? mActive : mIdle;
-
-                if (view === 'folders') document.getElementById('view-folders').classList.remove('hidden');
-                if (view === 'folder-detail') document.getElementById('view-folder-detail').classList.remove('hidden');
-                if (view === 'homework') document.getElementById('view-homework').classList.remove('hidden');
-                if (view === 'timetable') document.getElementById('view-timetable').classList.remove('hidden');
-                if (view === 'grades') document.getElementById('view-grades').classList.remove('hidden');
-                if (view === 'chat') document.getElementById('view-chat').classList.remove('hidden');
-                if (view === 'calendar') document.getElementById('view-calendar').classList.remove('hidden');
-
-                renderAll();
-            };
-
-            window.openFolderDetail = function (folderId) {
-                state.selectedFolderId = folderId;
-                state.selectedSubfolder = 'ALL';
-                setMainView('folder-detail');
-            };
-
-            window.handleGlobalSearch = function (q) {
-                state.searchQuery = (q || '').trim().toLowerCase();
-                renderAll();
-            };
-
-            // --- RENDER GENERALE ---
             function renderAll() {
-                if (!state.user) return;
                 const ws = getActiveWorkspace();
-
-                document.getElementById('sidebar-user-badge').textContent = state.user.name;
                 const isClass = !!state.activeClassId;
+
                 document.getElementById('active-ws-name').textContent = isClass ? ws.name : 'Spazio Personale';
                 document.getElementById('active-ws-sub').textContent = `${isClass ? 'Classe Condivisa' : 'Privato'} • ${ws.folders.length} cartelle`;
-                document.getElementById('dashboard-class-pill').textContent = isClass ? `Classe: ${ws.name} (${ws.id})` : 'Spazio Personale (Crea / Entra in Classe)';
-
-                // Badge notifiche chat
-                const chatBadge = document.getElementById('nav-chat-badge');
-                const mChatDot = document.getElementById('mnav-chat-dot');
-                if (state.unreadChatCount > 0) {
-                    chatBadge.textContent = `+${state.unreadChatCount}`;
-                    chatBadge.className = 'px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold';
-                    mChatDot.classList.remove('hidden');
-                } else {
-                    chatBadge.textContent = 'Live';
-                    chatBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold';
-                    mChatDot.classList.add('hidden');
-                }
+                document.getElementById('dashboard-class-pill').textContent = isClass ? `👥 ${ws.name} (${ws.id})` : 'Spazio Personale • Cambia';
+                document.getElementById('mnav-chat-dot').classList.toggle('hidden', state.unreadChatCount <= 0);
 
                 // Badge compiti da fare nel Diario
                 const pendingHwCount = (ws.homeworks || []).filter(h => !h.completed).length;
@@ -4330,7 +4363,7 @@
             loadStorage();
             if (state.user) {
                 enterAppShell();
-                if (!state.hasSeenOnboarding) {
+                if (!state.hasSeenOnboarding && !state.hideOnboardingForever) {
                     openOnboardingTour(0);
                 }
             } else {
