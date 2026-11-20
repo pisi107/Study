@@ -12,6 +12,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Mammoth.js per lettura reale documenti Word (.docx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <!-- SheetJS per lettura reale fogli Excel (.xlsx, .xls, .csv) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -109,404 +113,353 @@
             color: #1e1b4b;
             margin: 8px 0;
         }
+        /* Stili documenti Word & Excel nel Visualizzatore Integrato */
+        .docx-viewer-content h1, .docx-viewer-content h2, .docx-viewer-content h3 {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0.9rem 0 0.45rem;
+        }
+        .docx-viewer-content h1 { font-size: 1.45rem; }
+        .docx-viewer-content h2 { font-size: 1.2rem; }
+        .docx-viewer-content p { margin-bottom: 0.65rem; line-height: 1.65; }
+        .docx-viewer-content ul, .docx-viewer-content ol { padding-left: 1.5rem; margin-bottom: 0.75rem; list-style: revert; }
+        .docx-viewer-content table, .xlsx-viewer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            background: #ffffff;
+        }
+        .docx-viewer-content td, .docx-viewer-content th,
+        .xlsx-viewer-table td, .xlsx-viewer-table th {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .xlsx-viewer-table tr:first-child td, .xlsx-viewer-table th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: #0f172a;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- ===================================================================== -->
-    <!-- 1. SCHERMATA ACCESSO / REGISTRAZIONE / OSPITE                         -->
+    <!-- SCHERMATA 1: ACCESSO & REGISTRAZIONE                                  -->
     <!-- ===================================================================== -->
-    <section id="auth-screen" class="min-h-screen w-full bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center p-4">
-        <div class="bg-white/95 backdrop-blur-md w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-white/40 fade-in">
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-8 space-y-6 fade-in">
             <div class="text-center space-y-2">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-indigo-500/30">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-indigo-500/25">
                     <i class="ph-duotone ph-books"></i>
                 </div>
-                <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">StudyFlow</h1>
-                <p class="text-xs sm:text-sm text-slate-500 font-medium">Cartelle colorate, orario scolastico, file universali e chat di classe</p>
+                <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">StudyFlow</h1>
+                <p class="text-xs sm:text-sm text-slate-500">Appunti colorati, file multi-formato, orario e chat di classe</p>
             </div>
 
-            <div class="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-100 rounded-2xl">
-                <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-xs transition-all cursor-pointer">
-                    Accedi
-                </button>
-                <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-all cursor-pointer">
-                    Registrati
-                </button>
+            <div class="grid grid-cols-2 p-1.5 rounded-2xl bg-slate-100">
+                <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-xs transition-all cursor-pointer">Accedi</button>
+                <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-all cursor-pointer">Registrati</button>
             </div>
 
-            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
                 <div id="auth-name-wrap" class="hidden space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Il tuo Nome</label>
-                    <input type="text" id="auth-name" placeholder="Es. Marco Rossi" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-medium outline-none transition-all">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome / Nickname</label>
+                    <input type="text" id="auth-name" placeholder="Es. Marco Rossi" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Email Scolastica o Personale</label>
-                    <input type="email" id="auth-email" required placeholder="studente@scuola.it" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-medium outline-none transition-all">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Email Scolastica o Personale</label>
+                    <input type="email" id="auth-email" required placeholder="nome@scuola.it" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Password</label>
-                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-medium outline-none transition-all">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
                 </div>
-                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all cursor-pointer">
+                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-500/20 transition-all cursor-pointer">
                     Entra nel tuo Spazio
                 </button>
             </form>
 
-            <div class="relative flex py-1 items-center">
-                <div class="flex-grow border-t border-slate-200"></div>
-                <span class="shrink mx-3 text-xs font-semibold text-slate-400">oppure</span>
-                <div class="flex-grow border-t border-slate-200"></div>
+            <div class="relative flex items-center justify-center">
+                <div class="border-t border-slate-200 w-full"></div>
+                <span class="bg-white px-3 text-[11px] font-bold uppercase text-slate-400">oppure</span>
+                <div class="border-t border-slate-200 w-full"></div>
             </div>
 
-            <button type="button" onclick="handleGuestLogin()" class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
-                <i class="ph-bold ph-rocket-launch text-amber-400 text-base"></i>
-                <span>Entra subito come Ospite</span>
+            <button type="button" onclick="handleGuestLogin()" class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
+                <i class="ph-bold ph-lightning text-amber-400 text-base"></i>
+                <span>Entra subito come Ospite (0 cartelle)</span>
             </button>
         </div>
-    </section>
+    </div>
 
     <!-- ===================================================================== -->
-    <!-- 2. APPLICAZIONE PRINCIPALE                                            -->
+    <!-- SCHERMATA 2: APPLICAZIONE PRINCIPALE                                  -->
     <!-- ===================================================================== -->
-    <div id="app-shell" class="hidden min-h-screen flex-1 flex flex-col lg:flex-row pb-16 lg:pb-0">
+    <div id="app-shell" class="hidden min-h-screen flex flex-col lg:flex-row">
 
         <!-- Overlay Mobile Sidebar -->
-        <div id="mobile-sidebar-overlay" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+        <div id="mobile-sidebar-overlay" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 hidden lg:hidden"></div>
 
-        <!-- SIDEBAR LATERALE -->
-        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200/80 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center text-xl shadow-sm">
-                        <i class="ph-duotone ph-books"></i>
-                    </div>
-                    <div>
-                        <span class="font-display font-extrabold text-lg text-slate-900 tracking-tight block leading-none">StudyFlow</span>
-                        <span id="sidebar-user-badge" class="text-[11px] font-semibold text-slate-400 mt-1 block truncate max-w-[140px]">Studente</span>
-                    </div>
-                </div>
-                <button type="button" onclick="toggleMobileSidebar(false)" class="lg:hidden p-2 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer">
-                    <i class="ph-bold ph-x text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Selettore Spazio Personale / Classe -->
-            <div class="p-4 border-b border-slate-100 space-y-2.5">
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Spazio Attivo</span>
-                    <button type="button" onclick="openClassModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer">
-                        <i class="ph-bold ph-plus-circle"></i> Classi
-                    </button>
-                </div>
-                <button type="button" onclick="openClassModal()" class="w-full p-3 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200/90 flex items-center justify-between gap-2 text-left transition-all cursor-pointer">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <span id="active-ws-icon" class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base shrink-0">
-                            <i class="ph-duotone ph-user-circle"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <p id="active-ws-name" class="text-xs font-extrabold text-slate-800 truncate">Spazio Personale</p>
-                            <p id="active-ws-sub" class="text-[11px] font-medium text-slate-400 truncate">Privato • 0 cartelle</p>
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-72 bg-white border-r border-slate-200/90 flex flex-col justify-between p-4 transform -translate-x-full lg:translate-x-0 transition-transform duration-200">
+            <div class="space-y-5 overflow-y-auto pr-1">
+                <div class="flex items-center justify-between px-1">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center text-xl shadow-sm">
+                            <i class="ph-duotone ph-books"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-display font-extrabold text-base text-slate-900 leading-none">StudyFlow</h2>
+                            <span id="sidebar-user-badge" class="text-[11px] font-semibold text-slate-400">Studente</span>
                         </div>
                     </div>
-                    <i class="ph-bold ph-caret-up-down text-slate-400 shrink-0"></i>
-                </button>
-
-                <div id="sidebar-class-code-box" class="hidden p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2">
-                    <div class="min-w-0">
-                        <span class="text-[10px] font-bold uppercase text-emerald-700 block">Codice Invito Classe</span>
-                        <span id="sidebar-class-code-val" class="font-mono font-extrabold text-xs text-emerald-900">CLS-2026</span>
-                    </div>
-                    <button type="button" onclick="copyCurrentClassCode()" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200 shrink-0 cursor-pointer">
-                        Copia
+                    <button type="button" onclick="toggleMobileSidebar(false)" class="lg:hidden p-2 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer">
+                        <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
-            </div>
 
-            <!-- Menu Principale -->
-            <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
-                <button type="button" id="nav-folders" onclick="setMainView('folders')" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold bg-indigo-50 text-indigo-700 transition-all cursor-pointer">
-                    <i class="ph-duotone ph-folders text-xl"></i>
-                    <span>Le mie Cartelle</span>
-                </button>
-                <button type="button" id="nav-timetable" onclick="setMainView('timetable')" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
-                    <i class="ph-duotone ph-clock-afternoon text-xl"></i>
-                    <span>Orario Scolastico</span>
-                </button>
-                <button type="button" id="nav-chat" onclick="setMainView('chat')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
-                    <span class="flex items-center gap-3">
-                        <i class="ph-duotone ph-chats-circle text-xl"></i>
-                        <span>Chat di Classe</span>
-                    </span>
-                    <span id="nav-chat-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Live</span>
-                </button>
-                <button type="button" id="nav-calendar" onclick="setMainView('calendar')" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
-                    <i class="ph-duotone ph-calendar-check text-xl"></i>
-                    <span>Calendario</span>
-                </button>
+                <!-- Selettore Spazio / Classe -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <p id="active-ws-name" class="font-display font-extrabold text-xs text-slate-900 truncate">Spazio Personale</p>
+                            <p id="active-ws-sub" class="text-[10px] font-semibold text-slate-400">Privato • 0 cartelle</p>
+                        </div>
+                        <button type="button" onclick="openClassModal()" class="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold shrink-0 cursor-pointer">
+                            Cambia
+                        </button>
+                    </div>
+                    <div id="sidebar-class-code-box" class="hidden pt-2 border-t border-slate-200/80 flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-slate-500">Codice: <b id="sidebar-class-code-val" class="font-mono text-indigo-600">CLS-2026</b></span>
+                        <button type="button" onclick="copyCurrentClassCode()" class="text-[10px] font-extrabold text-indigo-600 hover:underline cursor-pointer">Copia</button>
+                    </div>
+                </div>
 
-                <!-- Scorciatoia Cartelle -->
-                <div class="pt-4 mt-3 border-t border-slate-100 space-y-2">
+                <!-- Navigazione Principale -->
+                <nav class="space-y-1.5">
+                    <button type="button" id="nav-folders" onclick="setMainView('folders')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold bg-indigo-50 text-indigo-700 transition-all cursor-pointer">
+                        <span class="flex items-center gap-2.5"><i class="ph-duotone ph-folders text-lg"></i> Cartelle Materie</span>
+                    </button>
+                    <button type="button" id="nav-timetable" onclick="setMainView('timetable')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+                        <span class="flex items-center gap-2.5"><i class="ph-duotone ph-clock-afternoon text-lg"></i> Orario Scolastico</span>
+                    </button>
+                    <button type="button" id="nav-chat" onclick="setMainView('chat')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+                        <span class="flex items-center gap-2.5"><i class="ph-duotone ph-chats-circle text-lg"></i> Chat di Classe</span>
+                        <span id="nav-chat-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Live</span>
+                    </button>
+                    <button type="button" id="nav-calendar" onclick="setMainView('calendar')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+                        <span class="flex items-center gap-2.5"><i class="ph-duotone ph-calendar-blank text-lg"></i> Calendario</span>
+                    </button>
+                </nav>
+
+                <!-- Accesso Rapido Cartelle -->
+                <div class="space-y-2 pt-2 border-t border-slate-100">
                     <div class="flex items-center justify-between px-2">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Materie Rapide</span>
-                        <button type="button" onclick="openFolderModal()" class="p-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer" title="Nuova Cartella">
-                            <i class="ph-bold ph-plus"></i>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Le tue Materie</span>
+                        <button type="button" onclick="openFolderModal()" class="text-indigo-600 hover:bg-indigo-50 p-1 rounded-lg cursor-pointer" title="Nuova cartella">
+                            <i class="ph-bold ph-plus text-xs"></i>
                         </button>
                     </div>
                     <div id="sidebar-folders-list" class="space-y-1"></div>
                 </div>
-            </nav>
+            </div>
 
-            <!-- Footer Sidebar -->
-            <div class="p-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                <button type="button" onclick="openOnboardingTour(0)" class="flex-1 py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
-                    <i class="ph-duotone ph-sparkle text-base"></i>
-                    <span>Guida App</span>
+            <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                <button type="button" onclick="openOnboardingTour(0)" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="ph-bold ph-info"></i> Guida
                 </button>
-                <button type="button" onclick="handleLogout()" title="Esci dall'account" class="p-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer">
-                    <i class="ph-bold ph-sign-out text-base"></i>
+                <button type="button" onclick="handleLogout()" class="py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer" title="Esci">
+                    <i class="ph-bold ph-sign-out"></i>
                 </button>
             </div>
         </aside>
 
-        <!-- AREA PRINCIPALE DESTRA -->
-        <div class="flex-1 flex flex-col min-w-0">
-
-            <!-- TOP HEADER -->
-            <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2.5 min-w-0">
-                    <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">
+        <!-- CONTENUTO PRINCIPALE -->
+        <main class="flex-1 flex flex-col min-w-0 pb-20 lg:pb-6">
+            <!-- Header Top -->
+            <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                    <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2.5 rounded-xl bg-slate-100 text-slate-700 cursor-pointer">
                         <i class="ph-bold ph-list text-lg"></i>
                     </button>
-                    <div class="relative hidden sm:block w-56 md:w-72">
+                    <div class="relative flex-1 max-w-md">
                         <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="global-search-input" oninput="handleGlobalSearch(this.value)" placeholder="Cerca cartelle, appunti o file..." class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-100/90 focus:bg-white border border-transparent focus:border-indigo-300 text-xs font-medium outline-none transition-all">
+                        <input type="text" oninput="handleGlobalSearch(this.value)" placeholder="Cerca cartelle, appunti o file..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-xs sm:text-sm font-medium outline-none">
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
-                    <button type="button" onclick="openOnboardingTour(0)" title="Presentazione App" class="p-2.5 sm:px-3 sm:py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-                        <i class="ph-duotone ph-sparkle text-base"></i>
-                        <span class="hidden md:inline">Guida</span>
+                    <input type="file" id="universal-file-input" multiple onchange="handleUniversalFilesSelected(event)" class="hidden">
+                    <button type="button" onclick="triggerUniversalFileImport()" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="ph-bold ph-upload-simple"></i>
+                        <span class="hidden sm:inline">Importa File</span>
                     </button>
-                    <button type="button" onclick="openFolderModal()" class="p-2.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-                        <i class="ph-bold ph-folder-plus text-indigo-600 text-base"></i>
+                    <button type="button" onclick="openFolderModal()" class="px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="ph-bold ph-folder-plus"></i>
                         <span class="hidden sm:inline">Nuova Cartella</span>
-                    </button>
-                    <button type="button" onclick="triggerUniversalFileImport()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer">
-                        <i class="ph-bold ph-upload-simple text-sm"></i>
-                        <span>Importa File</span>
-                    </button>
-                    <button type="button" onclick="openNoteEditor()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer">
-                        <i class="ph-bold ph-plus text-sm"></i>
-                        <span class="hidden sm:inline">Nuovo Appunto</span>
                     </button>
                 </div>
             </header>
 
-            <!-- Input File Nascosto Universale -->
-            <input type="file" id="universal-file-input" multiple accept="*/*" onchange="handleUniversalFilesSelected(event)" class="hidden">
+            <!-- VISTA 1: DASHBOARD SOLO CARTELLE COLORATE -->
+            <section id="view-folders" class="p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-5 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Le Tue Cartelle</h1>
+                        <p class="text-xs sm:text-sm text-slate-500">Organizza appunti scritti e file importati divisi per materia</p>
+                    </div>
+                    <button type="button" onclick="openClassModal()" id="dashboard-class-pill" class="self-start sm:self-auto px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200/80 cursor-pointer">
+                        Spazio Personale
+                    </button>
+                </div>
 
-            <!-- CONTENUTO SCORREVOLE -->
-            <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+                <div id="dashboard-live-lesson-banner" class="hidden"></div>
+                <div id="folders-grid"></div>
+            </section>
 
-                <!-- ========================================================= -->
-                <!-- VISTA A: DASHBOARD SOLO CARTELLE COLORATE                 -->
-                <!-- ========================================================= -->
-                <section id="view-folders" class="space-y-6 fade-in">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Le mie Cartelle</h2>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Organizza ogni materia con colori diversi e importa appunti o file di qualsiasi formato</p>
+            <!-- VISTA 2: DETTAGLIO CARTELLA & SOTTOCARTELLE -->
+            <section id="view-folder-detail" class="hidden p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-5 fade-in">
+                <button type="button" onclick="setMainView('folders')" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 cursor-pointer">
+                    <i class="ph-bold ph-arrow-left"></i> Torna a tutte le cartelle
+                </button>
+
+                <div id="folder-detail-banner" class="rounded-3xl p-5 sm:p-7 border border-indigo-200 bg-indigo-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div id="detail-folder-icon" class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-3xl shrink-0">📐</div>
+                        <div class="min-w-0">
+                            <h2 id="detail-folder-title" class="font-display text-xl sm:text-2xl font-extrabold text-slate-900 truncate">Materia</h2>
+                            <p id="detail-folder-stats" class="text-xs font-semibold text-slate-500 mt-0.5">0 appunti • 0 file</p>
                         </div>
-                        <button type="button" onclick="openClassModal()" class="self-start sm:self-center px-3.5 py-2 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer">
-                            <i class="ph-duotone ph-users-three text-indigo-600 text-base"></i>
-                            <span id="dashboard-class-pill">Spazio Personale (Crea / Entra in Classe)</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button type="button" onclick="editCurrentFolder()" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold cursor-pointer">
+                            Personalizza
+                        </button>
+                        <button type="button" onclick="triggerUniversalFileImport()" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                            <i class="ph-bold ph-upload-simple"></i> Importa File
+                        </button>
+                        <button type="button" onclick="openNoteEditor()" class="px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                            <i class="ph-bold ph-plus"></i> Nuovo Appunto
+                        </button>
+                    </div>
+                </div>
+
+                <div id="subfolders-bar" class="flex items-center gap-2 overflow-x-auto pb-1"></div>
+                <div id="folder-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- VISTA 3: ORARIO SCOLASTICO -->
+            <section id="view-timetable" class="hidden p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-5 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Orario Scolastico</h1>
+                        <p class="text-xs sm:text-sm text-slate-500">Inserisci le lezioni della settimana collegate alle tue cartelle</p>
+                    </div>
+                    <button type="button" onclick="openTimetableModal()" class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="ph-bold ph-plus"></i> Aggiungi Ora
+                    </button>
+                </div>
+
+                <div id="timetable-live-banner"></div>
+                <div id="timetable-mobile-days" class="flex lg:hidden items-center gap-2 overflow-x-auto pb-1"></div>
+                <div id="timetable-board"></div>
+            </section>
+
+            <!-- VISTA 4: CHAT DI CLASSE -->
+            <section id="view-chat" class="hidden p-4 sm:p-6 max-w-5xl w-full mx-auto flex-1 flex flex-col fade-in">
+                <div id="chat-no-class-box" class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-xl mx-auto my-auto space-y-4">
+                    <div class="w-16 h-16 mx-auto rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl">
+                        <i class="ph-duotone ph-users-three"></i>
+                    </div>
+                    <h2 class="font-display text-xl sm:text-2xl font-extrabold text-slate-900">Entra o Crea una Classe</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                        Per chattare con i compagni e condividere appunti o file (Word, Excel, Canva, AutoCAD, PDF), crea una classe con codice invito oppure prova subito la classe demo.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+                        <button type="button" onclick="openClassModal()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold cursor-pointer">
+                            Crea o Inserisci Codice
+                        </button>
+                        <button type="button" onclick="quickJoinDemoClass()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs sm:text-sm font-bold cursor-pointer">
+                            Entra nella Classe Demo (CLS-2026)
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chat-active-box" class="hidden flex-1 flex flex-col bg-white rounded-3xl border border-slate-200 overflow-hidden min-h-[70vh]">
+                    <div class="px-4 sm:px-6 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <h3 id="chat-class-title" class="font-display font-extrabold text-base sm:text-lg text-slate-900 truncate">Classe</h3>
+                            <p id="chat-class-members" class="text-xs text-slate-500 truncate">Messaggi sincronizzati</p>
+                        </div>
+                        <button type="button" onclick="copyCurrentClassCode()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-mono text-xs font-extrabold border border-indigo-200 shrink-0 cursor-pointer">
+                            <span id="chat-class-code-pill">CLS-2026</span> 📋
                         </button>
                     </div>
 
-                    <!-- Banner Lezione Attuale / Prossima dall'Orario -->
-                    <div id="dashboard-live-lesson-banner" class="hidden"></div>
+                    <div id="chat-messages-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50/40 max-h-[55vh]"></div>
 
-                    <!-- Griglia SOLO Cartelle Colorate -->
-                    <div id="folders-grid"></div>
-                </section>
+                    <form onsubmit="sendChatMessage(event)" class="p-3 sm:p-4 border-t border-slate-100 bg-white flex items-center gap-2">
+                        <button type="button" onclick="openAttachModal()" class="p-3 rounded-2xl bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-colors shrink-0 cursor-pointer" title="Allega Appunto o File">
+                            <i class="ph-bold ph-paperclip text-lg"></i>
+                        </button>
+                        <input type="text" id="chat-message-input" placeholder="Scrivi un messaggio ai compagni..." class="flex-1 px-4 py-3 rounded-2xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-xs sm:text-sm font-medium outline-none">
+                        <button type="submit" class="px-4 sm:px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shrink-0 cursor-pointer">
+                            <span>Invia</span>
+                            <i class="ph-bold ph-paper-plane-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
 
-                <!-- ========================================================= -->
-                <!-- VISTA B: DETTAGLIO SINGOLA CARTELLA & SOTTOCARTELLE       -->
-                <!-- ========================================================= -->
-                <section id="view-folder-detail" class="hidden space-y-6 fade-in">
-                    <div id="folder-detail-banner" class="rounded-3xl p-5 sm:p-7 border bg-white shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-3.5 min-w-0">
-                            <button type="button" onclick="setMainView('folders')" class="p-2.5 rounded-2xl bg-white/90 hover:bg-white border border-slate-200/80 text-slate-700 shrink-0 cursor-pointer" title="Torna alle cartelle">
-                                <i class="ph-bold ph-arrow-left text-lg"></i>
-                            </button>
-                            <div id="detail-folder-icon" class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-3xl shrink-0">📐</div>
-                            <div class="min-w-0">
-                                <h2 id="detail-folder-title" class="font-display text-xl sm:text-2xl font-extrabold text-slate-900 truncate">Materia</h2>
-                                <p id="detail-folder-stats" class="text-xs font-semibold text-slate-500 mt-0.5">0 appunti • 0 file</p>
+            <!-- VISTA 5: CALENDARIO SCOLASTICO -->
+            <section id="view-calendar" class="hidden p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-5 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Calendario Scolastico</h1>
+                        <p class="text-xs sm:text-sm text-slate-500">Verifiche, interrogazioni, consegne ed eventi</p>
+                    </div>
+                    <button type="button" onclick="openEventModal()" class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="ph-bold ph-plus"></i> Nuovo Evento
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 id="calendar-month-label" class="font-display font-extrabold text-base sm:text-lg text-slate-900 capitalize">Mese</h3>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"><i class="ph-bold ph-caret-left"></i></button>
+                                <button type="button" onclick="goToTodayCalendar()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">Oggi</button>
+                                <button type="button" onclick="changeCalendarMonth(1)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"><i class="ph-bold ph-caret-right"></i></button>
                             </div>
                         </div>
+                        <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-extrabold text-slate-400">
+                            <span>LUN</span><span>MAR</span><span>MER</span><span>GIO</span><span>VEN</span><span>SAB</span><span>DOM</span>
+                        </div>
+                        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5"></div>
+                    </div>
 
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <button type="button" onclick="editCurrentFolder()" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
-                                <i class="ph-bold ph-sliders-horizontal"></i>
-                                <span>Personalizza</span>
-                            </button>
-                            <button type="button" onclick="triggerUniversalFileImport()" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                                <i class="ph-bold ph-upload-simple"></i>
-                                <span>Importa File</span>
-                            </button>
-                            <button type="button" onclick="openNoteEditor()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Eventi del giorno</span>
+                                <h4 id="selected-day-label" class="font-display font-extrabold text-base text-slate-900 capitalize">Data</h4>
+                            </div>
+                            <button type="button" onclick="openEventModal()" class="p-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer">
                                 <i class="ph-bold ph-plus"></i>
-                                <span>Scrivi Appunto</span>
                             </button>
                         </div>
+                        <div id="day-events-list" class="space-y-2.5"></div>
                     </div>
+                </div>
+            </section>
+        </main>
 
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1" id="subfolders-bar"></div>
-                    <div id="folder-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                </section>
-
-                <!-- ========================================================= -->
-                <!-- VISTA C: ORARIO SCOLASTICO SETTIMANALE (LUN-SAB)          -->
-                <!-- ========================================================= -->
-                <section id="view-timetable" class="hidden space-y-6 fade-in">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Orario Scolastico</h2>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Inserisci le tue materie dal Lunedì al Sabato e apri subito la cartella durante la lezione</p>
-                        </div>
-                        <button type="button" onclick="openTimetableModal()" class="self-start sm:self-center px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="ph-bold ph-plus-circle text-base"></i>
-                            <span>Aggiungi Lezione</span>
-                        </button>
-                    </div>
-
-                    <!-- Banner Ora in Corso / Prossima Lezione -->
-                    <div id="timetable-live-banner"></div>
-
-                    <!-- Selettore Giorno Rapido su Mobile -->
-                    <div id="timetable-mobile-days" class="flex lg:hidden items-center gap-1.5 overflow-x-auto pb-1"></div>
-
-                    <!-- Griglia Orario (Giorno singolo su mobile / Settimana Lun-Sab su desktop) -->
-                    <div id="timetable-board"></div>
-                </section>
-
-                <!-- ========================================================= -->
-                <!-- VISTA D: CHAT DI CLASSE SINCRONIZZATA                     -->
-                <!-- ========================================================= -->
-                <section id="view-chat" class="hidden fade-in">
-                    <div id="chat-no-class-box" class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-xl mx-auto space-y-5 shadow-2xs">
-                        <div class="w-16 h-16 mx-auto rounded-3xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl">
-                            <i class="ph-duotone ph-chats-circle"></i>
-                        </div>
-                        <div class="space-y-2">
-                            <h3 class="font-display text-2xl font-extrabold text-slate-900">Entra in una Classe per Chattare</h3>
-                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                                Crea una nuova classe e condividi il codice con i tuoi compagni (senza bisogno di numero di telefono), oppure entra con un codice invito per scambiare messaggi, appunti e file.
-                            </p>
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                            <button type="button" onclick="openClassModal()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer">
-                                Crea o Entra con Codice
-                            </button>
-                            <button type="button" onclick="quickJoinDemoClass()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs sm:text-sm font-bold cursor-pointer">
-                                Prova Classe Demo (CLS-2026)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="chat-active-box" class="hidden bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col h-[72vh] min-h-[460px]">
-                        <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3 flex-wrap">
-                            <div class="flex items-center gap-3">
-                                <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold relative">
-                                    <i class="ph-duotone ph-users-three"></i>
-                                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white"></span>
-                                </div>
-                                <div>
-                                    <h3 id="chat-class-title" class="font-display font-extrabold text-base text-slate-900">Classe</h3>
-                                    <p id="chat-class-members" class="text-xs text-slate-500 font-medium">Stanza sincronizzata in tempo reale</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span id="chat-class-code-pill" class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-xs font-extrabold">CLS-2026</span>
-                                <button type="button" onclick="copyCurrentClassCode()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 cursor-pointer">
-                                    Copia Codice
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="chat-messages-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/40"></div>
-
-                        <form onsubmit="sendChatMessage(event)" class="p-3 sm:p-4 border-t border-slate-100 bg-white flex items-center gap-2">
-                            <button type="button" onclick="openAttachModal()" title="Allega un appunto o un file" class="px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
-                                <i class="ph-bold ph-paperclip text-base"></i>
-                                <span class="hidden sm:inline">Allega Appunto / File</span>
-                            </button>
-                            <input type="text" id="chat-message-input" placeholder="Scrivi un messaggio ai compagni di classe..." class="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-300 text-xs sm:text-sm font-medium outline-none">
-                            <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shrink-0 cursor-pointer">
-                                <span class="hidden sm:inline">Invia</span>
-                                <i class="ph-bold ph-paper-plane-right"></i>
-                            </button>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- ========================================================= -->
-                <!-- VISTA E: CALENDARIO SCOLASTICO                            -->
-                <!-- ========================================================= -->
-                <section id="view-calendar" class="hidden space-y-6 fade-in">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Calendario Scolastico</h2>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Verifiche, interrogazioni, consegne ed eventi collegati alle tue materie</p>
-                        </div>
-                        <button type="button" onclick="openEventModal()" class="self-start sm:self-center px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="ph-bold ph-calendar-plus text-base"></i>
-                            <span>Nuovo Evento</span>
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
-                            <div class="flex items-center justify-between">
-                                <h3 id="calendar-month-label" class="font-display font-extrabold text-lg text-slate-900 capitalize">Novembre 2026</h3>
-                                <div class="flex items-center gap-1.5">
-                                    <button type="button" onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"><i class="ph-bold ph-caret-left"></i></button>
-                                    <button type="button" onclick="goToTodayCalendar()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">Oggi</button>
-                                    <button type="button" onclick="changeCalendarMonth(1)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"><i class="ph-bold ph-caret-right"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-7 text-center text-[11px] font-extrabold text-slate-400 uppercase pb-1">
-                                <span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
-                            </div>
-                            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
-                        </div>
-
-                        <div class="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Agenda Giorno</span>
-                                        <h4 id="selected-day-label" class="font-display font-extrabold text-base text-slate-900 mt-0.5">Seleziona un giorno</h4>
-                                    </div>
-                                    <button type="button" onclick="openEventModal()" class="p-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer" title="Aggiungi evento">
-                                        <i class="ph-bold ph-plus"></i>
-                                    </button>
-                                </div>
-                                <div id="day-events-list" class="space-y-2.5"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-            </main>
-        </div>
-
-        <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE -->
-        <nav class="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 grid grid-cols-4 py-1.5 px-2">
+        <!-- BOTTOM NAV MOBILE -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-slate-200 grid grid-cols-4 px-2 py-1.5">
             <button type="button" id="mnav-folders" onclick="setMainView('folders')" class="flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer">
                 <i class="ph-duotone ph-folders text-xl"></i>
                 <span>Cartelle</span>
@@ -516,40 +469,36 @@
                 <span>Orario</span>
             </button>
             <button type="button" id="mnav-chat" onclick="setMainView('chat')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 relative cursor-pointer">
+                <span id="mnav-chat-dot" class="hidden w-2 h-2 rounded-full bg-rose-500 absolute top-1 right-6"></span>
                 <i class="ph-duotone ph-chats-circle text-xl"></i>
                 <span>Chat</span>
-                <span id="mnav-chat-dot" class="hidden absolute top-1 right-6 w-2 h-2 rounded-full bg-rose-500"></span>
             </button>
             <button type="button" id="mnav-calendar" onclick="setMainView('calendar')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer">
-                <i class="ph-duotone ph-calendar-check text-xl"></i>
+                <i class="ph-duotone ph-calendar-blank text-xl"></i>
                 <span>Calendario</span>
             </button>
         </nav>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 1: PRESENTAZIONE INIZIALE (4 SLIDE CON FRECCE AVANTI/INDIETRO) -->
+    <!-- MODALE 1: PRESENTAZIONE INIZIALE A 4 SLIDE CON FRECCE AVANTI/INDIETRO -->
     <!-- ===================================================================== -->
     <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden fade-in flex flex-col">
-            <div class="px-6 pt-5 pb-2 flex items-center justify-between">
-                <span id="onboarding-step-label" class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold">1 di 4</span>
-                <button type="button" onclick="closeOnboardingTour()" class="text-xs font-bold text-slate-400 hover:text-slate-700 px-2.5 py-1 rounded-lg hover:bg-slate-100 cursor-pointer">
-                    Salta presentazione
-                </button>
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-8 flex flex-col justify-between min-h-[420px] fade-in">
+            <div class="flex items-center justify-between">
+                <span id="onboarding-step-label" class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-extrabold">1 di 4</span>
+                <button type="button" onclick="closeOnboardingTour()" class="text-xs font-bold text-slate-400 hover:text-slate-700 cursor-pointer">Salta presentazione</button>
             </div>
 
-            <div id="onboarding-slide-content" class="px-6 sm:px-9 py-5 text-center space-y-5 min-h-[320px] flex flex-col items-center justify-center"></div>
+            <div id="onboarding-slide-content" class="py-6 text-center space-y-4"></div>
 
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
-                <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="h-11 px-4 rounded-2xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-35 disabled:pointer-events-none transition-all cursor-pointer">
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
                     <i class="ph-bold ph-arrow-left text-base"></i>
                     <span>Indietro</span>
                 </button>
-
-                <div id="onboarding-dots" class="flex items-center gap-2"></div>
-
-                <button type="button" id="onboarding-next-btn" onclick="changeOnboardingSlide(1)" class="h-11 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                <div id="onboarding-dots" class="flex items-center gap-1.5"></div>
+                <button type="button" onclick="changeOnboardingSlide(1)" class="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <span id="onboarding-next-label">Avanti</span>
                     <i id="onboarding-next-icon" class="ph-bold ph-arrow-right text-base"></i>
                 </button>
@@ -558,37 +507,37 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 2: CREA O PERSONALIZZA CARTELLA COLORATA                       -->
+    <!-- MODALE 2: CREA / MODIFICA CARTELLA COLORATA                           -->
     <!-- ===================================================================== -->
-    <div id="folder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5 max-h-[90vh] overflow-y-auto">
+    <div id="folder-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <h3 id="folder-modal-title" class="font-display text-lg font-extrabold text-slate-900">Nuova Cartella Materia</h3>
+                <h3 id="folder-modal-title" class="font-display text-lg font-extrabold text-slate-900">Nuova Cartella Colorata</h3>
                 <button type="button" onclick="closeFolderModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
 
             <form onsubmit="saveFolderForm(event)" class="space-y-4">
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia / Cartella</label>
-                    <input type="text" id="folder-name-input" required placeholder="Es. Matematica, Progettazione CAD, Storia..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia</label>
+                    <input type="text" id="folder-name-input" required placeholder="Es. Matematica, Storia, CAD..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Colore Cartella</label>
-                    <div id="folder-colors-picker" class="grid grid-cols-5 gap-2.5"></div>
+                    <div id="folder-colors-picker" class="grid grid-cols-5 gap-2"></div>
                 </div>
 
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase">Icona</label>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Icona Materia</label>
                     <div id="folder-icons-picker" class="grid grid-cols-6 gap-2"></div>
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Sottocartelle (separate da virgola)</label>
-                    <input type="text" id="folder-subfolders-input" placeholder="Es. Trimestre 1, Formule, Esercizi" class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs font-semibold outline-none">
+                    <input type="text" id="folder-subfolders-input" placeholder="Generale, Formule, Verifiche" class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
                 </div>
 
-                <div class="flex items-center justify-between pt-2 gap-2">
+                <div class="flex items-center justify-between pt-2">
                     <button type="button" id="delete-folder-btn" onclick="deleteCurrentEditingFolder()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
                         Elimina
                     </button>
@@ -602,10 +551,52 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 3: AGGIUNGI / MODIFICA ORA DI LEZIONE NELL'ORARIO              -->
+    <!-- MODALE 3: EDITOR APPUNTO FORMATTATO                                   -->
+    <!-- ===================================================================== -->
+    <div id="note-editor-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white w-full max-w-3xl h-[88vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
+            <div class="px-4 sm:px-6 py-3.5 border-b border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <select id="note-folder-select" onchange="updateNoteSubfolderOptions()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
+                    <select id="note-subfolder-select" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 outline-none"></select>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="note-pin-btn" onclick="toggleNotePin()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200 cursor-pointer" title="Fissa in alto">
+                        <i class="ph-fill ph-star text-base"></i>
+                    </button>
+                    <button type="button" id="note-delete-btn" onclick="deleteCurrentNote()" class="hidden p-2 rounded-xl text-rose-500 hover:bg-rose-50 cursor-pointer" title="Elimina">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                    <button type="button" onclick="saveNoteFromEditor()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">
+                        Salva Appunto
+                    </button>
+                    <button type="button" onclick="closeNoteEditor()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-4 sm:px-6 py-2 border-b border-slate-100 bg-white flex items-center gap-1.5 overflow-x-auto">
+                <button type="button" onclick="execFormat('formatBlock', 'H2')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold text-slate-700 cursor-pointer">Titolo</button>
+                <button type="button" onclick="execFormat('bold')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold text-slate-700 cursor-pointer">B</button>
+                <button type="button" onclick="execFormat('italic')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs italic font-bold text-slate-700 cursor-pointer">I</button>
+                <button type="button" onclick="execFormat('insertUnorderedList')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-bold text-slate-700 cursor-pointer">• Elenco</button>
+                <button type="button" onclick="execFormat('hiliteColor', '#fef08a')" class="px-2.5 py-1.5 rounded-lg bg-yellow-200 text-xs font-bold text-slate-800 cursor-pointer">Evidenzia</button>
+                <button type="button" onclick="insertFormulaBox()" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold cursor-pointer">+ Box Formula</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4">
+                <input type="text" id="note-title-input" placeholder="Titolo dell'appunto..." class="w-full font-display text-2xl sm:text-3xl font-extrabold text-slate-900 placeholder-slate-300 outline-none">
+                <div id="note-editor-area" contenteditable="true" data-placeholder="Inizia a scrivere qui i tuoi appunti..." class="min-h-[300px] text-sm sm:text-base text-slate-700 leading-relaxed outline-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODALE 4: AGGIUNGI / MODIFICA ORA DI LEZIONE                          -->
     <!-- ===================================================================== -->
     <div id="timetable-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
             <div class="flex items-center justify-between">
                 <h3 id="timetable-modal-title" class="font-display text-lg font-extrabold text-slate-900">Aggiungi Ora di Lezione</h3>
                 <button type="button" onclick="closeTimetableModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
@@ -624,15 +615,14 @@
                     </select>
                 </div>
 
-                <!-- ORA INIZIO E FINE CENTRATI SU IOS/MOBILE -->
                 <div class="ios-datetime-grid">
                     <div class="ios-datetime-col space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Ora Inizio</label>
-                        <input type="time" id="tt-start-input" required value="08:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Inizio</label>
+                        <input type="time" id="tt-start-input" required value="08:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-sm font-bold text-slate-800 outline-none">
                     </div>
                     <div class="ios-datetime-col space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Ora Fine</label>
-                        <input type="time" id="tt-end-input" required value="09:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Fine</label>
+                        <input type="time" id="tt-end-input" required value="09:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-sm font-bold text-slate-800 outline-none">
                     </div>
                 </div>
 
@@ -642,16 +632,16 @@
                 </div>
 
                 <div id="tt-custom-subject-wrap" class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia (se non hai ancora la cartella)</label>
-                    <input type="text" id="tt-subject-input" placeholder="Es. Matematica, Inglese, Educazione Fisica..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-semibold outline-none">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia</label>
+                    <input type="text" id="tt-subject-input" placeholder="Es. Educazione Fisica, Inglese..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-semibold outline-none">
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-500 uppercase">Aula / Laboratorio / Prof (opzionale)</label>
-                    <input type="text" id="tt-room-input" placeholder="Es. Aula 14, Lab. Informatica, Prof. Bianchi..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs font-medium outline-none">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Aula / Laboratorio (opzionale)</label>
+                    <input type="text" id="tt-room-input" placeholder="Es. Aula 14, Lab. Informatica..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
                 </div>
 
-                <div class="flex items-center justify-between pt-2 gap-2">
+                <div class="flex items-center justify-between pt-2">
                     <button type="button" id="tt-delete-btn" onclick="deleteCurrentTimetableSlot()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
                         Elimina
                     </button>
@@ -665,81 +655,47 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 4: EDITOR APPUNTI FORMATTATO                                   -->
+    <!-- MODALE 5: VISUALIZZATORE INTEGRATO FULL-SCREEN FILE IMPORTATI         -->
     <!-- ===================================================================== -->
-    <div id="note-editor-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="bg-white w-full max-w-3xl max-h-[92vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
-            <div class="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-2 flex-wrap">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <select id="note-folder-select" onchange="updateNoteSubfolderOptions()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
-                    <select id="note-subfolder-select" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-600 outline-none"></select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" id="note-pin-btn" onclick="toggleNotePin()" class="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-500 cursor-pointer" title="Fissa in alto">
-                        <i class="ph-fill ph-star"></i>
-                    </button>
-                    <button type="button" id="note-delete-btn" onclick="deleteCurrentNote()" class="hidden p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer" title="Elimina appunto">
-                        <i class="ph-bold ph-trash"></i>
-                    </button>
-                    <button type="button" onclick="saveNoteFromEditor()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs cursor-pointer">
-                        Salva Appunto
-                    </button>
-                    <button type="button" onclick="closeNoteEditor()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200 cursor-pointer">
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="px-5 py-2 border-b border-slate-100 bg-white flex items-center gap-1.5 overflow-x-auto">
-                <button type="button" onclick="execFormat('bold')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold text-slate-700 cursor-pointer">B</button>
-                <button type="button" onclick="execFormat('italic')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs italic font-serif text-slate-700 cursor-pointer">I</button>
-                <button type="button" onclick="execFormat('formatBlock', 'H2')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-bold text-slate-700 cursor-pointer">Titolo</button>
-                <button type="button" onclick="execFormat('insertUnorderedList')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-bold text-slate-700 cursor-pointer">• Elenco</button>
-                <span class="h-4 w-px bg-slate-200 mx-1"></span>
-                <button type="button" onclick="execFormat('hiliteColor', '#fef08a')" class="px-2.5 py-1 rounded-lg bg-yellow-200 text-yellow-900 text-[11px] font-bold cursor-pointer">Giallo</button>
-                <button type="button" onclick="execFormat('hiliteColor', '#bbf7d0')" class="px-2.5 py-1 rounded-lg bg-emerald-200 text-emerald-900 text-[11px] font-bold cursor-pointer">Verde</button>
-                <button type="button" onclick="execFormat('hiliteColor', '#fbcfe8')" class="px-2.5 py-1 rounded-lg bg-pink-200 text-pink-900 text-[11px] font-bold cursor-pointer">Rosa</button>
-                <button type="button" onclick="insertFormulaBox()" class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-bold cursor-pointer">+ Box Formula</button>
-            </div>
-
-            <div class="p-5 sm:p-7 flex-1 overflow-y-auto space-y-4">
-                <input type="text" id="note-title-input" placeholder="Titolo dell'appunto..." class="w-full font-display text-xl sm:text-2xl font-extrabold text-slate-900 placeholder-slate-300 outline-none">
-                <div id="note-editor-area" contenteditable="true" data-placeholder="Scrivi qui i tuoi appunti, schemi o riassunti..." class="min-h-[240px] text-sm sm:text-base text-slate-700 leading-relaxed outline-none"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- MODALE 5: VISUALIZZATORE & DOWNLOAD FILE IMPORTATI (CAD/WORD/CANVA..) -->
-    <!-- ===================================================================== -->
-    <div id="file-viewer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
-            <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 flex-wrap">
+    <div id="file-viewer-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-white w-full max-w-5xl h-[92vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
+            <div class="px-4 sm:px-6 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <span id="file-viewer-badge" class="px-3 py-1 rounded-xl text-xs font-extrabold border bg-indigo-100 text-indigo-700 shrink-0">FILE</span>
-                    <h3 id="file-viewer-title" class="font-display font-extrabold text-sm sm:text-base text-slate-900 truncate">Documento</h3>
+                    <div class="min-w-0">
+                        <h3 id="file-viewer-title" class="font-display font-extrabold text-sm sm:text-base text-slate-900 truncate">Documento</h3>
+                        <p id="file-viewer-subtitle" class="text-[11px] font-medium text-slate-400 truncate">Visualizzatore integrato</p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <button type="button" id="file-viewer-external-btn" onclick="openCurrentFileInNewTab()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="ph-bold ph-arrow-square-out"></i>
+                        <span>Apri a Schermo Intero</span>
+                    </button>
                     <button type="button" id="file-viewer-share-btn" onclick="shareCurrentFileToChat()" class="hidden px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
                         <i class="ph-bold ph-paper-plane-tilt"></i>
-                        <span class="hidden sm:inline">Invia in Chat</span>
+                        <span class="hidden md:inline">Invia in Chat</span>
                     </button>
-                    <button type="button" onclick="downloadCurrentViewedFile()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                    <button type="button" onclick="downloadCurrentViewedFile()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
                         <i class="ph-bold ph-download-simple"></i>
-                        <span>Scarica File</span>
+                        <span class="hidden sm:inline">Scarica</span>
                     </button>
                     <button type="button" id="file-viewer-delete-btn" onclick="deleteCurrentViewedFile()" class="p-2 rounded-xl text-rose-500 hover:bg-rose-50 cursor-pointer" title="Elimina file">
                         <i class="ph-bold ph-trash"></i>
                     </button>
-                    <button type="button" onclick="closeFileViewerModal()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200 cursor-pointer">
-                        <i class="ph-bold ph-x"></i>
+                    <button type="button" onclick="closeFileViewerModal()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer" title="Chiudi">
+                        <i class="ph-bold ph-x text-base"></i>
                     </button>
                 </div>
             </div>
 
-            <div id="file-viewer-body" class="flex-1 overflow-y-auto p-6 bg-slate-50/50"></div>
+            <!-- Barra strumenti contestuale (Zoom Immagini / Fogli Excel) -->
+            <div id="file-viewer-toolbar" class="hidden px-4 sm:px-6 py-2 border-b border-slate-200/80 bg-white flex items-center justify-between gap-2 overflow-x-auto"></div>
 
-            <div id="file-viewer-notes-bar" class="px-6 py-3.5 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center gap-2">
+            <!-- Area Contenuto Reale del File -->
+            <div id="file-viewer-body" class="flex-1 overflow-auto p-3 sm:p-6 bg-slate-100/70 flex flex-col"></div>
+
+            <div id="file-viewer-notes-bar" class="px-4 sm:px-6 py-3 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center gap-2">
                 <label class="text-xs font-bold text-slate-500 shrink-0">Nota sul file:</label>
                 <input type="text" id="file-viewer-note-input" oninput="saveFileCustomNote(this.value)" placeholder="Aggiungi un promemoria o descrizione..." class="flex-1 px-3.5 py-2 rounded-xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-xs font-medium outline-none">
             </div>
@@ -885,56 +841,151 @@
             'use strict';
 
             const STORAGE_KEY = 'studyflow_v7_data';
+            const IDB_NAME = 'StudyFlowFilesDB';
+            const IDB_STORE = 'fileBlobs';
             const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('studyflow_realtime_sync') : null;
 
+            // --- ARCHIVIAZIONE BLOB / DATAURL IN INDEXEDDB + MEMORIA PER FILE PESANTI ---
+            const fileBlobMemoryCache = {};
+            let idbPromise = null;
+
+            function getIDB() {
+                if (idbPromise) return idbPromise;
+                idbPromise = new Promise((resolve) => {
+                    if (typeof indexedDB === 'undefined') {
+                        resolve(null);
+                        return;
+                    }
+                    try {
+                        const req = indexedDB.open(IDB_NAME, 1);
+                        req.onupgradeneeded = function (e) {
+                            const db = e.target.result;
+                            if (!db.objectStoreNames.contains(IDB_STORE)) {
+                                db.createObjectStore(IDB_STORE);
+                            }
+                        };
+                        req.onsuccess = function (e) { resolve(e.target.result); };
+                        req.onerror = function () { resolve(null); };
+                    } catch (err) {
+                        resolve(null);
+                    }
+                });
+                return idbPromise;
+            }
+
+            async function storeFileBinary(fileId, dataUrl) {
+                if (!fileId || !dataUrl) return;
+                fileBlobMemoryCache[fileId] = dataUrl;
+                const db = await getIDB();
+                if (!db) return;
+                return new Promise((resolve) => {
+                    try {
+                        const tx = db.transaction(IDB_STORE, 'readwrite');
+                        tx.objectStore(IDB_STORE).put(dataUrl, fileId);
+                        tx.oncomplete = function () { resolve(true); };
+                        tx.onerror = function () { resolve(false); };
+                    } catch (e) {
+                        resolve(false);
+                    }
+                });
+            }
+
+            async function retrieveFileBinary(item) {
+                if (!item) return null;
+                if (item.fileDataUrl && item.fileDataUrl.startsWith('data:')) {
+                    fileBlobMemoryCache[item.id] = item.fileDataUrl;
+                    return item.fileDataUrl;
+                }
+                const key = item.storageBlobId || item.id;
+                if (key && fileBlobMemoryCache[key]) {
+                    return fileBlobMemoryCache[key];
+                }
+                const db = await getIDB();
+                if (!db || !key) return null;
+                return new Promise((resolve) => {
+                    try {
+                        const tx = db.transaction(IDB_STORE, 'readonly');
+                        const req = tx.objectStore(IDB_STORE).get(key);
+                        req.onsuccess = function () {
+                            if (req.result) fileBlobMemoryCache[key] = req.result;
+                            resolve(req.result || null);
+                        };
+                        req.onerror = function () { resolve(null); };
+                    } catch (e) {
+                        resolve(null);
+                    }
+                });
+            }
+
+            function dataUrlToArrayBuffer(dataUrl) {
+                const base64 = dataUrl.split(',')[1] || '';
+                const binaryString = atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                return bytes.buffer;
+            }
+
+            function dataUrlToBlobUrl(dataUrl, fallbackMime) {
+                const parts = dataUrl.split(',');
+                const mimeMatch = parts[0].match(/:(.*?);/);
+                const mime = (mimeMatch && mimeMatch[1]) || fallbackMime || 'application/octet-stream';
+                const buf = dataUrlToArrayBuffer(dataUrl);
+                const blob = new Blob([buf], { type: mime });
+                return URL.createObjectURL(blob);
+            }
+
             const COLOR_THEMES = {
-                indigo:  { label: 'Indaco',     bg: 'bg-gradient-to-br from-indigo-50 to-blue-50/70',     border: 'border-indigo-200/80', bar: 'bg-indigo-500',  iconBg: 'bg-indigo-100 text-indigo-700',  badge: 'bg-indigo-100 text-indigo-800',  dot: 'bg-indigo-500' },
-                rose:    { label: 'Rosa Rosso', bg: 'bg-gradient-to-br from-rose-50 to-pink-50/70',       border: 'border-rose-200/80',   bar: 'bg-rose-500',    iconBg: 'bg-rose-100 text-rose-700',      badge: 'bg-rose-100 text-rose-800',      dot: 'bg-rose-500' },
-                emerald: { label: 'Smeraldo',   bg: 'bg-gradient-to-br from-emerald-50 to-teal-50/70',    border: 'border-emerald-200/80',bar: 'bg-emerald-500', iconBg: 'bg-emerald-100 text-emerald-700',badge: 'bg-emerald-100 text-emerald-800',dot: 'bg-emerald-500' },
-                amber:   { label: 'Ambra',      bg: 'bg-gradient-to-br from-amber-50 to-yellow-50/70',    border: 'border-amber-200/80',  bar: 'bg-amber-500',   iconBg: 'bg-amber-100 text-amber-700',    badge: 'bg-amber-100 text-amber-800',    dot: 'bg-amber-500' },
-                sky:     { label: 'Cielo',      bg: 'bg-gradient-to-br from-sky-50 to-cyan-50/70',        border: 'border-sky-200/80',    bar: 'bg-sky-500',     iconBg: 'bg-sky-100 text-sky-700',        badge: 'bg-sky-100 text-sky-800',        dot: 'bg-sky-500' },
-                violet:  { label: 'Viola',      bg: 'bg-gradient-to-br from-violet-50 to-purple-50/70',   border: 'border-violet-200/80', bar: 'bg-violet-500',  iconBg: 'bg-violet-100 text-violet-700',  badge: 'bg-violet-100 text-violet-800',  dot: 'bg-violet-500' },
-                orange:  { label: 'Arancio',    bg: 'bg-gradient-to-br from-orange-50 to-amber-50/70',    border: 'border-orange-200/80', bar: 'bg-orange-500',  iconBg: 'bg-orange-100 text-orange-700',  badge: 'bg-orange-100 text-orange-800',  dot: 'bg-orange-500' },
-                teal:    { label: 'Ottanio',    bg: 'bg-gradient-to-br from-teal-50 to-emerald-50/70',    border: 'border-teal-200/80',   bar: 'bg-teal-500',    iconBg: 'bg-teal-100 text-teal-700',      badge: 'bg-teal-100 text-teal-800',      dot: 'bg-teal-500' },
-                pink:    { label: 'Fucsia',     bg: 'bg-gradient-to-br from-pink-50 to-fuchsia-50/70',    border: 'border-pink-200/80',   bar: 'bg-pink-500',    iconBg: 'bg-pink-100 text-pink-700',      badge: 'bg-pink-100 text-pink-800',      dot: 'bg-pink-500' },
-                slate:   { label: 'Grafite',    bg: 'bg-gradient-to-br from-slate-100 to-zinc-100/70',    border: 'border-slate-300/80',  bar: 'bg-slate-600',   iconBg: 'bg-slate-200 text-slate-700',    badge: 'bg-slate-200 text-slate-800',    dot: 'bg-slate-600' }
+                indigo: { label: 'Indaco', bg: 'bg-indigo-50/80', border: 'border-indigo-200', bar: 'bg-indigo-500', dot: 'bg-indigo-500', iconBg: 'bg-indigo-100', badge: 'bg-indigo-100 text-indigo-700' },
+                emerald: { label: 'Smeraldo', bg: 'bg-emerald-50/80', border: 'border-emerald-200', bar: 'bg-emerald-500', dot: 'bg-emerald-500', iconBg: 'bg-emerald-100', badge: 'bg-emerald-100 text-emerald-700' },
+                rose: { label: 'Rosa', bg: 'bg-rose-50/80', border: 'border-rose-200', bar: 'bg-rose-500', dot: 'bg-rose-500', iconBg: 'bg-rose-100', badge: 'bg-rose-100 text-rose-700' },
+                amber: { label: 'Ambra', bg: 'bg-amber-50/80', border: 'border-amber-200', bar: 'bg-amber-500', dot: 'bg-amber-500', iconBg: 'bg-amber-100', badge: 'bg-amber-100 text-amber-800' },
+                sky: { label: 'Azzurro', bg: 'bg-sky-50/80', border: 'border-sky-200', bar: 'bg-sky-500', dot: 'bg-sky-500', iconBg: 'bg-sky-100', badge: 'bg-sky-100 text-sky-700' },
+                purple: { label: 'Viola', bg: 'bg-purple-50/80', border: 'border-purple-200', bar: 'bg-purple-500', dot: 'bg-purple-500', iconBg: 'bg-purple-100', badge: 'bg-purple-100 text-purple-700' },
+                orange: { label: 'Arancio', bg: 'bg-orange-50/80', border: 'border-orange-200', bar: 'bg-orange-500', dot: 'bg-orange-500', iconBg: 'bg-orange-100', badge: 'bg-orange-100 text-orange-700' },
+                teal: { label: 'Ottanio', bg: 'bg-teal-50/80', border: 'border-teal-200', bar: 'bg-teal-500', dot: 'bg-teal-500', iconBg: 'bg-teal-100', badge: 'bg-teal-100 text-teal-700' },
+                pink: { label: 'Fucsia', bg: 'bg-pink-50/80', border: 'border-pink-200', bar: 'bg-pink-500', dot: 'bg-pink-500', iconBg: 'bg-pink-100', badge: 'bg-pink-100 text-pink-700' },
+                slate: { label: 'Grafite', bg: 'bg-slate-100/80', border: 'border-slate-300', bar: 'bg-slate-700', dot: 'bg-slate-700', iconBg: 'bg-slate-200', badge: 'bg-slate-200 text-slate-800' }
             };
 
-            const FOLDER_EMOJIS = ['📐', '📚', '🧪', '🌍', '💻', '🎨', '🏛️', '🧬', '🇬🇧', '📊', '✏️', '🎵'];
+            const FOLDER_EMOJIS = ['📐', '📚', '🧪', '💻', '🏛️', '🌍', '🎨', '🧬', '📜', '⚖️', '🎵', '🇬🇧'];
+
             const DAYS_MAP = { 1: 'Lunedì', 2: 'Martedì', 3: 'Mercoledì', 4: 'Giovedì', 5: 'Venerdì', 6: 'Sabato' };
 
             const ONBOARDING_SLIDES = [
                 {
-                    badge: 'Pagina 1 di 4 • Cartelle Colorate',
-                    title: 'Parti da Zero e Organizza le Materie',
-                    description: 'Appena crei il tuo account hai 0 cartelle preimpostate. Crea una cartella colorata per ogni materia con icona personalizzata e dividila in sottocartelle.',
-                    gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+                    badge: '1 • Organizzazione Perfetta',
+                    title: 'Cartelle Colorate per Ogni Materia',
+                    description: 'Parti da una scrivania pulita e crea cartelle con 10 colori diversi, icone e sottocartelle per dividere al meglio teoria, esercizi e verifiche.',
                     icon: 'ph-folders',
-                    pills: ['✨ 0 Cartelle Iniziali', '🎨 10 Colori Vivaci', '📂 Sottocartelle']
+                    gradient: 'from-indigo-500 to-purple-600',
+                    pills: ['10 Colori', 'Sottocartelle', 'Dashboard Pulita']
                 },
                 {
-                    badge: 'Pagina 2 di 4 • File Universali',
-                    title: 'Importa Canva, Word, Excel, AutoCAD e altro',
-                    description: 'Carica direttamente dentro le tue cartelle progetti Canva, documenti Word, fogli Excel, disegni AutoCAD (.dwg/.dxf), PDF e immagini con anteprima e download.',
-                    gradient: 'from-emerald-500 via-teal-500 to-cyan-500',
+                    badge: '2 • Apri Tutto Dentro l’App',
+                    title: 'Importa e Consulta Ogni File',
+                    description: 'Carica progetti Canva, documenti Word (.docx), fogli Excel (.xlsx), disegni AutoCAD (.dwg/.dxf), PDF e foto: si aprono direttamente nel visualizzatore integrato.',
                     icon: 'ph-file-arrow-up',
-                    pills: ['📐 AutoCAD', '📘 Word & Excel', '🎨 Canva & PDF']
+                    gradient: 'from-emerald-500 to-teal-600',
+                    pills: ['Word & Excel', 'PDF & Canva', 'AutoCAD & Immagini']
                 },
                 {
-                    badge: 'Pagina 3 di 4 • Orario & Calendario',
-                    title: 'Orario Scolastico & Verifiche',
-                    description: 'Inserisci il tuo orario settimanale dal Lunedì al Sabato: l’app riconosce la lezione in corso e ti apre subito la cartella giusta, oltre al calendario verifiche.',
-                    gradient: 'from-amber-500 via-orange-500 to-rose-500',
+                    badge: '3 • Orario Intelligente',
+                    title: 'Orario Settimanale Collegato',
+                    description: 'Inserisci le ore di lezione dal Lunedì al Sabato: StudyFlow riconosce quale materia hai in corso e ti apre subito la cartella corrispondente.',
                     icon: 'ph-clock-afternoon',
-                    pills: ['⏰ Ora in Corso', '📅 Lun–Sab', '📝 Verifiche']
+                    gradient: 'from-amber-500 to-orange-600',
+                    pills: ['Lunedì – Sabato', 'Materia Ora in Corso', 'Aule & Laboratori']
                 },
                 {
-                    badge: 'Pagina 4 di 4 • Classe & Chat',
-                    title: 'Classe con Codice Invito & Chat Condivisa',
-                    description: 'Crea una classe con codice invito (senza bisogno di numero di telefono) per chattare con i compagni e condividere al volo appunti e file.',
-                    gradient: 'from-sky-500 via-blue-600 to-indigo-600',
+                    badge: '4 • Classe & Calendario',
+                    title: 'Chat di Classe e Scadenze',
+                    description: 'Crea una classe con codice invito per scambiare appunti e file con i compagni in tempo reale, e segna verifiche e interrogazioni sul calendario.',
                     icon: 'ph-chats-circle',
-                    pills: ['🔑 Codice Classe', '💬 Chat Live', '📎 Condividi File']
+                    gradient: 'from-pink-500 to-rose-600',
+                    pills: ['Codice Classe', 'Condivisione File', 'Calendario Verifiche']
                 }
             ];
 
@@ -963,6 +1014,11 @@
                 editingNoteId: null,
                 editingNotePinned: false,
                 viewingFileItem: null,
+                viewingFileDataUrl: null,
+                viewingFileObjectUrl: null,
+                viewerZoom: 1,
+                viewerRotation: 0,
+                viewerWorkbook: null,
                 viewingSharedNote: null,
                 unreadChatCount: 0,
                 calendarMonth: new Date(),
@@ -1046,17 +1102,35 @@
             }
 
             function saveStorage(broadcast) {
+                // Evita di saturare localStorage se ci sono file molto pesanti già salvati in IndexedDB
+                const stripHeavyDataUrls = (wsObj) => ({
+                    ...wsObj,
+                    notes: (wsObj.notes || []).map(n => {
+                        if (n.isFile && n.fileDataUrl && n.fileDataUrl.length > 450000) {
+                            return { ...n, storageBlobId: n.storageBlobId || n.id, fileDataUrl: '' };
+                        }
+                        return n;
+                    })
+                });
+
+                const safeClasses = {};
+                Object.keys(state.classes || {}).forEach(cid => {
+                    safeClasses[cid] = stripHeavyDataUrls(state.classes[cid]);
+                });
+
                 const payload = JSON.stringify({
                     user: state.user,
                     hasSeenOnboarding: state.hasSeenOnboarding,
                     activeClassId: state.activeClassId,
-                    personalData: state.personalData,
-                    classes: state.classes
+                    personalData: stripHeavyDataUrls(state.personalData),
+                    classes: safeClasses
                 });
                 memoryBackup = payload;
                 try {
                     localStorage.setItem(STORAGE_KEY, payload);
-                } catch (e) {}
+                } catch (e) {
+                    console.warn('Quota localStorage raggiunta, uso IndexedDB + memoria.');
+                }
                 if (broadcast && channel) {
                     channel.postMessage({ type: 'SYNC_UPDATE', classId: state.activeClassId });
                 }
@@ -2024,9 +2098,16 @@
                 let loaded = 0;
                 files.forEach(file => {
                     const reader = new FileReader();
-                    reader.onload = function (ev) {
+                    reader.onload = async function (ev) {
+                        const fileId = 'file-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+                        const dataUrl = ev.target.result;
+
+                        // Salva sempre in IndexedDB + cache memoria per supporto file grandi
+                        await storeFileBinary(fileId, dataUrl);
+
                         ws.notes.unshift({
-                            id: 'file-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+                            id: fileId,
+                            storageBlobId: fileId,
                             isFile: true,
                             folderId: targetFolder.id,
                             subfolder: targetSub,
@@ -2034,7 +2115,7 @@
                             fileName: file.name,
                             mimeType: file.type || 'application/octet-stream',
                             fileSize: formatBytes(file.size),
-                            fileDataUrl: ev.target.result,
+                            fileDataUrl: dataUrl,
                             fileNote: '',
                             content: '',
                             pinned: false,
@@ -2057,20 +2138,35 @@
                 });
             };
 
-            window.openFileViewer = function (itemId, externalAttachment) {
+            function cleanupViewerObjectUrl() {
+                if (state.viewingFileObjectUrl) {
+                    try { URL.revokeObjectURL(state.viewingFileObjectUrl); } catch (e) {}
+                    state.viewingFileObjectUrl = null;
+                }
+            }
+
+            window.openFileViewer = async function (itemId, externalAttachment) {
                 const ws = getActiveWorkspace();
                 const item = externalAttachment || ws.notes.find(n => n.id === itemId);
                 if (!item) return;
 
+                cleanupViewerObjectUrl();
                 state.viewingFileItem = item;
+                state.viewerZoom = 1;
+                state.viewerRotation = 0;
+                state.viewerWorkbook = null;
+
                 const isExternal = !!externalAttachment;
-                const fmt = getFileFormatInfo(item.fileName || item.title);
+                const fileName = item.fileName || item.title || 'documento';
+                const ext = (fileName.split('.').pop() || '').toLowerCase();
+                const fmt = getFileFormatInfo(fileName);
 
                 const badge = document.getElementById('file-viewer-badge');
                 badge.className = `px-3 py-1 rounded-xl text-xs font-extrabold border ${fmt.bg} shrink-0`;
                 badge.textContent = fmt.label;
 
-                document.getElementById('file-viewer-title').textContent = item.fileName || item.title;
+                document.getElementById('file-viewer-title').textContent = fileName;
+                document.getElementById('file-viewer-subtitle').textContent = `${fmt.software} • ${item.fileSize || 'File'}`;
                 document.getElementById('file-viewer-share-btn').classList.toggle('hidden', isExternal || !state.activeClassId);
                 document.getElementById('file-viewer-delete-btn').classList.toggle('hidden', isExternal);
                 document.getElementById('file-viewer-notes-bar').classList.toggle('hidden', isExternal);
@@ -2078,55 +2174,244 @@
                     document.getElementById('file-viewer-note-input').value = item.fileNote || '';
                 }
 
-                const body = document.getElementById('file-viewer-body');
-                const mime = (item.mimeType || '').toLowerCase();
-                const dataUrl = item.fileDataUrl || '';
+                const toolbar = document.getElementById('file-viewer-toolbar');
+                toolbar.classList.add('hidden');
+                toolbar.innerHTML = '';
 
-                if (dataUrl && mime.startsWith('image/')) {
+                const body = document.getElementById('file-viewer-body');
+                body.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center py-12 text-slate-400 space-y-2">
+                        <i class="ph-duotone ph-spinner-gap animate-spin text-4xl text-indigo-600"></i>
+                        <p class="text-xs font-bold">Caricamento anteprima reale del file...</p>
+                    </div>
+                `;
+                document.getElementById('file-viewer-modal').classList.remove('hidden');
+
+                const dataUrl = await retrieveFileBinary(item);
+                state.viewingFileDataUrl = dataUrl;
+
+                if (!dataUrl) {
                     body.innerHTML = `
-                        <div class="rounded-2xl overflow-hidden border border-slate-200 bg-white p-3 flex items-center justify-center">
-                            <img src="${dataUrl}" alt="${escapeHtml(item.title)}" class="max-h-[55vh] w-auto rounded-xl object-contain">
+                        <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-3 my-auto">
+                            <i class="ph-duotone ph-warning-circle text-4xl text-amber-500"></i>
+                            <h4 class="font-display font-extrabold text-base text-slate-900">Contenuto file non trovato</h4>
+                            <p class="text-xs text-slate-500">Il file potrebbe essere stato caricato su un altro dispositivo. Prova a reimportarlo.</p>
                         </div>
                     `;
-                } else if (dataUrl && mime === 'application/pdf') {
-                    body.innerHTML = `
-                        <div class="rounded-2xl overflow-hidden border border-slate-200 bg-white h-[55vh]">
-                            <iframe src="${dataUrl}" class="w-full h-full border-0"></iframe>
-                        </div>
-                    `;
-                } else {
-                    body.innerHTML = `
-                        <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4">
-                            <div class="w-20 h-20 mx-auto rounded-3xl border ${fmt.bg} flex items-center justify-center text-4xl">
-                                <i class="ph-duotone ${fmt.icon}"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold border ${fmt.bg}">${fmt.software}</span>
-                                <h4 class="font-display font-extrabold text-lg text-slate-900 break-all pt-1">${escapeHtml(item.fileName || item.title)}</h4>
-                                <p class="text-xs text-slate-400">Dimensione: ${item.fileSize || 'N/D'} • Caricato il ${item.updatedAt || 'Oggi'}</p>
-                            </div>
-                            <p class="text-xs text-slate-500 max-w-md mx-auto">
-                                Premi <b>Scarica File</b> in alto per aprirlo direttamente con ${fmt.software} sul tuo dispositivo.
-                            </p>
-                        </div>
-                    `;
+                    return;
                 }
 
-                document.getElementById('file-viewer-modal').classList.remove('hidden');
+                const mime = (item.mimeType || '').toLowerCase();
+                const blobUrl = dataUrlToBlobUrl(dataUrl, item.mimeType);
+                state.viewingFileObjectUrl = blobUrl;
+
+                // 1. IMMAGINI (JPG, PNG, WEBP, SVG, GIF, esportazioni Canva)
+                if (mime.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp'].includes(ext)) {
+                    toolbar.classList.remove('hidden');
+                    toolbar.innerHTML = `
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="adjustViewerImageZoom(-0.2)" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer">
+                                <i class="ph-bold ph-magnifying-glass-minus"></i> Zoom -
+                            </button>
+                            <span id="viewer-zoom-label" class="px-2.5 py-1 text-xs font-extrabold text-slate-700">100%</span>
+                            <button type="button" onclick="adjustViewerImageZoom(0.2)" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer">
+                                <i class="ph-bold ph-magnifying-glass-plus"></i> Zoom +
+                            </button>
+                            <button type="button" onclick="rotateViewerImage()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer">
+                                <i class="ph-bold ph-arrow-clockwise"></i> Ruota
+                            </button>
+                            <button type="button" onclick="resetViewerImage()" class="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold cursor-pointer">
+                                Reset 100%
+                            </button>
+                        </div>
+                        <span class="text-[11px] font-semibold text-slate-400 hidden sm:inline">Usa i controlli per ingrandire appunti o lavagna</span>
+                    `;
+                    body.innerHTML = `
+                        <div class="flex-1 min-h-[55vh] rounded-2xl border border-slate-200 bg-slate-900/5 overflow-auto flex items-center justify-center p-4">
+                            <img id="viewer-image-el" src="${blobUrl}" alt="${escapeHtml(fileName)}" style="transform: scale(1) rotate(0deg); transform-origin: center center;" class="max-w-full max-h-[66vh] rounded-xl shadow-md transition-transform duration-150 object-contain">
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 2. DOCUMENTI PDF (inclusi progetti esportati da Canva in PDF)
+                if (mime === 'application/pdf' || ext === 'pdf') {
+                    body.innerHTML = `
+                        <div class="flex-1 min-h-[62vh] rounded-2xl overflow-hidden border border-slate-300 bg-white shadow-inner flex flex-col">
+                            <iframe src="${blobUrl}#toolbar=1&navpanes=0" class="w-full flex-1 min-h-[60vh] border-0"></iframe>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 3. DOCUMENTI WORD (.docx) tramite Mammoth.js
+                if (ext === 'docx' && typeof mammoth !== 'undefined') {
+                    try {
+                        const arrayBuffer = dataUrlToArrayBuffer(dataUrl);
+                        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                        const htmlContent = result.value || '<p class="text-slate-400 italic">Documento Word vuoto.</p>';
+                        body.innerHTML = `
+                            <div class="max-w-3xl w-full mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-10 docx-viewer-content text-sm sm:text-base text-slate-800">
+                                ${htmlContent}
+                            </div>
+                        `;
+                        return;
+                    } catch (err) {
+                        console.warn('Errore parsing DOCX:', err);
+                    }
+                }
+
+                // 4. FOGLI EXCEL & CSV (.xlsx, .xls, .csv) tramite SheetJS
+                if (['xlsx', 'xls', 'csv', 'ods'].includes(ext) && typeof XLSX !== 'undefined') {
+                    try {
+                        const arrayBuffer = dataUrlToArrayBuffer(dataUrl);
+                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                        state.viewerWorkbook = workbook;
+
+                        if (workbook.SheetNames && workbook.SheetNames.length > 0) {
+                            toolbar.classList.remove('hidden');
+                            toolbar.innerHTML = `
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[11px] font-extrabold uppercase text-slate-400 mr-1">Fogli:</span>
+                                    ${workbook.SheetNames.map((sName, idx) => `
+                                        <button type="button" onclick="selectExcelSheet(${idx})" id="xlsx-sheet-tab-${idx}" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${idx === 0 ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+                                            ${escapeHtml(sName)}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            `;
+                            renderExcelSheetIndex(0);
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn('Errore parsing XLSX:', err);
+                    }
+                }
+
+                // 5. FILE DI TESTO, CODICE & DXF TESTUALE (.txt, .md, .json, .dxf, .html, .css, .js, .xml, .py, .c, .cpp, .java)
+                const textExts = ['txt', 'md', 'json', 'dxf', 'html', 'htm', 'css', 'js', 'ts', 'xml', 'py', 'c', 'cpp', 'h', 'java', 'sql', 'log', 'ini', 'yaml', 'yml'];
+                if (mime.startsWith('text/') || textExts.includes(ext)) {
+                    try {
+                        const arrayBuffer = dataUrlToArrayBuffer(dataUrl);
+                        const decoder = new TextDecoder('utf-8');
+                        const textContent = decoder.decode(arrayBuffer);
+                        body.innerHTML = `
+                            <div class="w-full bg-slate-900 text-slate-100 rounded-2xl p-4 sm:p-6 overflow-auto font-mono text-xs sm:text-sm leading-relaxed shadow-inner flex-1">
+                                <pre class="whitespace-pre-wrap break-words">${escapeHtml(textContent)}</pre>
+                            </div>
+                        `;
+                        return;
+                    } catch (err) {
+                        console.warn('Errore lettura testo:', err);
+                    }
+                }
+
+                // 6. FILE CAD BINARI (.dwg) / POWERPOINT (.pptx) / ARCHIVI / ALTRI FORMATI
+                body.innerHTML = `
+                    <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 text-center space-y-5 my-auto max-w-xl mx-auto shadow-2xs">
+                        <div class="w-20 h-20 mx-auto rounded-3xl border ${fmt.bg} flex items-center justify-center text-4xl">
+                            <i class="ph-duotone ${fmt.icon}"></i>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold border ${fmt.bg}">${fmt.software}</span>
+                            <h4 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 break-all pt-1">${escapeHtml(fileName)}</h4>
+                            <p class="text-xs text-slate-400">Dimensione: ${item.fileSize || 'N/D'} • Caricato il ${item.updatedAt || 'Oggi'}</p>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                            Questo formato binario (<b>.${escapeHtml(ext)}</b>) può essere aperto direttamente con l'applicazione installata sul tuo dispositivo oppure scaricato.
+                        </p>
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+                            <button type="button" onclick="openCurrentFileInNewTab()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                                <i class="ph-bold ph-arrow-square-out text-base"></i>
+                                <span>Apri con App del Dispositivo</span>
+                            </button>
+                            <button type="button" onclick="downloadCurrentViewedFile()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                                <i class="ph-bold ph-download-simple text-base"></i>
+                                <span>Scarica File</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            };
+
+            window.adjustViewerImageZoom = function (delta) {
+                state.viewerZoom = Math.min(4, Math.max(0.4, +(state.viewerZoom + delta).toFixed(2)));
+                applyViewerImageTransform();
+            };
+
+            window.rotateViewerImage = function () {
+                state.viewerRotation = (state.viewerRotation + 90) % 360;
+                applyViewerImageTransform();
+            };
+
+            window.resetViewerImage = function () {
+                state.viewerZoom = 1;
+                state.viewerRotation = 0;
+                applyViewerImageTransform();
+            };
+
+            function applyViewerImageTransform() {
+                const img = document.getElementById('viewer-image-el');
+                const lbl = document.getElementById('viewer-zoom-label');
+                if (img) {
+                    img.style.transform = `scale(${state.viewerZoom}) rotate(${state.viewerRotation}deg)`;
+                }
+                if (lbl) {
+                    lbl.textContent = `${Math.round(state.viewerZoom * 100)}%`;
+                }
+            }
+
+            window.selectExcelSheet = function (idx) {
+                if (!state.viewerWorkbook) return;
+                state.viewerWorkbook.SheetNames.forEach((_, i) => {
+                    const btn = document.getElementById(`xlsx-sheet-tab-${i}`);
+                    if (btn) {
+                        btn.className = i === idx
+                            ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-emerald-600 text-white'
+                            : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200';
+                    }
+                });
+                renderExcelSheetIndex(idx);
+            };
+
+            function renderExcelSheetIndex(idx) {
+                const wb = state.viewerWorkbook;
+                if (!wb) return;
+                const sheetName = wb.SheetNames[idx];
+                const sheet = wb.Sheets[sheetName];
+                const rawTableHtml = XLSX.utils.sheet_to_html(sheet, { editable: false });
+                const styledTable = rawTableHtml.replace('<table', '<table class="xlsx-viewer-table"');
+
+                document.getElementById('file-viewer-body').innerHTML = `
+                    <div class="w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-auto flex-1">
+                        ${styledTable}
+                    </div>
+                `;
+            }
+
+            window.openCurrentFileInNewTab = function () {
+                if (!state.viewingFileObjectUrl && !state.viewingFileDataUrl) {
+                    showToast('File non disponibile');
+                    return;
+                }
+                const targetUrl = state.viewingFileObjectUrl || state.viewingFileDataUrl;
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
             };
 
             window.closeFileViewerModal = function () {
+                cleanupViewerObjectUrl();
                 document.getElementById('file-viewer-modal').classList.add('hidden');
             };
 
             window.downloadCurrentViewedFile = function () {
                 const item = state.viewingFileItem;
-                if (!item || !item.fileDataUrl) {
+                const url = state.viewingFileObjectUrl || state.viewingFileDataUrl || (item && item.fileDataUrl);
+                if (!item || !url) {
                     showToast('File non disponibile per il download');
                     return;
                 }
                 const a = document.createElement('a');
-                a.href = item.fileDataUrl;
+                a.href = url;
                 a.download = item.fileName || item.title || 'file';
                 document.body.appendChild(a);
                 a.click();
@@ -2512,11 +2797,12 @@
                 sendAttachmentToChat(entry.item, entry.ws);
             };
 
-            function sendAttachmentToChat(item, sourceWs) {
+            async function sendAttachmentToChat(item, sourceWs) {
                 if (!state.activeClassId) return;
                 const cls = state.classes[state.activeClassId];
                 const ws = sourceWs || getActiveWorkspace();
                 const folder = ws.folders.find(f => f.id === item.folderId) || { name: 'Materia', icon: '📄', color: 'indigo' };
+                const resolvedDataUrl = item.isFile ? (await retrieveFileBinary(item) || item.fileDataUrl || '') : '';
 
                 cls.messages.push({
                     id: 'msg-' + Date.now(),
@@ -2527,11 +2813,12 @@
                         : `📚 Ho condiviso un appunto di ${folder.name}:`,
                     attachedNote: {
                         isFile: !!item.isFile,
+                        storageBlobId: item.storageBlobId || item.id,
                         title: item.title,
                         fileName: item.fileName || '',
                         mimeType: item.mimeType || '',
                         fileSize: item.fileSize || '',
-                        fileDataUrl: item.fileDataUrl || '',
+                        fileDataUrl: resolvedDataUrl,
                         content: item.content || '',
                         folderName: folder.name,
                         folderIcon: folder.icon,
