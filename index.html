@@ -246,6 +246,9 @@
                     <button type="button" id="nav-timetable" onclick="setMainView('timetable')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
                         <span class="flex items-center gap-2.5"><i class="ph-duotone ph-clock-afternoon text-lg"></i> Orario Scolastico</span>
                     </button>
+                    <button type="button" id="nav-grades" onclick="setMainView('grades')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+                        <span class="flex items-center gap-2.5"><i class="ph-duotone ph-chart-line-up text-lg"></i> Voti &amp; Media</span>
+                    </button>
                     <button type="button" id="nav-chat" onclick="setMainView('chat')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
                         <span class="flex items-center gap-2.5"><i class="ph-duotone ph-chats-circle text-lg"></i> Chat di Classe</span>
                         <span id="nav-chat-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Live</span>
@@ -368,6 +371,56 @@
                 <div id="timetable-board"></div>
             </section>
 
+            <!-- VISTA 3B: VOTI & MEDIA CON GRAFICO -->
+            <section id="view-grades" class="hidden p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-5 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Voti &amp; Media</h1>
+                        <p class="text-xs sm:text-sm text-slate-500">Monitora la tua media scolastica e l'andamento dei voti per materia</p>
+                    </div>
+                    <button type="button" onclick="openGradeModal()" class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="ph-bold ph-plus"></i> Aggiungi Voto
+                    </button>
+                </div>
+
+                <!-- Riepilogo KPI Media Generale, Totale Voti e Miglior Materia -->
+                <div id="grades-kpi-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+
+                <!-- Filtro rapido per materia -->
+                <div id="grades-subject-filters" class="flex items-center gap-2 overflow-x-auto pb-1"></div>
+
+                <!-- Grafico Andamento Voti + Medie per Materia -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 space-y-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <h3 class="font-display font-extrabold text-base sm:text-lg text-slate-900">Grafico Andamento Voti</h3>
+                                <p id="grades-chart-subtitle" class="text-xs text-slate-500">Evoluzione cronologica delle valutazioni</p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-[11px] font-bold text-slate-600">Sufficienza: 6.0</span>
+                        </div>
+                        <div id="grades-chart-container" class="w-full overflow-x-auto"></div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 space-y-4">
+                        <div>
+                            <h3 class="font-display font-extrabold text-base text-slate-900">Media per Materia</h3>
+                            <p class="text-xs text-slate-500">Rendimento suddiviso nelle cartelle</p>
+                        </div>
+                        <div id="grades-subject-averages" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Elenco Storico Voti -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-display font-extrabold text-base sm:text-lg text-slate-900">Registro Voti</h3>
+                        <span id="grades-list-count" class="text-xs font-bold text-slate-400">0 voti</span>
+                    </div>
+                    <div id="grades-history-list" class="space-y-2.5"></div>
+                </div>
+            </section>
+
             <!-- VISTA 4: CHAT DI CLASSE -->
             <section id="view-chat" class="hidden p-4 sm:p-6 max-w-5xl w-full mx-auto flex-1 flex flex-col fade-in">
                 <div id="chat-no-class-box" class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-xl mx-auto my-auto space-y-4">
@@ -459,7 +512,7 @@
         </main>
 
         <!-- BOTTOM NAV MOBILE -->
-        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-slate-200 grid grid-cols-4 px-2 py-1.5">
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-slate-200 grid grid-cols-5 px-1 py-1.5">
             <button type="button" id="mnav-folders" onclick="setMainView('folders')" class="flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer">
                 <i class="ph-duotone ph-folders text-xl"></i>
                 <span>Cartelle</span>
@@ -468,8 +521,12 @@
                 <i class="ph-duotone ph-clock-afternoon text-xl"></i>
                 <span>Orario</span>
             </button>
+            <button type="button" id="mnav-grades" onclick="setMainView('grades')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer">
+                <i class="ph-duotone ph-chart-line-up text-xl"></i>
+                <span>Voti</span>
+            </button>
             <button type="button" id="mnav-chat" onclick="setMainView('chat')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 relative cursor-pointer">
-                <span id="mnav-chat-dot" class="hidden w-2 h-2 rounded-full bg-rose-500 absolute top-1 right-6"></span>
+                <span id="mnav-chat-dot" class="hidden w-2 h-2 rounded-full bg-rose-500 absolute top-1 right-4"></span>
                 <i class="ph-duotone ph-chats-circle text-xl"></i>
                 <span>Chat</span>
             </button>
@@ -484,21 +541,19 @@
     <!-- MODALE 1: PRESENTAZIONE INIZIALE A 4 SLIDE CON FRECCE AVANTI/INDIETRO -->
     <!-- ===================================================================== -->
     <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-8 flex flex-col justify-between min-h-[420px] fade-in">
-            <div class="flex items-center justify-between">
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden fade-in flex flex-col">
+            <div class="px-6 pt-5 pb-3 flex items-center justify-between border-b border-slate-100">
                 <span id="onboarding-step-label" class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-extrabold">1 di 4</span>
                 <button type="button" onclick="closeOnboardingTour()" class="text-xs font-bold text-slate-400 hover:text-slate-700 cursor-pointer">Salta presentazione</button>
             </div>
-
-            <div id="onboarding-slide-content" class="py-6 text-center space-y-4"></div>
-
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+            <div id="onboarding-slide-content" class="p-6 sm:p-8 text-center space-y-5"></div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
+                <button type="button" id="onboarding-prev-btn" onclick="changeOnboardingSlide(-1)" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 disabled:opacity-40 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
                     <i class="ph-bold ph-arrow-left text-base"></i>
                     <span>Indietro</span>
                 </button>
-                <div id="onboarding-dots" class="flex items-center gap-1.5"></div>
-                <button type="button" onclick="changeOnboardingSlide(1)" class="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <div id="onboarding-dots" class="flex items-center gap-2"></div>
+                <button type="button" onclick="changeOnboardingSlide(1)" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <span id="onboarding-next-label">Avanti</span>
                     <i id="onboarding-next-icon" class="ph-bold ph-arrow-right text-base"></i>
                 </button>
@@ -507,40 +562,33 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 2: CREA / MODIFICA CARTELLA COLORATA                           -->
+    <!-- MODALE 2: NUOVA / MODIFICA CARTELLA COLORATA                          -->
     <!-- ===================================================================== -->
     <div id="folder-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
             <div class="flex items-center justify-between">
                 <h3 id="folder-modal-title" class="font-display text-lg font-extrabold text-slate-900">Nuova Cartella Colorata</h3>
                 <button type="button" onclick="closeFolderModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
-
             <form onsubmit="saveFolderForm(event)" class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia</label>
-                    <input type="text" id="folder-name-input" required placeholder="Es. Matematica, Storia, CAD..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
+                    <input type="text" id="folder-name-input" required placeholder="Es. Matematica, Storia, AutoCAD..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-bold outline-none">
                 </div>
-
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Colore Cartella</label>
                     <div id="folder-colors-picker" class="grid grid-cols-5 gap-2"></div>
                 </div>
-
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Icona Materia</label>
                     <div id="folder-icons-picker" class="grid grid-cols-6 gap-2"></div>
                 </div>
-
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Sottocartelle (separate da virgola)</label>
-                    <input type="text" id="folder-subfolders-input" placeholder="Generale, Formule, Verifiche" class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
+                    <input type="text" id="folder-subfolders-input" placeholder="Generale, Esercizi, Verifica" class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
                 </div>
-
                 <div class="flex items-center justify-between pt-2">
-                    <button type="button" id="delete-folder-btn" onclick="deleteCurrentEditingFolder()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
-                        Elimina
-                    </button>
+                    <button type="button" id="delete-folder-btn" onclick="deleteCurrentEditingFolder()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">Elimina</button>
                     <div class="flex items-center gap-2 ml-auto">
                         <button type="button" onclick="closeFolderModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva Cartella</button>
@@ -551,49 +599,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 3: EDITOR APPUNTO FORMATTATO                                   -->
-    <!-- ===================================================================== -->
-    <div id="note-editor-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="bg-white w-full max-w-3xl h-[88vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
-            <div class="px-4 sm:px-6 py-3.5 border-b border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                    <select id="note-folder-select" onchange="updateNoteSubfolderOptions()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
-                    <select id="note-subfolder-select" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 outline-none"></select>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <button type="button" id="note-pin-btn" onclick="toggleNotePin()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200 cursor-pointer" title="Fissa in alto">
-                        <i class="ph-fill ph-star text-base"></i>
-                    </button>
-                    <button type="button" id="note-delete-btn" onclick="deleteCurrentNote()" class="hidden p-2 rounded-xl text-rose-500 hover:bg-rose-50 cursor-pointer" title="Elimina">
-                        <i class="ph-bold ph-trash"></i>
-                    </button>
-                    <button type="button" onclick="saveNoteFromEditor()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">
-                        Salva Appunto
-                    </button>
-                    <button type="button" onclick="closeNoteEditor()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer">
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="px-4 sm:px-6 py-2 border-b border-slate-100 bg-white flex items-center gap-1.5 overflow-x-auto">
-                <button type="button" onclick="execFormat('formatBlock', 'H2')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold text-slate-700 cursor-pointer">Titolo</button>
-                <button type="button" onclick="execFormat('bold')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold text-slate-700 cursor-pointer">B</button>
-                <button type="button" onclick="execFormat('italic')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs italic font-bold text-slate-700 cursor-pointer">I</button>
-                <button type="button" onclick="execFormat('insertUnorderedList')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-bold text-slate-700 cursor-pointer">• Elenco</button>
-                <button type="button" onclick="execFormat('hiliteColor', '#fef08a')" class="px-2.5 py-1.5 rounded-lg bg-yellow-200 text-xs font-bold text-slate-800 cursor-pointer">Evidenzia</button>
-                <button type="button" onclick="insertFormulaBox()" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold cursor-pointer">+ Box Formula</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4">
-                <input type="text" id="note-title-input" placeholder="Titolo dell'appunto..." class="w-full font-display text-2xl sm:text-3xl font-extrabold text-slate-900 placeholder-slate-300 outline-none">
-                <div id="note-editor-area" contenteditable="true" data-placeholder="Inizia a scrivere qui i tuoi appunti..." class="min-h-[300px] text-sm sm:text-base text-slate-700 leading-relaxed outline-none"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- MODALE 4: AGGIUNGI / MODIFICA ORA DI LEZIONE                          -->
+    <!-- MODALE 3: AGGIUNGI / MODIFICA ORA DI LEZIONE                          -->
     <!-- ===================================================================== -->
     <div id="timetable-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
@@ -601,11 +607,10 @@
                 <h3 id="timetable-modal-title" class="font-display text-lg font-extrabold text-slate-900">Aggiungi Ora di Lezione</h3>
                 <button type="button" onclick="closeTimetableModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
-
             <form onsubmit="saveTimetableSlot(event)" class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Giorno della Settimana</label>
-                    <select id="tt-day-input" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-bold text-slate-800 outline-none">
+                    <select id="tt-day-input" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
                         <option value="1">Lunedì</option>
                         <option value="2">Martedì</option>
                         <option value="3">Mercoledì</option>
@@ -614,37 +619,30 @@
                         <option value="6">Sabato</option>
                     </select>
                 </div>
-
                 <div class="ios-datetime-grid">
                     <div class="ios-datetime-col space-y-1.5">
                         <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Inizio</label>
-                        <input type="time" id="tt-start-input" required value="08:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-sm font-bold text-slate-800 outline-none">
+                        <input type="time" id="tt-start-input" required value="08:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
                     </div>
                     <div class="ios-datetime-col space-y-1.5">
                         <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Fine</label>
-                        <input type="time" id="tt-end-input" required value="09:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-sm font-bold text-slate-800 outline-none">
+                        <input type="time" id="tt-end-input" required value="09:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
                     </div>
                 </div>
-
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-500 uppercase">Cartella Materia Collegata</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">Collega a Cartella Materia</label>
                     <select id="tt-folder-input" onchange="handleTimetableFolderChange()" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none"></select>
                 </div>
-
                 <div id="tt-custom-subject-wrap" class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia</label>
-                    <input type="text" id="tt-subject-input" placeholder="Es. Educazione Fisica, Inglese..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-semibold outline-none">
+                    <input type="text" id="tt-subject-input" placeholder="Es. Educazione Fisica..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-semibold outline-none">
                 </div>
-
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Aula / Laboratorio (opzionale)</label>
-                    <input type="text" id="tt-room-input" placeholder="Es. Aula 14, Lab. Informatica..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
+                    <input type="text" id="tt-room-input" placeholder="Es. Aula 14, Lab. CAD..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
                 </div>
-
                 <div class="flex items-center justify-between pt-2">
-                    <button type="button" id="tt-delete-btn" onclick="deleteCurrentTimetableSlot()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
-                        Elimina
-                    </button>
+                    <button type="button" id="tt-delete-btn" onclick="deleteCurrentTimetableSlot()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">Elimina</button>
                     <div class="flex items-center gap-2 ml-auto">
                         <button type="button" onclick="closeTimetableModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva Ora</button>
@@ -655,81 +653,102 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 5: VISUALIZZATORE INTEGRATO FULL-SCREEN FILE IMPORTATI         -->
+    <!-- MODALE 4: VISUALIZZATORE UNIVERSALE FILE INTEGRATO                    -->
     <!-- ===================================================================== -->
-    <div id="file-viewer-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-4">
-        <div class="bg-white w-full max-w-5xl h-[92vh] rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden fade-in">
-            <div class="px-4 sm:px-6 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-2 flex-wrap">
-                <div class="flex items-center gap-2.5 min-w-0">
-                    <span id="file-viewer-badge" class="px-3 py-1 rounded-xl text-xs font-extrabold border bg-indigo-100 text-indigo-700 shrink-0">FILE</span>
+    <div id="file-viewer-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-5">
+        <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] fade-in">
+            <div class="px-4 sm:px-6 py-4 border-b border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span id="file-viewer-badge" class="px-3 py-1 rounded-xl text-xs font-extrabold border bg-indigo-100 text-indigo-800 shrink-0">FILE</span>
                     <div class="min-w-0">
                         <h3 id="file-viewer-title" class="font-display font-extrabold text-sm sm:text-base text-slate-900 truncate">Documento</h3>
-                        <p id="file-viewer-subtitle" class="text-[11px] font-medium text-slate-400 truncate">Visualizzatore integrato</p>
+                        <p id="file-viewer-subtitle" class="text-[11px] text-slate-500 truncate">Anteprima integrata</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <button type="button" id="file-viewer-external-btn" onclick="openCurrentFileInNewTab()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                        <i class="ph-bold ph-arrow-square-out"></i>
-                        <span>Apri a Schermo Intero</span>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" id="file-viewer-share-btn" onclick="shareCurrentFileToChat()" class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold cursor-pointer">Invia in Chat</button>
+                    <button type="button" onclick="openCurrentFileInNewTab()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer" title="Apri a schermo intero">
+                        <i class="ph-bold ph-arrows-out"></i>
                     </button>
-                    <button type="button" id="file-viewer-share-btn" onclick="shareCurrentFileToChat()" class="hidden px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
-                        <i class="ph-bold ph-paper-plane-tilt"></i>
-                        <span class="hidden md:inline">Invia in Chat</span>
-                    </button>
-                    <button type="button" onclick="downloadCurrentViewedFile()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                    <button type="button" onclick="downloadCurrentViewedFile()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer">
                         <i class="ph-bold ph-download-simple"></i>
                         <span class="hidden sm:inline">Scarica</span>
                     </button>
-                    <button type="button" id="file-viewer-delete-btn" onclick="deleteCurrentViewedFile()" class="p-2 rounded-xl text-rose-500 hover:bg-rose-50 cursor-pointer" title="Elimina file">
+                    <button type="button" id="file-viewer-delete-btn" onclick="deleteCurrentViewedFile()" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer" title="Elimina file">
                         <i class="ph-bold ph-trash"></i>
                     </button>
-                    <button type="button" onclick="closeFileViewerModal()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer" title="Chiudi">
-                        <i class="ph-bold ph-x text-base"></i>
+                    <button type="button" onclick="closeFileViewerModal()" class="p-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 cursor-pointer">
+                        <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
             </div>
-
-            <!-- Barra strumenti contestuale (Zoom Immagini / Fogli Excel) -->
-            <div id="file-viewer-toolbar" class="hidden px-4 sm:px-6 py-2 border-b border-slate-200/80 bg-white flex items-center justify-between gap-2 overflow-x-auto"></div>
-
-            <!-- Area Contenuto Reale del File -->
-            <div id="file-viewer-body" class="flex-1 overflow-auto p-3 sm:p-6 bg-slate-100/70 flex flex-col"></div>
-
-            <div id="file-viewer-notes-bar" class="px-4 sm:px-6 py-3 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center gap-2">
-                <label class="text-xs font-bold text-slate-500 shrink-0">Nota sul file:</label>
-                <input type="text" id="file-viewer-note-input" oninput="saveFileCustomNote(this.value)" placeholder="Aggiungi un promemoria o descrizione..." class="flex-1 px-3.5 py-2 rounded-xl bg-slate-100/80 focus:bg-white border border-transparent focus:border-indigo-300 text-xs font-medium outline-none">
+            <div id="file-viewer-toolbar" class="hidden px-4 sm:px-6 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between gap-2 overflow-x-auto"></div>
+            <div id="file-viewer-body" class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/70 flex flex-col"></div>
+            <div id="file-viewer-notes-bar" class="px-4 sm:px-6 py-3 bg-white border-t border-slate-100 flex items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-400 shrink-0">Nota sul file:</span>
+                <input type="text" id="file-viewer-note-input" oninput="saveFileCustomNote(this.value)" placeholder="Aggiungi un promemoria rapido su questo file..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-medium outline-none">
             </div>
         </div>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 6: GESTIONE CLASSI (CREA CLASSE O ENTRA CON CODICE)            -->
+    <!-- MODALE 5: EDITOR APPUNTI FORMATTATO                                   -->
+    <!-- ===================================================================== -->
+    <div id="note-editor-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] fade-in">
+            <div class="px-4 sm:px-6 py-3.5 border-b border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <select id="note-folder-select" onchange="updateNoteSubfolderOptions()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
+                    <select id="note-subfolder-select" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 outline-none"></select>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="note-pin-btn" onclick="toggleNotePin()" class="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-500 cursor-pointer" title="Fissa in alto">
+                        <i class="ph-fill ph-star"></i>
+                    </button>
+                    <button type="button" id="note-delete-btn" onclick="deleteCurrentNote()" class="hidden p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer" title="Elimina appunto">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                    <button type="button" onclick="saveNoteFromEditor()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">Salva Appunto</button>
+                    <button type="button" onclick="closeNoteEditor()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-200/70 cursor-pointer"><i class="ph-bold ph-x"></i></button>
+                </div>
+            </div>
+            <div class="px-4 sm:px-6 py-2 border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto bg-white">
+                <button type="button" onclick="execFormat('bold')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-extrabold cursor-pointer">B</button>
+                <button type="button" onclick="execFormat('italic')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs italic font-bold cursor-pointer">I</button>
+                <button type="button" onclick="execFormat('formatBlock', 'H2')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-bold cursor-pointer">Titolo</button>
+                <button type="button" onclick="execFormat('insertUnorderedList')" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-xs font-bold cursor-pointer">• Elenco</button>
+                <button type="button" onclick="execFormat('hiliteColor', '#fef08a')" class="px-2.5 py-1.5 rounded-lg bg-amber-100 text-amber-900 text-xs font-bold cursor-pointer">Evidenzia</button>
+                <button type="button" onclick="insertFormulaBox()" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold cursor-pointer">+ Box Formula</button>
+            </div>
+            <div class="p-5 sm:p-7 flex-1 overflow-y-auto space-y-4">
+                <input type="text" id="note-title-input" placeholder="Titolo dell'appunto..." class="w-full font-display text-xl sm:text-2xl font-extrabold text-slate-900 placeholder-slate-300 outline-none">
+                <div id="note-editor-area" contenteditable="true" data-placeholder="Scrivi qui i tuoi appunti, schemi o riassunti..." class="min-h-[240px] text-sm sm:text-base text-slate-700 leading-relaxed outline-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODALE 6: GESTIONE CLASSE & CODICE INVITO                             -->
     <!-- ===================================================================== -->
     <div id="class-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5">
             <div class="flex items-center justify-between">
-                <h3 class="font-display text-lg font-extrabold text-slate-900">Spazi &amp; Classi Condivise</h3>
+                <h3 class="font-display text-lg font-extrabold text-slate-900">Spazio &amp; Classi Condivise</h3>
                 <button type="button" onclick="closeClassModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
-
-            <div class="space-y-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Seleziona Spazio</span>
-                <div id="class-switcher-list" class="space-y-2"></div>
-            </div>
-
-            <form onsubmit="createNewClass(event)" class="pt-3 border-t border-slate-100 space-y-2.5">
-                <label class="text-xs font-bold text-slate-700 block">Crea una Nuova Classe (genera codice invito)</label>
+            <div id="class-switcher-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            <form onsubmit="createNewClass(event)" class="pt-3 border-t border-slate-100 space-y-2">
+                <label class="text-[11px] font-extrabold uppercase text-slate-400">Crea una Nuova Classe</label>
                 <div class="flex gap-2">
-                    <input type="text" id="new-class-name-input" required placeholder="Es. 5ª A Informatica" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold outline-none focus:bg-white focus:border-indigo-500">
+                    <input type="text" id="new-class-name-input" required placeholder="Es. 5ª A Informatica" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 text-xs font-bold outline-none">
                     <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 cursor-pointer">Crea</button>
                 </div>
             </form>
-
-            <form onsubmit="joinClassByCode(event)" class="pt-3 border-t border-slate-100 space-y-2.5">
-                <label class="text-xs font-bold text-slate-700 block">Entra con Codice Classe (es. <span class="font-mono text-indigo-600">CLS-2026</span>)</label>
+            <form onsubmit="joinClassByCode(event)" class="pt-3 border-t border-slate-100 space-y-2">
+                <label class="text-[11px] font-extrabold uppercase text-slate-400">Entra con Codice Invito</label>
                 <div class="flex gap-2">
-                    <input type="text" id="join-class-code-input" required placeholder="CLS-XXXX" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 font-mono uppercase text-xs font-bold outline-none focus:bg-white focus:border-indigo-500">
-                    <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0 cursor-pointer">Entra</button>
+                    <input type="text" id="join-class-code-input" required placeholder="Es. CLS-2026" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 font-mono uppercase text-xs font-bold outline-none">
+                    <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 cursor-pointer">Entra</button>
                 </div>
             </form>
         </div>
@@ -739,89 +758,150 @@
     <!-- MODALE 7: ALLEGA APPUNTO O FILE IN CHAT                               -->
     <!-- ===================================================================== -->
     <div id="attach-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[85vh] flex flex-col">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
             <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="font-display text-lg font-extrabold text-slate-900">Allega Appunto o File in Chat</h3>
-                    <p class="text-xs text-slate-500">Condividi appunti scritti o file (Word, Excel, Canva, AutoCAD, PDF...)</p>
-                </div>
+                <h3 class="font-display text-lg font-extrabold text-slate-900">Allega in Chat</h3>
                 <button type="button" onclick="closeAttachModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
-            <div id="attach-items-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+            <div id="attach-items-list" class="space-y-2 max-h-72 overflow-y-auto"></div>
         </div>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 8: VISUALIZZA APPUNTO CONDIVISO IN CHAT                        -->
+    <!-- MODALE 8: ANTEPRIMA APPUNTO CONDIVISO IN CHAT                         -->
     <!-- ===================================================================== -->
     <div id="shared-note-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4 max-h-[85vh] flex flex-col">
-            <div class="flex items-center justify-between gap-2">
-                <span id="shared-note-badge" class="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-100 text-indigo-700">Materia</span>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="importSharedNoteToWorkspace()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">
-                        Salva nelle mie Cartelle
-                    </button>
-                    <button type="button" onclick="closeSharedNoteModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
-                </div>
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
+            <div class="flex items-center justify-between">
+                <span id="shared-note-badge" class="px-3 py-1 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-extrabold">Materia</span>
+                <button type="button" onclick="closeSharedNoteModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
             <h3 id="shared-note-title" class="font-display text-xl font-extrabold text-slate-900">Titolo</h3>
-            <div id="shared-note-body" class="flex-1 overflow-y-auto text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-3"></div>
+            <div id="shared-note-body" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-700 max-h-64 overflow-y-auto"></div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeSharedNoteModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Chiudi</button>
+                <button type="button" onclick="importSharedNoteToWorkspace()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">Salva nelle Mie Cartelle</button>
+            </div>
         </div>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODALE 9: NUOVO EVENTO SCOLASTICO (DATA E ORA CENTRATI SU iOS/MOBILE) -->
+    <!-- MODALE 9: NUOVO EVENTO SCOLASTICO (DATA E ORA CENTRATI SU IOS)        -->
     <!-- ===================================================================== -->
     <div id="event-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-5">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
             <div class="flex items-center justify-between">
                 <h3 class="font-display text-lg font-extrabold text-slate-900">Nuovo Evento Scolastico</h3>
                 <button type="button" onclick="closeEventModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
             </div>
-
             <form onsubmit="saveCalendarEvent(event)" class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold text-slate-500 uppercase">Titolo Evento</label>
-                    <input type="text" id="event-title-input" required placeholder="Es. Verifica di Matematica..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-semibold outline-none">
+                    <input type="text" id="event-title-input" required placeholder="Es. Verifica di Matematica..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-semibold outline-none">
                 </div>
-
-                <!-- DATA E ORA PERFETTAMENTE CENTRATI E CONTENUTI SU IPHONE -->
                 <div class="ios-datetime-grid">
                     <div class="ios-datetime-col space-y-1.5">
                         <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Data</label>
-                        <input type="date" id="event-date-input" required class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                        <input type="date" id="event-date-input" required class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
                     </div>
                     <div class="ios-datetime-col space-y-1.5">
                         <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Ora</label>
-                        <input type="time" id="event-time-input" required class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 focus:bg-white focus:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                        <input type="time" id="event-time-input" required value="09:00" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
                     </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Materia</label>
+                        <select id="event-folder-input" class="w-full px-3 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Tipologia</label>
+                        <select id="event-type-input" class="w-full px-3 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-bold text-slate-800 outline-none">
+                            <option value="Verifica">📝 Verifica</option>
+                            <option value="Interrogazione">🗣️ Interrogazione</option>
+                            <option value="Consegna">📁 Consegna</option>
+                            <option value="Evento">📅 Evento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Note</label>
+                    <input type="text" id="event-notes-input" placeholder="Argomenti..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeEventModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODALE 10: AGGIUNGI / MODIFICA VOTO SCOLASTICO                        -->
+    <!-- ===================================================================== -->
+    <div id="grade-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 id="grade-modal-title" class="font-display text-lg font-extrabold text-slate-900">Aggiungi Voto</h3>
+                <button type="button" onclick="closeGradeModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
+            </div>
+
+            <form onsubmit="saveGradeForm(event)" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Materia</label>
+                    <select id="grade-folder-input" onchange="handleGradeFolderChange()" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none"></select>
+                </div>
+
+                <div id="grade-custom-subject-wrap" class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia</label>
+                    <input type="text" id="grade-subject-input" placeholder="Es. Storia, Inglese..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-semibold outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1.5 min-w-0">
-                        <label class="text-xs font-bold text-slate-500 uppercase">Materia</label>
-                        <select id="event-folder-input" class="w-full px-3 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-bold text-slate-800 outline-none"></select>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Voto (es. 7.5, 8+, 6½)</label>
+                        <input type="text" id="grade-value-input" required placeholder="8.0" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-base font-extrabold text-center text-slate-900 outline-none">
                     </div>
-                    <div class="space-y-1.5 min-w-0">
+                    <div class="space-y-1.5">
                         <label class="text-xs font-bold text-slate-500 uppercase">Tipologia</label>
-                        <select id="event-type-input" class="w-full px-3 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-bold text-slate-800 outline-none">
-                            <option value="Verifica">📝 Verifica</option>
-                            <option value="Interrogazione">🗣️ Interrogazione</option>
-                            <option value="Consegna">📎 Consegna File</option>
-                            <option value="Gita / Evento">🎒 Evento</option>
+                        <select id="grade-type-input" class="w-full px-3 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-bold text-slate-800 outline-none">
+                            <option value="Scritto">📝 Scritto</option>
+                            <option value="Orale">🗣️ Orale</option>
+                            <option value="Pratico">💻 Pratico</option>
+                            <option value="Test">⚡ Test</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ios-datetime-grid">
+                    <div class="ios-datetime-col space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Data</label>
+                        <input type="date" id="grade-date-input" required class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                    </div>
+                    <div class="ios-datetime-col space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Peso (%)</label>
+                        <select id="grade-weight-input" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                            <option value="1">100% (Normale)</option>
+                            <option value="0.5">50% (Mezzo)</option>
+                            <option value="1.5">150% (Verifica)</option>
+                            <option value="2">200% (Doppio)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-500 uppercase">Note / Argomenti</label>
-                    <input type="text" id="event-notes-input" placeholder="Capitoli o dettagli..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-medium outline-none">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Argomento / Note (opzionale)</label>
+                    <input type="text" id="grade-note-input" placeholder="Es. Verifica sulle derivate..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeEventModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
-                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva Evento</button>
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" id="grade-delete-btn" onclick="deleteCurrentEditingGrade()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
+                        Elimina
+                    </button>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" onclick="closeGradeModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva Voto</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1000,7 +1080,8 @@
                     folders: [],
                     notes: [],
                     events: [],
-                    timetable: []
+                    timetable: [],
+                    grades: []
                 },
                 currentView: 'folders',
                 selectedFolderId: null,
@@ -1011,6 +1092,8 @@
                 selectedFolderEmoji: '📐',
                 editingTimetableId: null,
                 selectedTimetableDay: (new Date().getDay() >= 1 && new Date().getDay() <= 6) ? new Date().getDay() : 1,
+                editingGradeId: null,
+                selectedGradeFilter: 'ALL',
                 editingNoteId: null,
                 editingNotePinned: false,
                 viewingFileItem: null,
@@ -1064,6 +1147,7 @@
                             { id: 'demo-tt1', day: 1, start: '08:00', end: '09:00', folderId: 'demo-f1', subject: 'Matematica', room: 'Aula 12' },
                             { id: 'demo-tt2', day: 1, start: '09:00', end: '11:00', folderId: 'demo-f2', subject: 'Disegno & CAD', room: 'Lab. AutoCAD' }
                         ],
+                        grades: [],
                         messages: [
                             {
                                 id: 'demo-m1',
@@ -1090,7 +1174,8 @@
                                 folders: parsed.personalData.folders || [],
                                 notes: parsed.personalData.notes || [],
                                 events: parsed.personalData.events || [],
-                                timetable: parsed.personalData.timetable || []
+                                timetable: parsed.personalData.timetable || [],
+                                grades: parsed.personalData.grades || []
                             };
                         }
                         if (parsed.classes) state.classes = parsed.classes;
@@ -1172,10 +1257,12 @@
                 if (state.activeClassId && state.classes[state.activeClassId]) {
                     const cls = state.classes[state.activeClassId];
                     if (!cls.timetable) cls.timetable = [];
+                    if (!cls.grades) cls.grades = [];
                     return cls;
                 }
                 state.activeClassId = null;
                 if (!state.personalData.timetable) state.personalData.timetable = [];
+                if (!state.personalData.grades) state.personalData.grades = [];
                 return state.personalData;
             }
 
@@ -1226,7 +1313,7 @@
                 const cleanName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
 
                 state.user = { id: 'usr-' + Date.now(), name: cleanName, email: email };
-                state.personalData = { folders: [], notes: [], events: [], timetable: [] };
+                state.personalData = { folders: [], notes: [], events: [], timetable: [], grades: [] };
                 state.activeClassId = null;
                 state.hasSeenOnboarding = false;
                 saveStorage(false);
@@ -1237,7 +1324,7 @@
 
             window.handleGuestLogin = function () {
                 state.user = { id: 'guest-' + Date.now(), name: 'Studente Ospite', email: 'ospite@studyflow.it' };
-                state.personalData = { folders: [], notes: [], events: [], timetable: [] };
+                state.personalData = { folders: [], notes: [], events: [], timetable: [], grades: [] };
                 state.activeClassId = null;
                 state.hasSeenOnboarding = false;
                 saveStorage(false);
@@ -1335,10 +1422,7 @@
 
             window.setMainView = function (view) {
                 state.currentView = view;
-                if (view === 'chat') state.unreadChatCount = 0;
-                toggleMobileSidebar(false);
-
-                ['view-folders', 'view-folder-detail', 'view-timetable', 'view-chat', 'view-calendar'].forEach(id => {
+                ['view-folders', 'view-folder-detail', 'view-timetable', 'view-grades', 'view-chat', 'view-calendar'].forEach(id => {
                     document.getElementById(id).classList.add('hidden');
                 });
 
@@ -1347,6 +1431,7 @@
 
                 document.getElementById('nav-folders').className = (view === 'folders' || view === 'folder-detail') ? activeNav : idleNav;
                 document.getElementById('nav-timetable').className = view === 'timetable' ? activeNav : idleNav;
+                document.getElementById('nav-grades').className = view === 'grades' ? activeNav : idleNav;
                 document.getElementById('nav-chat').className = view === 'chat' ? activeNav : idleNav;
                 document.getElementById('nav-calendar').className = view === 'calendar' ? activeNav : idleNav;
 
@@ -1355,12 +1440,14 @@
                 const mIdle = 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer';
                 document.getElementById('mnav-folders').className = (view === 'folders' || view === 'folder-detail') ? mActive : mIdle;
                 document.getElementById('mnav-timetable').className = view === 'timetable' ? mActive : mIdle;
+                document.getElementById('mnav-grades').className = view === 'grades' ? mActive : mIdle;
                 document.getElementById('mnav-chat').className = view === 'chat' ? mActive + ' relative' : mIdle + ' relative';
                 document.getElementById('mnav-calendar').className = view === 'calendar' ? mActive : mIdle;
 
                 if (view === 'folders') document.getElementById('view-folders').classList.remove('hidden');
                 if (view === 'folder-detail') document.getElementById('view-folder-detail').classList.remove('hidden');
                 if (view === 'timetable') document.getElementById('view-timetable').classList.remove('hidden');
+                if (view === 'grades') document.getElementById('view-grades').classList.remove('hidden');
                 if (view === 'chat') document.getElementById('view-chat').classList.remove('hidden');
                 if (view === 'calendar') document.getElementById('view-calendar').classList.remove('hidden');
 
@@ -1429,6 +1516,7 @@
                 if (state.currentView === 'folders') renderFoldersDashboard();
                 if (state.currentView === 'folder-detail') renderFolderDetailView();
                 if (state.currentView === 'timetable') renderTimetableView();
+                if (state.currentView === 'grades') renderGradesView();
                 if (state.currentView === 'chat') renderChatView();
                 if (state.currentView === 'calendar') renderCalendarView();
             }
@@ -1929,6 +2017,388 @@
                 closeTimetableModal();
                 renderAll();
                 showToast('Ora rimossa dall’orario');
+            };
+
+            // --- VISTA D: VOTI & MEDIA SCOLASTICA CON GRAFICO SVG INTERATTIVO ---
+            function parseItalianGradeValue(rawStr) {
+                const s = String(rawStr || '').trim().replace(',', '.').toLowerCase();
+                if (!s) return NaN;
+                if (s.endsWith('½')) {
+                    const base = parseFloat(s.slice(0, -1));
+                    return isNaN(base) ? NaN : base + 0.5;
+                }
+                if (s.endsWith('+')) {
+                    const base = parseFloat(s.slice(0, -1));
+                    return isNaN(base) ? NaN : base + 0.25;
+                }
+                if (s.endsWith('-')) {
+                    const base = parseFloat(s.slice(0, -1));
+                    return isNaN(base) ? NaN : base - 0.25;
+                }
+                return parseFloat(s);
+            }
+
+            function computeWeightedAverage(gradesList) {
+                if (!gradesList || gradesList.length === 0) return null;
+                let sum = 0;
+                let totalWeight = 0;
+                gradesList.forEach(g => {
+                    const val = Number(g.numericValue);
+                    const w = Number(g.weight) || 1;
+                    if (!isNaN(val)) {
+                        sum += val * w;
+                        totalWeight += w;
+                    }
+                });
+                return totalWeight > 0 ? (sum / totalWeight) : null;
+            }
+
+            function getGradeBadgeColors(val) {
+                if (val >= 7.5) return { bg: 'bg-emerald-100 text-emerald-800 border-emerald-200', dot: '#10b981', text: 'text-emerald-600' };
+                if (val >= 6.0) return { bg: 'bg-indigo-100 text-indigo-800 border-indigo-200', dot: '#4f46e5', text: 'text-indigo-600' };
+                if (val >= 5.5) return { bg: 'bg-amber-100 text-amber-800 border-amber-200', dot: '#f59e0b', text: 'text-amber-600' };
+                return { bg: 'bg-rose-100 text-rose-800 border-rose-200', dot: '#f43f5e', text: 'text-rose-600' };
+            }
+
+            function renderGradesView() {
+                const ws = getActiveWorkspace();
+                const allGrades = (ws.grades || []).slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+                // Costruisci elenco materie presenti tra cartelle e voti
+                const subjectMap = {};
+                ws.folders.forEach(f => {
+                    subjectMap[f.id] = { key: f.id, label: `${f.icon} ${f.name}`, name: f.name, color: f.color, icon: f.icon, grades: [] };
+                });
+                allGrades.forEach(g => {
+                    const k = g.folderId || ('sub_' + (g.subject || 'Materia').toLowerCase());
+                    if (!subjectMap[k]) {
+                        subjectMap[k] = { key: k, label: `📘 ${g.subject || 'Materia'}`, name: g.subject || 'Materia', color: 'indigo', icon: '📘', grades: [] };
+                    }
+                    subjectMap[k].grades.push(g);
+                });
+
+                const subjectsArr = Object.values(subjectMap);
+
+                // Filtri materia
+                const filtersEl = document.getElementById('grades-subject-filters');
+                filtersEl.innerHTML = [
+                    `<button type="button" onclick="selectGradeSubjectFilter('ALL')" class="px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${state.selectedGradeFilter === 'ALL' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">Tutte le Materie (${allGrades.length})</button>`,
+                    ...subjectsArr.filter(s => s.grades.length > 0).map(s => `
+                        <button type="button" onclick="selectGradeSubjectFilter('${escapeHtml(s.key)}')" class="px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${state.selectedGradeFilter === s.key ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                            ${escapeHtml(s.label)} (${s.grades.length})
+                        </button>
+                    `)
+                ].join('');
+
+                const filteredGrades = state.selectedGradeFilter === 'ALL'
+                    ? allGrades
+                    : allGrades.filter(g => {
+                        const k = g.folderId || ('sub_' + (g.subject || 'Materia').toLowerCase());
+                        return k === state.selectedGradeFilter;
+                    });
+
+                const avg = computeWeightedAverage(filteredGrades);
+                const avgText = avg !== null ? avg.toFixed(2) : '—';
+                const avgStatus = avg === null
+                    ? 'Nessun voto inserito'
+                    : (avg >= 6 ? 'Media sufficiente 👍' : 'Sotto la sufficienza ⚠️');
+
+                // Calcola miglior materia
+                let bestSub = null;
+                subjectsArr.forEach(s => {
+                    const sAvg = computeWeightedAverage(s.grades);
+                    if (sAvg !== null && (!bestSub || sAvg > bestSub.avg)) {
+                        bestSub = { label: s.label, avg: sAvg };
+                    }
+                });
+
+                // KPI Cards
+                document.getElementById('grades-kpi-grid').innerHTML = `
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 flex items-center justify-between gap-3 shadow-2xs">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Media ${state.selectedGradeFilter === 'ALL' ? 'Generale' : 'Materia'}</span>
+                            <p class="font-display text-3xl font-extrabold ${avg === null ? 'text-slate-400' : (avg >= 6 ? 'text-emerald-600' : 'text-rose-600')} mt-1">${avgText}</p>
+                            <span class="text-xs font-semibold text-slate-500">${avgStatus}</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shrink-0">
+                            <i class="ph-duotone ph-chart-line-up"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 flex items-center justify-between gap-3 shadow-2xs">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Voti Registrati</span>
+                            <p class="font-display text-3xl font-extrabold text-slate-900 mt-1">${filteredGrades.length}</p>
+                            <span class="text-xs font-semibold text-slate-500">${filteredGrades.filter(g => g.numericValue >= 6).length} sufficienti</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shrink-0">
+                            <i class="ph-duotone ph-exam"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 flex items-center justify-between gap-3 shadow-2xs">
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Punto di Forza</span>
+                            <p class="font-display text-lg font-extrabold text-slate-900 truncate mt-1">${bestSub ? escapeHtml(bestSub.label) : '—'}</p>
+                            <span class="text-xs font-semibold text-indigo-600">${bestSub ? `Media ${bestSub.avg.toFixed(2)}` : 'Aggiungi i tuoi voti'}</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-2xl shrink-0">
+                            <i class="ph-duotone ph-trophy"></i>
+                        </div>
+                    </div>
+                `;
+
+                // Grafico SVG Andamento Voti
+                renderGradesSvgChart(filteredGrades);
+
+                // Barre Medie per Materia
+                const subAvgEl = document.getElementById('grades-subject-averages');
+                const subjectsWithGrades = subjectsArr.filter(s => s.grades.length > 0);
+                if (subjectsWithGrades.length === 0) {
+                    subAvgEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-8 bg-slate-50 rounded-2xl">Nessuna media disponibile.</p>`;
+                } else {
+                    subAvgEl.innerHTML = subjectsWithGrades.map(s => {
+                        const sAvg = computeWeightedAverage(s.grades) || 0;
+                        const pct = Math.min(100, Math.max(5, (sAvg / 10) * 100));
+                        const theme = COLOR_THEMES[s.color] || COLOR_THEMES.indigo;
+                        return `
+                            <div onclick="selectGradeSubjectFilter('${escapeHtml(s.key)}')" class="p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-100 space-y-1.5 cursor-pointer transition-colors">
+                                <div class="flex items-center justify-between text-xs font-bold">
+                                    <span class="text-slate-800 truncate">${escapeHtml(s.label)}</span>
+                                    <span class="${sAvg >= 6 ? 'text-emerald-600' : 'text-rose-600'} font-extrabold">${sAvg.toFixed(2)}</span>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                                    <div class="h-full rounded-full ${theme.bar}" style="width: ${pct}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                // Registro Storico Voti
+                document.getElementById('grades-list-count').textContent = `${filteredGrades.length} voti`;
+                const listEl = document.getElementById('grades-history-list');
+                if (filteredGrades.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="text-center py-8 space-y-3">
+                            <p class="text-xs sm:text-sm text-slate-500">Non hai ancora inserito nessun voto. Aggiungi il primo per vedere la media e il grafico!</p>
+                            <button type="button" onclick="openGradeModal()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer">
+                                <i class="ph-bold ph-plus"></i> Inserisci Primo Voto
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    const descList = filteredGrades.slice().reverse();
+                    listEl.innerHTML = descList.map(g => {
+                        const folder = ws.folders.find(f => f.id === g.folderId);
+                        const subLabel = folder ? `${folder.icon} ${folder.name}` : `📘 ${g.subject || 'Materia'}`;
+                        const badgeStyle = getGradeBadgeColors(g.numericValue);
+                        return `
+                            <div onclick="openGradeModal('${g.id}')" class="p-3.5 rounded-2xl border border-slate-200/80 hover:border-indigo-300 bg-slate-50/50 hover:bg-white flex items-center justify-between gap-3 cursor-pointer transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-12 h-12 rounded-2xl border ${badgeStyle.bg} flex items-center justify-center font-display font-extrabold text-base shrink-0">
+                                        ${escapeHtml(g.displayValue || String(g.numericValue))}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h4 class="font-display font-bold text-sm text-slate-900 truncate">${escapeHtml(subLabel)}</h4>
+                                            <span class="px-2 py-0.5 rounded-md bg-slate-200/70 text-[10px] font-bold text-slate-700">${escapeHtml(g.type || 'Scritto')}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 truncate mt-0.5">${g.note ? escapeHtml(g.note) + ' • ' : ''}${g.date || ''}</p>
+                                    </div>
+                                </div>
+                                <i class="ph-bold ph-pencil-simple text-slate-400 shrink-0"></i>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            function renderGradesSvgChart(gradesList) {
+                const container = document.getElementById('grades-chart-container');
+                if (!gradesList || gradesList.length === 0) {
+                    container.innerHTML = `
+                        <div class="h-56 rounded-2xl bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-4 space-y-2">
+                            <i class="ph-duotone ph-chart-line-up text-3xl text-slate-400"></i>
+                            <p class="text-xs font-semibold text-slate-500">Il grafico comparirà automaticamente non appena inserirai i tuoi voti.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const width = Math.max(520, gradesList.length * 72);
+                const height = 230;
+                const padLeft = 36;
+                const padRight = 24;
+                const padTop = 24;
+                const padBottom = 36;
+                const plotW = width - padLeft - padRight;
+                const plotH = height - padTop - padBottom;
+
+                const minGrade = 2;
+                const maxGrade = 10;
+                const yForGrade = (v) => {
+                    const clamped = Math.min(maxGrade, Math.max(minGrade, v));
+                    return padTop + plotH - ((clamped - minGrade) / (maxGrade - minGrade)) * plotH;
+                };
+
+                const points = gradesList.map((g, i) => {
+                    const x = gradesList.length === 1
+                        ? padLeft + plotW / 2
+                        : padLeft + (i / (gradesList.length - 1)) * plotW;
+                    const y = yForGrade(g.numericValue);
+                    return { x, y, grade: g };
+                });
+
+                const ySix = yForGrade(6);
+                const polylinePoints = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+                const areaPath = points.length > 1
+                    ? `M ${points[0].x.toFixed(1)},${(padTop + plotH).toFixed(1)} ` +
+                      points.map(p => `L ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') +
+                      ` L ${points[points.length - 1].x.toFixed(1)},${(padTop + plotH).toFixed(1)} Z`
+                    : '';
+
+                const gridLevels = [2, 4, 6, 8, 10];
+                const gridLinesSvg = gridLevels.map(lvl => {
+                    const y = yForGrade(lvl);
+                    const isSix = lvl === 6;
+                    return `
+                        <line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${width - padRight}" y2="${y.toFixed(1)}"
+                              stroke="${isSix ? '#f43f5e' : '#e2e8f0'}"
+                              stroke-width="${isSix ? '1.6' : '1'}"
+                              ${isSix ? 'stroke-dasharray="5,5"' : ''} />
+                        <text x="${padLeft - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10" font-weight="700" fill="${isSix ? '#e11d48' : '#94a3b8'}">${lvl}</text>
+                    `;
+                }).join('');
+
+                const dotsSvg = points.map(p => {
+                    const style = getGradeBadgeColors(p.grade.numericValue);
+                    const shortDate = (p.grade.date || '').slice(5).replace('-', '/');
+                    return `
+                        <g class="cursor-pointer" onclick="openGradeModal('${p.grade.id}')">
+                            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="7" fill="#ffffff" stroke="${style.dot}" stroke-width="3.5" />
+                            <rect x="${(p.x - 16).toFixed(1)}" y="${(p.y - 26).toFixed(1)}" width="32" height="18" rx="6" fill="#0f172a" />
+                            <text x="${p.x.toFixed(1)}" y="${(p.y - 14).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff">${escapeHtml(p.grade.displayValue || String(p.grade.numericValue))}</text>
+                            <text x="${p.x.toFixed(1)}" y="${(height - 12).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">${escapeHtml(shortDate)}</text>
+                        </g>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <svg viewBox="0 0 ${width} ${height}" class="w-full min-w-[480px] h-56 select-none">
+                        <defs>
+                            <linearGradient id="gradesAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.22" />
+                                <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.0" />
+                            </linearGradient>
+                        </defs>
+                        ${gridLinesSvg}
+                        ${areaPath ? `<path d="${areaPath}" fill="url(#gradesAreaGrad)" />` : ''}
+                        ${points.length > 1 ? `<polyline fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />` : ''}
+                        ${dotsSvg}
+                    </svg>
+                `;
+            }
+
+            window.selectGradeSubjectFilter = function (key) {
+                state.selectedGradeFilter = key;
+                renderGradesView();
+            };
+
+            window.openGradeModal = function (gradeId) {
+                const ws = getActiveWorkspace();
+                state.editingGradeId = gradeId || null;
+                const existing = gradeId ? (ws.grades || []).find(g => g.id === gradeId) : null;
+
+                document.getElementById('grade-modal-title').textContent = existing ? 'Modifica Voto' : 'Aggiungi Voto';
+                document.getElementById('grade-value-input').value = existing ? (existing.displayValue || existing.numericValue) : '';
+                document.getElementById('grade-type-input').value = existing ? (existing.type || 'Scritto') : 'Scritto';
+                document.getElementById('grade-date-input').value = existing ? existing.date : new Date().toISOString().split('T')[0];
+                document.getElementById('grade-weight-input').value = existing ? String(existing.weight || 1) : '1';
+                document.getElementById('grade-note-input').value = existing ? (existing.note || '') : '';
+                document.getElementById('grade-subject-input').value = existing ? (existing.subject || '') : '';
+
+                const fSel = document.getElementById('grade-folder-input');
+                fSel.innerHTML = [
+                    ...ws.folders.map(f => `<option value="${f.id}">${f.icon} ${escapeHtml(f.name)}</option>`),
+                    `<option value="">— Altra materia (scrivi nome) —</option>`
+                ].join('');
+                fSel.value = existing ? (existing.folderId || '') : (ws.folders[0] ? ws.folders[0].id : '');
+
+                handleGradeFolderChange();
+                document.getElementById('grade-delete-btn').classList.toggle('hidden', !existing);
+                document.getElementById('grade-modal').classList.remove('hidden');
+            };
+
+            window.handleGradeFolderChange = function () {
+                const fid = document.getElementById('grade-folder-input').value;
+                document.getElementById('grade-custom-subject-wrap').classList.toggle('hidden', !!fid);
+            };
+
+            window.closeGradeModal = function () {
+                document.getElementById('grade-modal').classList.add('hidden');
+            };
+
+            window.saveGradeForm = function (e) {
+                e.preventDefault();
+                const ws = getActiveWorkspace();
+                if (!ws.grades) ws.grades = [];
+
+                const rawVal = document.getElementById('grade-value-input').value.trim();
+                const numVal = parseItalianGradeValue(rawVal);
+                if (isNaN(numVal) || numVal < 1 || numVal > 10) {
+                    showToast('Inserisci un voto valido tra 1 e 10 (es. 7.5, 8+, 6½)');
+                    return;
+                }
+
+                const folderId = document.getElementById('grade-folder-input').value || null;
+                const customSub = document.getElementById('grade-subject-input').value.trim();
+                const linkedFolder = folderId ? ws.folders.find(f => f.id === folderId) : null;
+                const subjectName = linkedFolder ? linkedFolder.name : (customSub || 'Materia');
+                const type = document.getElementById('grade-type-input').value;
+                const date = document.getElementById('grade-date-input').value;
+                const weight = parseFloat(document.getElementById('grade-weight-input').value) || 1;
+                const note = document.getElementById('grade-note-input').value.trim();
+
+                if (state.editingGradeId) {
+                    const g = ws.grades.find(item => item.id === state.editingGradeId);
+                    if (g) {
+                        g.folderId = folderId;
+                        g.subject = subjectName;
+                        g.displayValue = rawVal;
+                        g.numericValue = numVal;
+                        g.type = type;
+                        g.date = date;
+                        g.weight = weight;
+                        g.note = note;
+                    }
+                    showToast('Voto aggiornato!');
+                } else {
+                    ws.grades.push({
+                        id: 'grd-' + Date.now(),
+                        folderId: folderId,
+                        subject: subjectName,
+                        displayValue: rawVal,
+                        numericValue: numVal,
+                        type: type,
+                        date: date,
+                        weight: weight,
+                        note: note
+                    });
+                    showToast(`Voto ${rawVal} aggiunto in ${subjectName}!`);
+                }
+
+                saveStorage(true);
+                closeGradeModal();
+                renderAll();
+            };
+
+            window.deleteCurrentEditingGrade = function () {
+                const ws = getActiveWorkspace();
+                if (!state.editingGradeId) return;
+                ws.grades = (ws.grades || []).filter(g => g.id !== state.editingGradeId);
+                saveStorage(true);
+                closeGradeModal();
+                renderAll();
+                showToast('Voto eliminato');
             };
 
             // --- GESTIONE CARTELLE COLORATE ---
@@ -2617,6 +3087,7 @@
                     notes: [],
                     events: [],
                     timetable: [],
+                    grades: [],
                     messages: [
                         {
                             id: 'msg-' + Date.now(),
@@ -2645,6 +3116,7 @@
                         notes: [],
                         events: [],
                         timetable: [],
+                        grades: [],
                         messages: []
                     };
                 }
