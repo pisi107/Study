@@ -1291,6 +1291,12 @@
         </div>
     </div>
 
+    <!-- TOAST NOTIFICA RAPIDA -->
+    <div id="toast" class="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-700/80 flex items-center gap-2.5 text-xs sm:text-sm font-bold transform translate-y-24 opacity-0 transition-all duration-200 pointer-events-none">
+        <i class="ph-fill ph-check-circle text-emerald-400 text-lg shrink-0"></i>
+        <span id="toast-msg">Operazione completata</span>
+    </div>
+
     <!-- ===================================================================== -->
     <!-- MOTORE JAVASCRIPT COMPLETO 100% LOCALE                                -->
     <!-- ===================================================================== -->
@@ -1595,7 +1601,9 @@
 
             function showToast(msg) {
                 const el = document.getElementById('toast');
-                document.getElementById('toast-msg').textContent = msg;
+                const msgEl = document.getElementById('toast-msg');
+                if (!el || !msgEl) return;
+                msgEl.textContent = msg;
                 el.classList.remove('translate-y-24', 'opacity-0');
                 clearTimeout(window.__toastTimer);
                 window.__toastTimer = setTimeout(() => {
@@ -2525,32 +2533,6 @@
                 saveStorage();
                 renderClassChatView();
                 if (savedAttachment) showToast('Appunto allegato e inviato alla classe!');
-            };
-
-            window.sendClassChatMessage = function (e) {
-                e.preventDefault();
-                const inp = document.getElementById('classchat-message-input');
-                const text = inp.value.trim();
-                if (!text) return;
-
-                ensureDefaultClassMessages();
-                const channel = document.getElementById('classchat-send-channel').value || 'Generale';
-                const now = new Date();
-                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-                state.data.classMessages.push({
-                    id: 'cmsg-' + Date.now(),
-                    roomCode: state.data.classRoomCode || '4A-LICEO',
-                    channel: channel,
-                    sender: state.studentName || 'Studente',
-                    text: text,
-                    time: timeStr,
-                    pinned: false
-                });
-
-                inp.value = '';
-                saveStorage();
-                renderClassChatView();
             };
 
             window.togglePinClassMessage = function (msgId) {
