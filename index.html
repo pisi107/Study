@@ -142,6 +142,22 @@
             font-weight: 700;
             color: #0f172a;
         }
+        /* Stile vero Diario Scolastico a righe e rilegatura centrale */
+        .diary-lined-paper {
+            background-color: #fffef9;
+            background-image: linear-gradient(to bottom, transparent 31px, #e2e8f0 32px);
+            background-size: 100% 32px;
+        }
+        .diary-margin-line {
+            border-left: 2px solid rgba(244, 63, 94, 0.35);
+        }
+        .diary-spiral-ring {
+            width: 24px;
+            height: 10px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #94a3b8 0%, #f1f5f9 45%, #64748b 100%);
+            box-shadow: 0 2px 3px rgba(15, 23, 42, 0.22);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -242,6 +258,10 @@
                 <nav class="space-y-1.5">
                     <button type="button" id="nav-folders" onclick="setMainView('folders')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold bg-indigo-50 text-indigo-700 transition-all cursor-pointer">
                         <span class="flex items-center gap-2.5"><i class="ph-duotone ph-folders text-lg"></i> Cartelle Materie</span>
+                    </button>
+                    <button type="button" id="nav-homework" onclick="setMainView('homework')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+                        <span class="flex items-center gap-2.5"><i class="ph-duotone ph-notebook text-lg"></i> Diario Compiti</span>
+                        <span id="nav-homework-badge" class="hidden px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">0</span>
                     </button>
                     <button type="button" id="nav-timetable" onclick="setMainView('timetable')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
                         <span class="flex items-center gap-2.5"><i class="ph-duotone ph-clock-afternoon text-lg"></i> Orario Scolastico</span>
@@ -352,6 +372,125 @@
 
                 <div id="subfolders-bar" class="flex items-center gap-2 overflow-x-auto pb-1"></div>
                 <div id="folder-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- VISTA 2B: DIARIO COMPITI (STILE DIARIO SCOLASTICO A DOPPIA PAGINA) -->
+            <section id="view-homework" class="hidden p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-5 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Diario Compiti</h1>
+                        <p class="text-xs sm:text-sm text-slate-500">Sfoglia i giorni della settimana, segna gli esercizi e spunta quelli completati</p>
+                    </div>
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        <button type="button" onclick="goToTodayDiary()" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold cursor-pointer">
+                            Oggi
+                        </button>
+                        <button type="button" onclick="openHomeworkModal()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                            <i class="ph-bold ph-plus"></i> Nuovo Compito
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Striscia Settimanale Interattiva con Frecce e Pallini Materie -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-3 sm:p-4 shadow-2xs space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <button type="button" onclick="shiftDiaryDate(-7)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer" title="Settimana precedente">
+                            <i class="ph-bold ph-caret-left"></i>
+                        </button>
+                        <span id="diary-week-range-label" class="font-display font-extrabold text-xs sm:text-sm text-slate-800 capitalize">Settimana</span>
+                        <button type="button" onclick="shiftDiaryDate(7)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer" title="Settimana successiva">
+                            <i class="ph-bold ph-caret-right"></i>
+                        </button>
+                    </div>
+                    <div id="diary-week-strip" class="grid grid-cols-6 gap-1.5 sm:gap-2"></div>
+                </div>
+
+                <!-- Copertina & Doppia Pagina del Diario Cartaceo -->
+                <div class="rounded-3xl p-2 sm:p-3.5 bg-gradient-to-br from-indigo-900 via-slate-800 to-indigo-950 shadow-xl">
+                    <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-0 rounded-2xl overflow-hidden">
+                        <!-- Spirale Centrale (visibile su desktop tra le due pagine) -->
+                        <div class="hidden lg:flex flex-col justify-evenly items-center absolute top-6 bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                            <span class="diary-spiral-ring"></span>
+                        </div>
+
+                        <!-- PAGINA SINISTRA: COMPITI DEL GIORNO SELEZIONATO -->
+                        <div class="diary-lined-paper rounded-2xl lg:rounded-r-none border border-amber-200/80 lg:border-r-slate-300 flex flex-col min-h-[430px] shadow-inner">
+                            <!-- Intestazione Giorno con Linguetta Colorata -->
+                            <div class="bg-amber-50/95 border-b-2 border-amber-200/90 px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <button type="button" onclick="shiftDiaryDate(-1)" class="p-1.5 rounded-xl bg-white/90 hover:bg-white border border-amber-200 text-slate-700 cursor-pointer" title="Giorno precedente">
+                                        <i class="ph-bold ph-caret-left text-xs"></i>
+                                    </button>
+                                    <div class="min-w-0">
+                                        <span id="diary-left-kicker" class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 block">Giorno Selezionato</span>
+                                        <h2 id="diary-left-date-title" class="font-display font-extrabold text-base sm:text-xl text-slate-900 capitalize truncate">Venerdì 20 Novembre</h2>
+                                    </div>
+                                    <button type="button" onclick="shiftDiaryDate(1)" class="p-1.5 rounded-xl bg-white/90 hover:bg-white border border-amber-200 text-slate-700 cursor-pointer" title="Giorno successivo">
+                                        <i class="ph-bold ph-caret-right text-xs"></i>
+                                    </button>
+                                </div>
+                                <span id="diary-left-counter" class="px-2.5 py-1 rounded-xl bg-white border border-amber-200 text-[11px] font-extrabold text-slate-700 shrink-0">0 / 0</span>
+                            </div>
+
+                            <!-- Barra Progresso Giornaliera -->
+                            <div class="px-4 sm:px-6 py-2 bg-white/75 border-b border-slate-200/70 flex items-center gap-3">
+                                <div class="flex-1 h-2 rounded-full bg-slate-200/80 overflow-hidden">
+                                    <div id="diary-left-progress-bar" class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <span id="diary-left-progress-text" class="text-[11px] font-extrabold text-slate-500 shrink-0">0% completato</span>
+                            </div>
+
+                            <!-- Foglio a righe con margine rosso -->
+                            <div class="flex-1 pl-4 sm:pl-6 pr-4 sm:pr-7 py-3">
+                                <div class="diary-margin-line pl-3.5 sm:pl-4 space-y-2.5 min-h-[260px]" id="diary-left-tasks-list"></div>
+                            </div>
+
+                            <!-- Input Rapido sul fondo pagina sinistra -->
+                            <form onsubmit="quickAddDiaryTask(event)" class="p-3 sm:px-6 sm:py-3.5 bg-amber-50/90 border-t border-amber-200/80 flex items-center gap-2">
+                                <select id="diary-quick-folder" class="max-w-[125px] sm:max-w-[155px] px-2.5 py-2 rounded-xl bg-white border border-amber-200 text-xs font-bold text-slate-800 outline-none truncate"></select>
+                                <input type="text" id="diary-quick-input" placeholder="Scrivi subito un compito..." class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-white border border-amber-200 focus:border-indigo-500 text-xs sm:text-sm font-medium outline-none">
+                                <button type="submit" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 cursor-pointer">
+                                    Segna
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- PAGINA DESTRA: GIORNO SUCCESSIVO (DESKTOP) & PROSSIME CONSEGNE -->
+                        <div class="diary-lined-paper rounded-2xl lg:rounded-l-none border border-amber-200/80 lg:border-l-slate-300 flex flex-col min-h-[430px] shadow-inner">
+                            <div class="bg-indigo-50/90 border-b-2 border-indigo-200/80 px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+                                <div class="min-w-0">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 block">Pagina Successiva • Domani</span>
+                                    <h3 id="diary-right-date-title" class="font-display font-extrabold text-base sm:text-xl text-slate-900 capitalize truncate">Sabato 21 Novembre</h3>
+                                </div>
+                                <button type="button" onclick="openHomeworkModal(null, state.selectedDiaryNextDate)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-extrabold shrink-0 cursor-pointer">
+                                    + Aggiungi
+                                </button>
+                            </div>
+
+                            <div class="flex-1 pl-4 sm:pl-7 pr-4 sm:pr-6 py-3 space-y-5">
+                                <div class="diary-margin-line pl-3.5 sm:pl-4 space-y-2.5" id="diary-right-tasks-list"></div>
+
+                                <!-- Box Prossime Scadenze della Settimana -->
+                                <div class="bg-white/95 rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 space-y-2.5 shadow-2xs">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                            <i class="ph-fill ph-push-pin text-rose-500"></i> Prossimi Compiti da Fare
+                                        </span>
+                                        <span id="diary-upcoming-count" class="text-[11px] font-bold text-indigo-600">0 in sospeso</span>
+                                    </div>
+                                    <div id="diary-upcoming-list" class="space-y-1.5 max-h-44 overflow-y-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- VISTA 3: ORARIO SCOLASTICO -->
@@ -512,10 +651,15 @@
         </main>
 
         <!-- BOTTOM NAV MOBILE -->
-        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-slate-200 grid grid-cols-5 px-1 py-1.5">
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-slate-200 grid grid-cols-6 px-1 py-1.5">
             <button type="button" id="mnav-folders" onclick="setMainView('folders')" class="flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer">
                 <i class="ph-duotone ph-folders text-xl"></i>
                 <span>Cartelle</span>
+            </button>
+            <button type="button" id="mnav-homework" onclick="setMainView('homework')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 relative cursor-pointer">
+                <span id="mnav-homework-dot" class="hidden w-2 h-2 rounded-full bg-amber-500 absolute top-1 right-3"></span>
+                <i class="ph-duotone ph-notebook text-xl"></i>
+                <span>Diario</span>
             </button>
             <button type="button" id="mnav-timetable" onclick="setMainView('timetable')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer">
                 <i class="ph-duotone ph-clock-afternoon text-xl"></i>
@@ -526,7 +670,7 @@
                 <span>Voti</span>
             </button>
             <button type="button" id="mnav-chat" onclick="setMainView('chat')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 relative cursor-pointer">
-                <span id="mnav-chat-dot" class="hidden w-2 h-2 rounded-full bg-rose-500 absolute top-1 right-4"></span>
+                <span id="mnav-chat-dot" class="hidden w-2 h-2 rounded-full bg-rose-500 absolute top-1 right-3"></span>
                 <i class="ph-duotone ph-chats-circle text-xl"></i>
                 <span>Chat</span>
             </button>
@@ -907,6 +1051,66 @@
         </div>
     </div>
 
+    <!-- ===================================================================== -->
+    <!-- MODALE 11: NUOVO / MODIFICA COMPITO NEL DIARIO                        -->
+    <!-- ===================================================================== -->
+    <div id="homework-modal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-200 fade-in space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 id="homework-modal-title" class="font-display text-lg font-extrabold text-slate-900">Nuovo Compito nel Diario</h3>
+                <button type="button" onclick="closeHomeworkModal()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer"><i class="ph-bold ph-x"></i></button>
+            </div>
+
+            <form onsubmit="saveHomeworkForm(event)" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Materia</label>
+                    <select id="hw-folder-input" onchange="handleHomeworkFolderChange()" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none"></select>
+                </div>
+
+                <div id="hw-custom-subject-wrap" class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Materia</label>
+                    <input type="text" id="hw-subject-input" placeholder="Es. Storia, Inglese, Educazione Fisica..." class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-sm font-semibold outline-none">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Compito / Esercizi da svolgere</label>
+                    <input type="text" id="hw-title-input" required placeholder="Es. Esercizi pag. 112 n. 4-5-6" class="w-full px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-indigo-500 text-sm font-bold outline-none">
+                </div>
+
+                <div class="ios-datetime-grid">
+                    <div class="ios-datetime-col space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Data Consegna</label>
+                        <input type="date" id="hw-date-input" required class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                    </div>
+                    <div class="ios-datetime-col space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase text-center w-full block">Tipologia</label>
+                        <select id="hw-type-input" class="ios-datetime-input rounded-2xl bg-slate-100/90 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 outline-none">
+                            <option value="Compito scritto">✍️ Scritto</option>
+                            <option value="Studio orale">📖 Studio</option>
+                            <option value="Tavola / Progetto">📐 Progetto</option>
+                            <option value="Porta materiale">🎒 Materiale</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Note / Dettagli aggiuntivi (opzionale)</label>
+                    <input type="text" id="hw-notes-input" placeholder="Es. Da consegnare su Classroom o quaderno..." class="w-full px-4 py-2.5 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs font-semibold outline-none">
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" id="hw-delete-btn" onclick="deleteCurrentEditingHomework()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer">
+                        Elimina
+                    </button>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" onclick="closeHomeworkModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer">Annulla</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm cursor-pointer">Salva nel Diario</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICHE -->
     <div id="toast" class="fixed bottom-20 lg:bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold pointer-events-none">
         <i class="ph-fill ph-check-circle text-emerald-400 text-lg"></i>
@@ -1081,7 +1285,8 @@
                     notes: [],
                     events: [],
                     timetable: [],
-                    grades: []
+                    grades: [],
+                    homeworks: []
                 },
                 currentView: 'folders',
                 selectedFolderId: null,
@@ -1094,6 +1299,9 @@
                 selectedTimetableDay: (new Date().getDay() >= 1 && new Date().getDay() <= 6) ? new Date().getDay() : 1,
                 editingGradeId: null,
                 selectedGradeFilter: 'ALL',
+                editingHomeworkId: null,
+                selectedDiaryDate: new Date().toISOString().split('T')[0],
+                selectedDiaryNextDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
                 editingNoteId: null,
                 editingNotePinned: false,
                 viewingFileItem: null,
@@ -1109,6 +1317,7 @@
             };
 
             let memoryBackup = null;
+            window.state = state;
 
             function initDemoClass() {
                 if (!state.classes['CLS-2026']) {
@@ -1148,6 +1357,18 @@
                             { id: 'demo-tt2', day: 1, start: '09:00', end: '11:00', folderId: 'demo-f2', subject: 'Disegno & CAD', room: 'Lab. AutoCAD' }
                         ],
                         grades: [],
+                        homeworks: [
+                            {
+                                id: 'demo-hw1',
+                                folderId: 'demo-f1',
+                                subject: 'Matematica',
+                                title: 'Esercizi pag. 114 n. 12, 15, 18 sulle derivate',
+                                date: new Date().toISOString().split('T')[0],
+                                type: 'Compito scritto',
+                                notes: 'Portare il formulario',
+                                completed: false
+                            }
+                        ],
                         messages: [
                             {
                                 id: 'demo-m1',
@@ -1175,7 +1396,8 @@
                                 notes: parsed.personalData.notes || [],
                                 events: parsed.personalData.events || [],
                                 timetable: parsed.personalData.timetable || [],
-                                grades: parsed.personalData.grades || []
+                                grades: parsed.personalData.grades || [],
+                                homeworks: parsed.personalData.homeworks || []
                             };
                         }
                         if (parsed.classes) state.classes = parsed.classes;
@@ -1258,11 +1480,13 @@
                     const cls = state.classes[state.activeClassId];
                     if (!cls.timetable) cls.timetable = [];
                     if (!cls.grades) cls.grades = [];
+                    if (!cls.homeworks) cls.homeworks = [];
                     return cls;
                 }
                 state.activeClassId = null;
                 if (!state.personalData.timetable) state.personalData.timetable = [];
                 if (!state.personalData.grades) state.personalData.grades = [];
+                if (!state.personalData.homeworks) state.personalData.homeworks = [];
                 return state.personalData;
             }
 
@@ -1313,7 +1537,18 @@
                 const cleanName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
 
                 state.user = { id: 'usr-' + Date.now(), name: cleanName, email: email };
-                state.personalData = { folders: [], notes: [], events: [], timetable: [], grades: [] };
+                state.personalData = { folders: [], notes: [], events: [], timetable: [], grades: [], homeworks: [] };
+                state.activeClassId = null;
+                state.hasSeenOnboarding = false;
+                saveStorage(false);
+
+                enterAppShell();
+                openOnboardingTour(0);
+            };
+
+            window.handleGuestLogin = function () {
+                state.user = { id: 'guest-' + Date.now(), name: 'Studente Ospite', email: 'ospite@studyflow.it' };
+                state.personalData = { folders: [], notes: [], events: [], timetable: [], grades: [], homeworks: [] };
                 state.activeClassId = null;
                 state.hasSeenOnboarding = false;
                 saveStorage(false);
@@ -1422,7 +1657,7 @@
 
             window.setMainView = function (view) {
                 state.currentView = view;
-                ['view-folders', 'view-folder-detail', 'view-timetable', 'view-grades', 'view-chat', 'view-calendar'].forEach(id => {
+                ['view-folders', 'view-folder-detail', 'view-homework', 'view-timetable', 'view-grades', 'view-chat', 'view-calendar'].forEach(id => {
                     document.getElementById(id).classList.add('hidden');
                 });
 
@@ -1430,6 +1665,7 @@
                 const idleNav = 'w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer';
 
                 document.getElementById('nav-folders').className = (view === 'folders' || view === 'folder-detail') ? activeNav : idleNav;
+                document.getElementById('nav-homework').className = view === 'homework' ? activeNav : idleNav;
                 document.getElementById('nav-timetable').className = view === 'timetable' ? activeNav : idleNav;
                 document.getElementById('nav-grades').className = view === 'grades' ? activeNav : idleNav;
                 document.getElementById('nav-chat').className = view === 'chat' ? activeNav : idleNav;
@@ -1439,6 +1675,7 @@
                 const mActive = 'flex flex-col items-center justify-center py-1 rounded-xl text-indigo-600 font-bold text-[10px] gap-0.5 cursor-pointer';
                 const mIdle = 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-bold text-[10px] gap-0.5 cursor-pointer';
                 document.getElementById('mnav-folders').className = (view === 'folders' || view === 'folder-detail') ? mActive : mIdle;
+                document.getElementById('mnav-homework').className = view === 'homework' ? mActive + ' relative' : mIdle + ' relative';
                 document.getElementById('mnav-timetable').className = view === 'timetable' ? mActive : mIdle;
                 document.getElementById('mnav-grades').className = view === 'grades' ? mActive : mIdle;
                 document.getElementById('mnav-chat').className = view === 'chat' ? mActive + ' relative' : mIdle + ' relative';
@@ -1446,6 +1683,7 @@
 
                 if (view === 'folders') document.getElementById('view-folders').classList.remove('hidden');
                 if (view === 'folder-detail') document.getElementById('view-folder-detail').classList.remove('hidden');
+                if (view === 'homework') document.getElementById('view-homework').classList.remove('hidden');
                 if (view === 'timetable') document.getElementById('view-timetable').classList.remove('hidden');
                 if (view === 'grades') document.getElementById('view-grades').classList.remove('hidden');
                 if (view === 'chat') document.getElementById('view-chat').classList.remove('hidden');
@@ -1489,6 +1727,19 @@
                     mChatDot.classList.add('hidden');
                 }
 
+                // Badge compiti da fare nel Diario
+                const pendingHwCount = (ws.homeworks || []).filter(h => !h.completed).length;
+                const hwBadge = document.getElementById('nav-homework-badge');
+                const mHwDot = document.getElementById('mnav-homework-dot');
+                if (pendingHwCount > 0) {
+                    hwBadge.textContent = String(pendingHwCount);
+                    hwBadge.classList.remove('hidden');
+                    mHwDot.classList.remove('hidden');
+                } else {
+                    hwBadge.classList.add('hidden');
+                    mHwDot.classList.add('hidden');
+                }
+
                 const codeBox = document.getElementById('sidebar-class-code-box');
                 if (isClass) {
                     codeBox.classList.remove('hidden');
@@ -1515,6 +1766,7 @@
 
                 if (state.currentView === 'folders') renderFoldersDashboard();
                 if (state.currentView === 'folder-detail') renderFolderDetailView();
+                if (state.currentView === 'homework') renderHomeworkDiaryView();
                 if (state.currentView === 'timetable') renderTimetableView();
                 if (state.currentView === 'grades') renderGradesView();
                 if (state.currentView === 'chat') renderChatView();
@@ -1826,6 +2078,336 @@
 
             window.quickAddSubfolder = function () {
                 if (state.selectedFolderId) openFolderModal(state.selectedFolderId);
+            };
+
+            // --- VISTA B2: DIARIO COMPITI SCOLASTICO A DOPPIA PAGINA ---
+            function formatIsoDateLocal(dObj) {
+                const y = dObj.getFullYear();
+                const m = String(dObj.getMonth() + 1).padStart(2, '0');
+                const d = String(dObj.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+
+            function parseIsoDateLocal(isoStr) {
+                const parts = (isoStr || formatIsoDateLocal(new Date())).split('-').map(Number);
+                return new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1, 12, 0, 0);
+            }
+
+            function getNextDiarySchoolDate(isoStr) {
+                const d = parseIsoDateLocal(isoStr);
+                d.setDate(d.getDate() + 1);
+                if (d.getDay() === 0) d.setDate(d.getDate() + 1); // Salta la domenica mostrando il lunedì
+                return formatIsoDateLocal(d);
+            }
+
+            function renderDiaryTaskRow(hw, ws) {
+                const folder = ws.folders.find(f => f.id === hw.folderId);
+                const theme = folder ? (COLOR_THEMES[folder.color] || COLOR_THEMES.indigo) : COLOR_THEMES.indigo;
+                const subjectLabel = folder ? `${folder.icon} ${folder.name}` : `📘 ${hw.subject || 'Materia'}`;
+                const done = !!hw.completed;
+
+                return `
+                    <div class="group rounded-2xl border ${done ? 'border-slate-200/80 bg-slate-100/75 opacity-80' : `${theme.border} bg-white/95 shadow-2xs`} p-3 transition-all flex items-start gap-2.5">
+                        <button type="button" onclick="toggleHomeworkDone('${hw.id}')" class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer ${done ? 'bg-emerald-500 border-emerald-500 text-white scale-95' : 'border-slate-300 hover:border-indigo-500 bg-white text-transparent'}" title="${done ? 'Segna come da fare' : 'Segna come completato'}">
+                            <i class="ph-bold ph-check text-xs"></i>
+                        </button>
+                        <div onclick="openHomeworkModal('${hw.id}')" class="flex-1 min-w-0 cursor-pointer space-y-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${done ? 'bg-slate-200 text-slate-600' : theme.badge}">${escapeHtml(subjectLabel)}</span>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600">${escapeHtml(hw.type || 'Compito scritto')}</span>
+                            </div>
+                            <p class="font-display font-bold text-xs sm:text-sm leading-snug ${done ? 'line-through text-slate-400' : 'text-slate-900'}">${escapeHtml(hw.title)}</p>
+                            ${hw.notes ? `<p class="text-[11px] text-slate-500 line-clamp-2">${escapeHtml(hw.notes)}</p>` : ''}
+                        </div>
+                        <button type="button" onclick="openHomeworkModal('${hw.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 shrink-0 cursor-pointer" title="Modifica compito">
+                            <i class="ph-bold ph-pencil-simple text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            function renderHomeworkDiaryView() {
+                const ws = getActiveWorkspace();
+                const allHomeworks = ws.homeworks || [];
+                const todayStr = formatIsoDateLocal(new Date());
+
+                if (!state.selectedDiaryDate) state.selectedDiaryDate = todayStr;
+                const leftDateStr = state.selectedDiaryDate;
+                const rightDateStr = getNextDiarySchoolDate(leftDateStr);
+                state.selectedDiaryNextDate = rightDateStr;
+
+                const leftDateObj = parseIsoDateLocal(leftDateStr);
+                const rightDateObj = parseIsoDateLocal(rightDateStr);
+
+                // Calcola Lunedì della settimana del giorno selezionato (Lun - Sab)
+                const mondayObj = new Date(leftDateObj);
+                const dayIdx = mondayObj.getDay();
+                const diffToMonday = dayIdx === 0 ? -6 : 1 - dayIdx;
+                mondayObj.setDate(mondayObj.getDate() + diffToMonday);
+
+                const saturdayObj = new Date(mondayObj);
+                saturdayObj.setDate(mondayObj.getDate() + 5);
+
+                const shortFmt = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short' });
+                document.getElementById('diary-week-range-label').textContent = `${shortFmt.format(mondayObj)} — ${shortFmt.format(saturdayObj)} ${saturdayObj.getFullYear()}`;
+
+                const weekStripEl = document.getElementById('diary-week-strip');
+                let stripHtml = '';
+                for (let i = 0; i < 6; i++) {
+                    const d = new Date(mondayObj);
+                    d.setDate(mondayObj.getDate() + i);
+                    const dStr = formatIsoDateLocal(d);
+                    const isSelected = dStr === leftDateStr;
+                    const isToday = dStr === todayStr;
+                    const dayTasks = allHomeworks.filter(h => h.date === dStr);
+
+                    stripHtml += `
+                        <button type="button" onclick="selectDiaryDate('${dStr}')" class="p-2 sm:p-2.5 rounded-2xl border transition-all flex flex-col items-center gap-1 cursor-pointer ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : (isToday ? 'bg-amber-50 border-amber-300 text-slate-900' : 'bg-slate-50/70 hover:bg-slate-100 border-slate-200/80 text-slate-700')}">
+                            <span class="text-[10px] font-extrabold uppercase ${isSelected ? 'text-indigo-100' : 'text-slate-400'}">${DAYS_MAP[i + 1].slice(0, 3)}</span>
+                            <span class="font-display font-extrabold text-sm sm:text-base leading-none">${d.getDate()}</span>
+                            <div class="flex items-center gap-0.5 h-2">
+                                ${dayTasks.slice(0, 4).map(t => {
+                                    const f = ws.folders.find(fl => fl.id === t.folderId);
+                                    const th = f ? (COLOR_THEMES[f.color] || COLOR_THEMES.indigo) : COLOR_THEMES.indigo;
+                                    return `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : (t.completed ? 'bg-emerald-500' : th.dot)}"></span>`;
+                                }).join('')}
+                            </div>
+                        </button>
+                    `;
+                }
+                weekStripEl.innerHTML = stripHtml;
+
+                // Intestazioni Pagina Sinistra
+                const fullDayFmt = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+                document.getElementById('diary-left-kicker').textContent = leftDateStr === todayStr ? '📌 OGGI SUL DIARIO' : 'PAGINA DEL DIARIO';
+                document.getElementById('diary-left-date-title').textContent = fullDayFmt.format(leftDateObj);
+
+                const leftTasks = allHomeworks
+                    .filter(h => h.date === leftDateStr)
+                    .sort((a, b) => (a.completed ? 1 : 0) - (b.completed ? 1 : 0));
+                const leftDoneCount = leftTasks.filter(h => h.completed).length;
+                const pct = leftTasks.length > 0 ? Math.round((leftDoneCount / leftTasks.length) * 100) : 0;
+
+                document.getElementById('diary-left-counter').textContent = `${leftDoneCount} / ${leftTasks.length} fatti`;
+                document.getElementById('diary-left-progress-bar').style.width = `${pct}%`;
+                document.getElementById('diary-left-progress-text').textContent = leftTasks.length > 0 ? `${pct}% completato` : 'Nessun compito';
+
+                const leftListEl = document.getElementById('diary-left-tasks-list');
+                if (leftTasks.length === 0) {
+                    leftListEl.innerHTML = `
+                        <div class="py-10 text-center space-y-2">
+                            <p class="font-display font-bold text-sm text-slate-500">Pagina libera!</p>
+                            <p class="text-xs text-slate-400">Scrivi qui sotto un esercizio o premi <b>+ Nuovo Compito</b> per annotarlo sul diario.</p>
+                        </div>
+                    `;
+                } else {
+                    leftListEl.innerHTML = leftTasks.map(hw => renderDiaryTaskRow(hw, ws)).join('');
+                }
+
+                // Popola select rapido materia nel footer pagina sinistra
+                const quickSel = document.getElementById('diary-quick-folder');
+                const prevVal = quickSel.value;
+                quickSel.innerHTML = [
+                    ...ws.folders.map(f => `<option value="${f.id}">${f.icon} ${escapeHtml(f.name)}</option>`),
+                    `<option value="">📘 Generale</option>`
+                ].join('');
+                if (prevVal && Array.from(quickSel.options).some(o => o.value === prevVal)) {
+                    quickSel.value = prevVal;
+                }
+
+                // Intestazioni & Lista Pagina Destra (Giorno Successivo)
+                document.getElementById('diary-right-date-title').textContent = fullDayFmt.format(rightDateObj);
+                const rightTasks = allHomeworks
+                    .filter(h => h.date === rightDateStr)
+                    .sort((a, b) => (a.completed ? 1 : 0) - (b.completed ? 1 : 0));
+
+                const rightListEl = document.getElementById('diary-right-tasks-list');
+                if (rightTasks.length === 0) {
+                    rightListEl.innerHTML = `
+                        <div class="py-6 text-center space-y-1">
+                            <p class="text-xs font-bold text-slate-500">Nessun compito segnato per il giorno successivo.</p>
+                        </div>
+                    `;
+                } else {
+                    rightListEl.innerHTML = rightTasks.map(hw => renderDiaryTaskRow(hw, ws)).join('');
+                }
+
+                // Box Prossime Consegne da Fare (tutti i giorni dal giorno corrente in poi)
+                const upcoming = allHomeworks
+                    .filter(h => !h.completed && h.date >= todayStr)
+                    .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+                document.getElementById('diary-upcoming-count').textContent = `${upcoming.length} da fare`;
+                const upListEl = document.getElementById('diary-upcoming-list');
+                if (upcoming.length === 0) {
+                    upListEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">Tutto in ordine! Nessun compito in sospeso.</p>`;
+                } else {
+                    upListEl.innerHTML = upcoming.slice(0, 6).map(hw => {
+                        const folder = ws.folders.find(f => f.id === hw.folderId);
+                        const subText = folder ? `${folder.icon} ${folder.name}` : `📘 ${hw.subject || 'Materia'}`;
+                        const shortD = shortFmt.format(parseIsoDateLocal(hw.date));
+                        return `
+                            <div onclick="selectDiaryDate('${hw.date}')" class="p-2 rounded-xl bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/70 flex items-center justify-between gap-2 cursor-pointer transition-colors">
+                                <div class="min-w-0">
+                                    <span class="text-[10px] font-extrabold text-indigo-600 block">${escapeHtml(subText)}</span>
+                                    <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(hw.title)}</p>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-extrabold text-slate-600 shrink-0">${escapeHtml(shortD)}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            window.selectDiaryDate = function (dateStr) {
+                state.selectedDiaryDate = dateStr;
+                renderHomeworkDiaryView();
+            };
+
+            window.shiftDiaryDate = function (daysDelta) {
+                const d = parseIsoDateLocal(state.selectedDiaryDate);
+                d.setDate(d.getDate() + daysDelta);
+                if (d.getDay() === 0) {
+                    d.setDate(d.getDate() + (daysDelta > 0 ? 1 : -1));
+                }
+                state.selectedDiaryDate = formatIsoDateLocal(d);
+                renderHomeworkDiaryView();
+            };
+
+            window.goToTodayDiary = function () {
+                state.selectedDiaryDate = formatIsoDateLocal(new Date());
+                renderHomeworkDiaryView();
+            };
+
+            window.toggleHomeworkDone = function (hwId) {
+                const ws = getActiveWorkspace();
+                const hw = (ws.homeworks || []).find(h => h.id === hwId);
+                if (!hw) return;
+                hw.completed = !hw.completed;
+                saveStorage(true);
+                renderAll();
+                if (hw.completed) {
+                    showToast('Compito completato e barrato sul diario!');
+                }
+            };
+
+            window.quickAddDiaryTask = function (e) {
+                e.preventDefault();
+                const ws = getActiveWorkspace();
+                if (!ws.homeworks) ws.homeworks = [];
+
+                const inp = document.getElementById('diary-quick-input');
+                const title = inp.value.trim();
+                if (!title) return;
+
+                const folderId = document.getElementById('diary-quick-folder').value || null;
+                const linkedFolder = folderId ? ws.folders.find(f => f.id === folderId) : null;
+
+                ws.homeworks.push({
+                    id: 'hw-' + Date.now(),
+                    folderId: folderId,
+                    subject: linkedFolder ? linkedFolder.name : 'Generale',
+                    title: title,
+                    date: state.selectedDiaryDate || formatIsoDateLocal(new Date()),
+                    type: 'Compito scritto',
+                    notes: '',
+                    completed: false
+                });
+
+                inp.value = '';
+                saveStorage(true);
+                renderAll();
+                showToast('Compito annotato sul diario!');
+            };
+
+            window.openHomeworkModal = function (hwId, presetDate) {
+                const ws = getActiveWorkspace();
+                state.editingHomeworkId = hwId || null;
+                const existing = hwId ? (ws.homeworks || []).find(h => h.id === hwId) : null;
+
+                document.getElementById('homework-modal-title').textContent = existing ? 'Modifica Compito' : 'Nuovo Compito nel Diario';
+                document.getElementById('hw-title-input').value = existing ? existing.title : '';
+                document.getElementById('hw-date-input').value = existing ? existing.date : (presetDate || state.selectedDiaryDate || formatIsoDateLocal(new Date()));
+                document.getElementById('hw-type-input').value = existing ? (existing.type || 'Compito scritto') : 'Compito scritto';
+                document.getElementById('hw-notes-input').value = existing ? (existing.notes || '') : '';
+                document.getElementById('hw-subject-input').value = existing ? (existing.subject || '') : '';
+
+                const fSel = document.getElementById('hw-folder-input');
+                fSel.innerHTML = [
+                    ...ws.folders.map(f => `<option value="${f.id}">${f.icon} ${escapeHtml(f.name)}</option>`),
+                    `<option value="">— Altra materia (scrivi nome) —</option>`
+                ].join('');
+                fSel.value = existing ? (existing.folderId || '') : (ws.folders[0] ? ws.folders[0].id : '');
+
+                handleHomeworkFolderChange();
+                document.getElementById('hw-delete-btn').classList.toggle('hidden', !existing);
+                document.getElementById('homework-modal').classList.remove('hidden');
+            };
+
+            window.handleHomeworkFolderChange = function () {
+                const fid = document.getElementById('hw-folder-input').value;
+                document.getElementById('hw-custom-subject-wrap').classList.toggle('hidden', !!fid);
+            };
+
+            window.closeHomeworkModal = function () {
+                document.getElementById('homework-modal').classList.add('hidden');
+            };
+
+            window.saveHomeworkForm = function (e) {
+                e.preventDefault();
+                const ws = getActiveWorkspace();
+                if (!ws.homeworks) ws.homeworks = [];
+
+                const folderId = document.getElementById('hw-folder-input').value || null;
+                const customSub = document.getElementById('hw-subject-input').value.trim();
+                const linkedFolder = folderId ? ws.folders.find(f => f.id === folderId) : null;
+                const subjectName = linkedFolder ? linkedFolder.name : (customSub || 'Generale');
+                const title = document.getElementById('hw-title-input').value.trim();
+                const date = document.getElementById('hw-date-input').value;
+                const type = document.getElementById('hw-type-input').value;
+                const notes = document.getElementById('hw-notes-input').value.trim();
+
+                if (!title || !date) return;
+
+                if (state.editingHomeworkId) {
+                    const hw = ws.homeworks.find(item => item.id === state.editingHomeworkId);
+                    if (hw) {
+                        hw.folderId = folderId;
+                        hw.subject = subjectName;
+                        hw.title = title;
+                        hw.date = date;
+                        hw.type = type;
+                        hw.notes = notes;
+                    }
+                    showToast('Compito aggiornato!');
+                } else {
+                    ws.homeworks.push({
+                        id: 'hw-' + Date.now(),
+                        folderId: folderId,
+                        subject: subjectName,
+                        title: title,
+                        date: date,
+                        type: type,
+                        notes: notes,
+                        completed: false
+                    });
+                    showToast(`Compito aggiunto per ${subjectName}!`);
+                }
+
+                state.selectedDiaryDate = date;
+                saveStorage(true);
+                closeHomeworkModal();
+                renderAll();
+            };
+
+            window.deleteCurrentEditingHomework = function () {
+                const ws = getActiveWorkspace();
+                if (!state.editingHomeworkId) return;
+                ws.homeworks = (ws.homeworks || []).filter(h => h.id !== state.editingHomeworkId);
+                saveStorage(true);
+                closeHomeworkModal();
+                renderAll();
+                showToast('Compito eliminato dal diario');
             };
 
             // --- VISTA C: ORARIO SCOLASTICO (LUNEDÌ - SABATO) ---
@@ -3088,6 +3670,7 @@
                     events: [],
                     timetable: [],
                     grades: [],
+                    homeworks: [],
                     messages: [
                         {
                             id: 'msg-' + Date.now(),
@@ -3117,6 +3700,7 @@
                         events: [],
                         timetable: [],
                         grades: [],
+                        homeworks: [],
                         messages: []
                     };
                 }
