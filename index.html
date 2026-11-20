@@ -550,6 +550,64 @@
                     </div>
                 </div>
 
+                <!-- SIMULATORE INTERATTIVO: "CHE VOTO DEVO PRENDERE?" -->
+                <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-3xl p-5 sm:p-7 text-white shadow-lg space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-xs flex items-center justify-center text-2xl shrink-0">
+                                <i class="ph-duotone ph-calculator"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-extrabold text-lg sm:text-xl leading-tight">Simulatore: Che voto devo prendere?</h3>
+                                <p class="text-xs text-indigo-100">Calcola in tempo reale il voto necessario nella prossima verifica per raggiungere la media desiderata</p>
+                            </div>
+                        </div>
+                        <span class="self-start sm:self-auto px-3 py-1 rounded-xl bg-white/15 text-[11px] font-extrabold uppercase tracking-wider">Calcolo Live</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                        <!-- Controlli di Input -->
+                        <div class="lg:col-span-7 bg-white/10 backdrop-blur-xs rounded-2xl border border-white/15 p-4 sm:p-5 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                <div class="space-y-1.5">
+                                    <label class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-100 block">Materia da simulare</label>
+                                    <select id="sim-subject-select" onchange="updateGradeSimulatorSubject(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold outline-none cursor-pointer"></select>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-100 block">Peso prossima prova</label>
+                                    <select id="sim-weight-select" onchange="updateGradeSimulatorWeight(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold outline-none cursor-pointer">
+                                        <option value="0.5">50% (Test rapido / Mezzo voto)</option>
+                                        <option value="1" selected>100% (Verifica / Interrogazione)</option>
+                                        <option value="1.5">150% (Verifica importante)</option>
+                                        <option value="2">200% (Prova doppia)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2.5 pt-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <label for="sim-target-slider" class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-100">Media Obiettivo Desiderata</label>
+                                    <span id="sim-target-display" class="px-3 py-1 rounded-xl bg-white text-indigo-700 font-display font-extrabold text-sm shadow-2xs">6.0</span>
+                                </div>
+
+                                <input type="range" id="sim-target-slider" min="5.0" max="10.0" step="0.1" value="6.0" oninput="updateGradeSimulatorTarget(this.value)" class="w-full accent-amber-400 cursor-pointer h-2 rounded-lg bg-white/25">
+
+                                <div class="flex flex-wrap items-center gap-1.5 pt-0.5" id="sim-quick-targets">
+                                    <button type="button" onclick="updateGradeSimulatorTarget(6.0)" data-target="6" class="sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white text-indigo-700 cursor-pointer transition-all">6.0</button>
+                                    <button type="button" onclick="updateGradeSimulatorTarget(6.5)" data-target="6.5" class="sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white/15 hover:bg-white/25 text-white cursor-pointer transition-all">6.5</button>
+                                    <button type="button" onclick="updateGradeSimulatorTarget(7.0)" data-target="7" class="sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white/15 hover:bg-white/25 text-white cursor-pointer transition-all">7.0</button>
+                                    <button type="button" onclick="updateGradeSimulatorTarget(7.5)" data-target="7.5" class="sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white/15 hover:bg-white/25 text-white cursor-pointer transition-all">7.5</button>
+                                    <button type="button" onclick="updateGradeSimulatorTarget(8.0)" data-target="8" class="sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white/15 hover:bg-white/25 text-white cursor-pointer transition-all">8.0</button>
+                                    <button type="button" onclick="updateGradeSimulatorTarget(9.0)" data-target="9" class="sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white/15 hover:bg-white/25 text-white cursor-pointer transition-all">9.0</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risultato in Tempo Reale -->
+                        <div id="sim-result-card" class="lg:col-span-5 bg-white text-slate-900 rounded-2xl p-5 flex flex-col justify-between gap-3 shadow-md"></div>
+                    </div>
+                </div>
+
                 <!-- Elenco Storico Voti -->
                 <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 space-y-4">
                     <div class="flex items-center justify-between">
@@ -1299,6 +1357,9 @@
                 selectedTimetableDay: (new Date().getDay() >= 1 && new Date().getDay() <= 6) ? new Date().getDay() : 1,
                 editingGradeId: null,
                 selectedGradeFilter: 'ALL',
+                simSubjectKey: 'ALL',
+                simTargetAverage: 6.0,
+                simNextWeight: 1,
                 editingHomeworkId: null,
                 selectedDiaryDate: new Date().toISOString().split('T')[0],
                 selectedDiaryNextDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
@@ -2755,6 +2816,9 @@
                     }).join('');
                 }
 
+                // Render Simulatore "Che voto devo prendere?"
+                renderGradeSimulator(subjectsArr, allGrades);
+
                 // Registro Storico Voti
                 document.getElementById('grades-list-count').textContent = `${filteredGrades.length} voti`;
                 const listEl = document.getElementById('grades-history-list');
@@ -2882,7 +2946,179 @@
 
             window.selectGradeSubjectFilter = function (key) {
                 state.selectedGradeFilter = key;
+                state.simSubjectKey = key;
                 renderGradesView();
+            };
+
+            function formatItalianSchoolGrade(val) {
+                const clamped = Math.max(1, Math.min(10, val));
+                const whole = Math.floor(clamped);
+                const frac = clamped - whole;
+                if (frac < 0.12) return `${whole}`;
+                if (frac < 0.38) return `${whole}+`;
+                if (frac < 0.63) return `${whole}½`;
+                if (frac < 0.88 && whole < 10) return `${whole + 1}-`;
+                return `${Math.min(10, whole + 1)}`;
+            }
+
+            function renderGradeSimulator(subjectsArr, allGrades) {
+                const subSelect = document.getElementById('sim-subject-select');
+                if (!subSelect) return;
+
+                const validKeys = ['ALL', ...subjectsArr.map(s => s.key)];
+                if (!validKeys.includes(state.simSubjectKey)) {
+                    state.simSubjectKey = 'ALL';
+                }
+
+                subSelect.innerHTML = [
+                    `<option value="ALL">📊 Media Generale (${allGrades.length} voti)</option>`,
+                    ...subjectsArr.map(s => `<option value="${escapeHtml(s.key)}">${escapeHtml(s.label)} (${s.grades.length} voti)</option>`)
+                ].join('');
+                subSelect.value = state.simSubjectKey;
+
+                const weightSelect = document.getElementById('sim-weight-select');
+                if (weightSelect) weightSelect.value = String(state.simNextWeight || 1);
+
+                const sliderEl = document.getElementById('sim-target-slider');
+                const targetVal = Number(state.simTargetAverage) || 6.0;
+                if (sliderEl) sliderEl.value = String(targetVal);
+                const targetDisp = document.getElementById('sim-target-display');
+                if (targetDisp) targetDisp.textContent = targetVal.toFixed(1);
+
+                document.querySelectorAll('.sim-target-pill').forEach(btn => {
+                    const bVal = parseFloat(btn.getAttribute('data-target'));
+                    const isActive = Math.abs(bVal - targetVal) < 0.05;
+                    btn.className = isActive
+                        ? 'sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white text-indigo-700 shadow-2xs cursor-pointer transition-all'
+                        : 'sim-target-pill px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white/15 hover:bg-white/25 text-white cursor-pointer transition-all';
+                });
+
+                const targetGrades = state.simSubjectKey === 'ALL'
+                    ? allGrades
+                    : ((subjectsArr.find(s => s.key === state.simSubjectKey) || {}).grades || []);
+
+                let currentWeightedSum = 0;
+                let currentTotalWeight = 0;
+                targetGrades.forEach(g => {
+                    const v = Number(g.numericValue);
+                    const w = Number(g.weight) || 1;
+                    if (!isNaN(v)) {
+                        currentWeightedSum += v * w;
+                        currentTotalWeight += w;
+                    }
+                });
+
+                const currentAvg = currentTotalWeight > 0 ? (currentWeightedSum / currentTotalWeight) : null;
+                const wNext = Number(state.simNextWeight) || 1;
+                const requiredGrade = (targetVal * (currentTotalWeight + wNext) - currentWeightedSum) / wNext;
+
+                const resCard = document.getElementById('sim-result-card');
+                if (!resCard) return;
+
+                const deltaAvgText = currentAvg !== null
+                    ? `${(targetVal - currentAvg >= 0 ? '+' : '')}${(targetVal - currentAvg).toFixed(2)} rispetto alla media attuale (${currentAvg.toFixed(2)})`
+                    : 'Nessun voto ancora registrato in questa materia';
+
+                if (requiredGrade <= 1.0) {
+                    resCard.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">✅ OBIETTIVO GIÀ SUPERATO</span>
+                            <span class="text-xs font-bold text-slate-400">Media: ${currentAvg !== null ? currentAvg.toFixed(2) : '—'}</span>
+                        </div>
+                        <div class="py-1">
+                            <p class="font-display font-extrabold text-2xl sm:text-3xl text-emerald-600">Anche con 2.0 resti sopra!</p>
+                            <p class="text-xs text-slate-500 mt-1">${escapeHtml(deltaAvgText)}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200/80 text-xs font-semibold text-emerald-900">
+                            Ottimo lavoro! Hai già un margine tale da mantenere la media del <b>${targetVal.toFixed(1)}</b> anche con un voto basso.
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (requiredGrade <= 10.0) {
+                    const roundedNum = Math.max(1, Math.min(10, requiredGrade));
+                    const schoolLabel = formatItalianSchoolGrade(roundedNum);
+                    const isHard = roundedNum > 8.5;
+                    const badgeCls = isHard ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
+                    const badgeTxt = isHard ? '🔥 SFIDA IMPEGNATIVA' : '🎯 OBIETTIVO ALLA PORTATA';
+                    const numColor = isHard ? 'text-amber-600' : 'text-indigo-600';
+
+                    resCard.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-2.5 py-1 rounded-lg ${badgeCls} text-[11px] font-extrabold">${badgeTxt}</span>
+                            <span class="text-xs font-bold text-slate-400">Media: ${currentAvg !== null ? currentAvg.toFixed(2) : '—'}</span>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-3 py-1">
+                            <div>
+                                <span class="text-[11px] font-bold uppercase text-slate-400 block">Devi prendere almeno</span>
+                                <p class="font-display font-extrabold text-4xl sm:text-5xl ${numColor} leading-none mt-1">${roundedNum.toFixed(2)}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[11px] font-bold uppercase text-slate-400 block">Voto scolastico</span>
+                                <span class="inline-block mt-1 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white font-display font-extrabold text-xl">${escapeHtml(schoolLabel)}</span>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 space-y-0.5">
+                            <p class="font-bold text-slate-800">${escapeHtml(deltaAvgText)}</p>
+                            <p>Prendendo <b>${escapeHtml(schoolLabel)}</b> (${roundedNum.toFixed(2)}) la tua media salirà esattamente a <b>${targetVal.toFixed(2)}</b>.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Caso in cui serve più di 10 in una sola prova: calcola quanti voti consecutivi da 8, 9 o 10 servono
+                const calcStepsNeeded = (gradePerTest) => {
+                    if (gradePerTest <= targetVal) return null;
+                    const n = Math.ceil((targetVal * currentTotalWeight - currentWeightedSum) / (wNext * (gradePerTest - targetVal)));
+                    return n > 0 && n <= 20 ? n : null;
+                };
+                const n10 = calcStepsNeeded(10);
+                const n9 = calcStepsNeeded(9);
+                const n8 = calcStepsNeeded(8);
+
+                const stepsSuggestions = [
+                    n10 ? `<b>${n10}</b> ${n10 === 1 ? 'voto' : 'voti'} da <b>10</b>` : null,
+                    n9 ? `<b>${n9}</b> ${n9 === 1 ? 'voto' : 'voti'} da <b>9</b>` : null,
+                    n8 ? `<b>${n8}</b> ${n8 === 1 ? 'voto' : 'voti'} da <b>8</b>` : null
+                ].filter(Boolean);
+
+                resCard.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 text-[11px] font-extrabold">⚠️ SERVE PIÙ DI UNA PROVA</span>
+                        <span class="text-xs font-bold text-slate-400">Media: ${currentAvg !== null ? currentAvg.toFixed(2) : '—'}</span>
+                    </div>
+                    <div class="py-0.5">
+                        <span class="text-[11px] font-bold uppercase text-slate-400 block">Calcolo matematico</span>
+                        <p class="font-display font-extrabold text-3xl text-rose-600 mt-0.5">${requiredGrade.toFixed(2)} <span class="text-xs font-bold text-slate-400">(oltre il 10)</span></p>
+                        <p class="text-xs text-slate-500 mt-1">${escapeHtml(deltaAvgText)}</p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-xs text-rose-950 space-y-1">
+                        <p class="font-bold">Non basta una sola verifica, ma puoi arrivarci con:</p>
+                        <p>${stepsSuggestions.length > 0 ? stepsSuggestions.join(' • oppure ') : 'Una serie costante di ottimi voti (9–10) nelle prossime prove.'}</p>
+                    </div>
+                `;
+            }
+
+            window.updateGradeSimulatorSubject = function (key) {
+                state.simSubjectKey = key || 'ALL';
+                renderGradesView();
+            };
+
+            window.updateGradeSimulatorTarget = function (val) {
+                const num = parseFloat(val);
+                if (!isNaN(num)) {
+                    state.simTargetAverage = Math.min(10, Math.max(5, num));
+                    renderGradesView();
+                }
+            };
+
+            window.updateGradeSimulatorWeight = function (w) {
+                const num = parseFloat(w);
+                if (!isNaN(num)) {
+                    state.simNextWeight = num;
+                    renderGradesView();
+                }
             };
 
             window.openGradeModal = function (gradeId) {
